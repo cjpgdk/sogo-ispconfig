@@ -3,6 +3,15 @@
 # 
 # Install SOGo on debian ISPConfig 3 server
 #
+# Update 3
+#   - updated plugin to remove user data and settings from sogodb upon delete of mail user
+#   - fixed plugin ''create sogo view''  now get the correct imap host if multi hosts exists...
+#   - Enabled EMail Alarms in SOGo
+#   - allow a per. domain config from config template ''ispc_path/server/conf/sogo_domains/..''
+#   - added more option during the install
+#       set passwd for sogo db user (leave emtpy to generate one.)
+#   - set permissins on the new files to ispconfig user
+#
 # Update 2
 #   - added more option during the install
 #       Select imap user Password Algorithm [Default: crypt]
@@ -23,23 +32,21 @@
 #       Debian Squeeze
 #
 # Single server inviroment
-#    - Install OK
 #    - Multi domain, user sharing/ACL restricted to @DOMAIN.TLD
 #       (User can't add other users ACLs unless allowed to by admin or other user.)
 #    - Administrator of A domain is postmaster@DOMAIN.TLD
 #    - ISPConfig plugin: 
 #        i say BETA add/update/delete domain will trigger event to rebuild SOGo config.
 #        - BuildConfig - 
-#        only configure enabled domains: OK
-#        only allow IMAP enabled user to use SOGo: OK
+#        only configure enabled domains
+#        only allow IMAP enabled user to use SOGo
 #        auto create sogo users view if none existing.
-#        Remove SOGo view if domain is deleted: 50%, needs to use "sogo-tools" to remove the tables created for individual users.
-#        
+#        Remove SOGo view if domain is deleted
+#        Remove user data from sogodb if user is deletet.. (if no data for user exists CRON log will show ''sogo-tool[nnn] No folder returned for user 'USER@DOMAIN.TLD') THATS not an error it just means the user never used sogo..
 #        
 # Multi server inviroment
 #        not tested, + i dont have the capacity to do the tests needed..
 #        
-#
 # Bugs:
 #    - vhost may need tweeking before SOGo can be accessed (Default: /etc/apache2/conf.d/SOGo.conf)
 #
@@ -60,9 +67,8 @@
 #    - Make the script upon install create and pack plugins for thunderbird
 #    - Add script support for Ubuntu, other OS not likely since they needs to be compiled from source..
 #    - Create a web module for ispconfig in order to allow a per domain configuration insted of a predefined for all
-#    - Add SOGo OpenChange backend --- http://www.sogo.nu/files/docs/SOGo%20Native%20Microsoft%20Outlook%20Configuration.pdf
+#    - Add SOGo OpenChange backend -- MAY BE -- http://www.sogo.nu/files/docs/SOGo%20Native%20Microsoft%20Outlook%20Configuration.pdf
 #
-
 
 OSTOCONF='debian'
 
@@ -165,6 +171,12 @@ echo "memcached not happy w. IPv6, settings to 127.0.0.1"
 rpl '127.0.0.1' localhost /etc/memcached.conf  > /dev/null 2>&1
 /etc/init.d/memcached restart  > /dev/null 2>&1
 
+echo -e "mysql admin user [root]: \c "
+read MYSQLADMUSER
+if [ -z "${MYSQLADMUSER}" ]; then
+    MYSQLADMUSER="root"
+fi
+
 echo -e "mysql root password: \c "
 read MYSQLROOTPW
 
@@ -180,19 +192,19 @@ if [ -z "${MYSQLPORT}" ]; then
     MYSQLPORT="3306"
 fi
 
-echo -e "ISPCONFIG database name [dbispconfig]\c "
+echo -e "ISPCONFIG database name [dbispconfig]: \c "
 read ISPCONFIGDB
 if [ -z "${ISPCONFIGDB}" ]; then
     ISPCONFIGDB="dbispconfig"
 fi
 
-echo -e "SOGo database name [sogodb]\c "
+echo -e "SOGo database name [sogodb]: \c "
 read SOGODB
 if [ -z "${SOGODB}" ]; then
     SOGODB="sogodb"
 fi
 
-echo -e "ISPCONFIG install path [/usr/local/ispconfig]\c "
+echo -e "ISPCONFIG install path [/usr/local/ispconfig]: \c "
 read ISPCONFIGINSTALLPATH
 
 if [ -z "${ISPCONFIGINSTALLPATH}" ]; then
@@ -205,24 +217,27 @@ fi
 #    ISPCONFIGUSERN="ispconfig"
 #fi
 
-echo -e "SOGO DB Username [sogosysuser]\c "
+echo -e "SOGO DB Username [sogosysuser]: \c "
 read SOGOUSERN
-
 if [ -z "${SOGOUSERN}" ]; then
     SOGOUSERN="sogosysuser"
 fi
 
-SOGOUSERPW=`< /dev/urandom tr -dc A-Za-z0-9_ | head -c15`
-mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE DATABASE ${SOGODB};";
-mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE USER '${SOGOUSERN}'@'${MYSQLHOST}' IDENTIFIED BY '${SOGOUSERPW}';";
-mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${SOGODB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
-mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}';";
-#mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
-#mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "REVOKE ALL PRIVILEGES ON \`${ISPCONFIGDB}\`.* FROM '${ISPCONFIGUSERN}'@'${MYSQLHOST}';";
-#mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE VIEW ON \`${ISPCONFIGDB}\`.* TO '${ISPCONFIGUSERN}'@'${MYSQLHOST}';";
-mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "FLUSH PRIVILEGES;";
+echo "SOGO DB Username Password"
+echo -e "leave empty for auto generation: \c "
+read SOGOUSERPW
+if [ -z "${SOGOUSERPW}" ]; then
+    SOGOUSERPW=`< /dev/urandom tr -dc A-Za-z0-9_ | head -c25`
+fi
 
-echo -e "Default IMAP Server Addr [localhost]\c "
+
+mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE DATABASE ${SOGODB};";
+mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE USER '${SOGOUSERN}'@'${MYSQLHOST}' IDENTIFIED BY '${SOGOUSERPW}';";
+mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${SOGODB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
+mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}';";
+mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "FLUSH PRIVILEGES;";
+
+echo -e "Default IMAP Server Addr [localhost]: \c "
 read IMAPSERVER
 if [ -z "${IMAPSERVER}" ]; then
     IMAPSERVER="localhost"
@@ -231,26 +246,26 @@ fi
 echo "Select IMAP user password algorithm"
 echo "plain|crypt|md5-crypt|md5|plain-md5"
 echo "Confirm with your imap server config || http://wiki.dovecot.org/Authentication/PasswordSchemes"
-echo -e "Use algorithm [crypt]\c "
+echo -e "Use algorithm [crypt]: \c "
 read IMAPPWALGORITHM
 if [ -z "${IMAPPWALGORITHM}" ]; then
     IMAPPWALGORITHM="crypt"
 fi
 
 
-echo -e "Default SMTP Server Addr [localhost]\c "
+echo -e "Default SMTP Server Addr [localhost]: \c "
 read SMTPSERVER
 if [ -z "${SMTPSERVER}" ]; then
     SMTPSERVER="localhost"
 fi
 
-echo -e "Default SOGo Language [English]\c "
+echo -e "Default SOGo Language [English]: \c "
 read SOGOLANGUAGE
 if [ -z "${SOGOLANGUAGE}" ]; then
     SOGOLANGUAGE="English"
 fi
 
-echo -e "Default SOGo TimeZone [Europe/Berlin]\c "
+echo -e "Default SOGo TimeZone [Europe/Berlin]: \c "
 read SOGOTIMEZONE
 if [ -z "${SOGOTIMEZONE}" ]; then
     SOGOTIMEZONE="Europe/Berlin"
@@ -270,6 +285,14 @@ if [ -f /etc/init.d/sogo ]; then
 fi
 if [ -f /etc/init.d/sogod ]; then
     SOGOINITSCRIPT=/etc/init.d/sogod
+fi
+
+
+if ! id ispconfig 1> /dev/null 2>&1; then
+    echo -e "can't find system user 'ispconfig' enter the name thank you: \c "
+    read ISPCSYSTEMUSER
+else
+    ISPCSYSTEMUSER="ispconfig"
 fi
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -309,6 +332,8 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
             </array>
             <key>NGImap4ConnectionStringSeparator</key>
             <string>.</string>
+            <key>SOGoEnableEMailAlarms</key>
+            <string>YES</string>
             <key>OCSEMailAlarmsFolderURL</key>
             <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@${MYSQLHOST}:${MYSQLPORT}/${SOGODB}/sogo_mailalarms_folder</string>
             <key>OCSFolderInfoURL</key>
@@ -382,14 +407,105 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         </dict>
     </dict>
 </plist>" >${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ
+chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ
 
-echo "
+mkdir -p ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains
+
+cat > ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default.conf << EOF
+
+                <key>{{DOMAIN}}</key>
+                <dict>
+                    <key>SOGoDraftsFolderName</key>
+                    <string>Drafts</string>
+                    <key>SOGoSentFolderName</key>
+                    <string>Sent</string>
+                    <key>SOGoTrashFolderName</key>
+                    <string>Trash</string>
+                    <key>SOGoMailShowSubscribedFoldersOnly</key>
+                    <string>NO</string>
+                    <key>SOGoLanguage</key>
+                    <string>English</string>
+                    <key>SOGoMailDomain</key>
+                    <string>{{DOMAIN}}</string>
+                    <key>SOGoSuperUsernames</key>
+                    <array>
+                        <string>{{DOMAINADMIN}}</string>
+                    </array>
+                    <key>SOGoUserSources</key>
+                    <array>
+                        <dict>
+                            <key>userPasswordAlgorithm</key>
+                            <string>crypt</string>
+                            <key>prependPasswordScheme</key>
+                            <string>NO</string>
+                            <key>LoginFieldNames</key>
+                            <array>
+                                <string>c_uid</string>
+                                <string>mail</string>
+                            </array>
+                            <key>IMAPHostFieldName</key>
+                            <string>imap_host</string>
+                            <key>IMAPLoginFieldName</key>
+                            <string>c_uid</string>
+                            <key>type</key>
+                            <string>sql</string>
+                            <key>isAddressBook</key>
+                            <string>NO</string>
+                            <key>canAuthenticate</key>
+                            <string>YES</string>
+                            <key>displayName</key>
+                            <string>Users in {{DOMAIN}}</string>
+                            <key>hostname</key>
+                            <string>localhost</string>
+                            <key>id</key>
+                            <string>{{SOGOUNIQID}}</string>
+                            <key>viewURL</key>
+                            <string>{{CONNECTIONVIEWURL}}</string>
+                        </dict>
+                    </array>
+                </dict>
+EOF
+cat > ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/read_me << EOF
+for how to configure the config file and the format of the files see SOGo documentation
+the file names must be as follow (must end with .conf)
+they are not automaticly created you need to do this by hand.
+
+a template for domain example.com wil be named.
+example.com.conf
+
+domains_default.conf :: default for all domains..
+EOF
+
+chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} -R ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains
+
+cat > ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php << EOF
 <?php
+
+/*
+ * Copyright (C) 2013 Christian M. Jensen
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * 
+ * NOTE* for more info, modifications etc.. contact me at http://www.howtoforge.com/ my user name: 'psykosen'
+ */
 
 class sogo_config_plugin {
 
     var \$plugin_name = 'sogo_config_plugin';
     var \$class_name = 'sogo_config_plugin';
+    var \$sogo_su_cmd = "sudo -u sogo";
     var \$sogopw = '${SOGOUSERPW}';
     var \$sogouser = '${SOGOUSERN}';
     var \$sogodb = '${SOGODB}';
@@ -400,6 +516,7 @@ class sogo_config_plugin {
     var \$sogoconffile = '${SOGOGNUSTEPCONFFILE}';
     var \$sogoinitscript = '${SOGOINITSCRIPT}';
     var \$templ_file = '${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ';
+    var \$templ_domains_dir = '${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains';
     var \$mysql_server_host = '${MYSQLHOST}:${MYSQLPORT}';
 
     function onInstall() {
@@ -416,24 +533,16 @@ class sogo_config_plugin {
         \$app->plugins->registerEvent('mail_domain_delete', \$this->plugin_name, 'reconfigure');
         \$app->plugins->registerEvent('mail_domain_insert', \$this->plugin_name, 'reconfigure');
         \$app->plugins->registerEvent('mail_domain_update', \$this->plugin_name, 'reconfigure');
+        \$app->plugins->registerEvent('mail_user_delete', \$this->plugin_name, 'remove_sogo_mail_user');
     }
 
-    /*
-      mail_domain_insert
-      [new] => Array
-      [old] => Array
-      (
-      [domain_id] => 6
-      [sys_userid] => 1
-      [sys_groupid] => 0
-      [sys_perm_user] => riud
-      [sys_perm_group] => ru
-      [sys_perm_other] =>
-      [server_id] => 1
-      [domain] => example.us
-      [active] => y
-      )
-     */
+    function remove_sogo_mail_user(\$event_name, \$data) {
+        global \$app, \$conf;
+        if (\$event_name == 'mail_user_delete') {
+            exec(\$this->sogo_su_cmd . ' ' . \$this->sogotoolbinary . ' remove ' . escapeshellarg(\$data['old']['login']));
+            sleep(1);
+        }
+    }
 
     function reconfigure(\$event_name, \$data) {
         global \$app, \$conf;
@@ -445,14 +554,14 @@ class sogo_config_plugin {
         } else if (\$event_name == 'mail_domain_update') {
             \$flag = true;
         } else {
-            //* i can't work with that give me a command...
+            //* i can\'t work with that give me a command...
             // /PATH/to/ISPConfig_DIR/server/SOGO-reconfigure.log
-            // file_put_contents('SOGO-reconfigure.log', print_r(\$event_name,true).\"\n\n\".print_r(\$data,true));
+            // file_put_contents('SOGO-reconfigure.log', print_r(\$event_name,true)."\n\n".print_r(\$data,true));
         }
         if (\$flag) {
             \$active_mail_domains = \$app->db->queryAllRecords('SELECT \`domain\` FROM \`mail_domain\` WHERE \`active\`=\'y\'');
             \$sogo_conf = file_get_contents(\$this->templ_file);
-            \$tmp_conf = \"\";
+            \$tmp_conf = "";
             foreach (\$active_mail_domains as \$vd) {
                 \$tmp_conf .= \$this->build_conf_sogo_maildomain(\$vd['domain']);
                 //* create if not exist
@@ -477,27 +586,7 @@ class sogo_config_plugin {
             \$app->log('ERROR. removeing sogo mail domain.. domain invalid [' . \$dom . ']', LOGLEVEL_ERROR);
             return false;
         }
-        /*
-          /usr/sbin/sogo-tool --help
-          2013-03-02 16:46:56.893 sogo-tool[5257] ERROR(+[GCSFolderManager defaultFolderManager]): default 'OCSFolderInfoURL' is not configured.
-          2013-03-02 16:46:56.904 sogo-tool[5257] sogo-tool [-v|--verbose] [-h|--help] command [argument1] ...
-          -v, --verbose enable verbose mode
-          -h, --help    display this help information
 
-          argument1, ...        arguments passed to the specified command
-
-          Available commands:
-          backup              -- backup user folders
-          check-doubles       -- check user addressbooks with duplicate contacts
-          dump-defaults       -- Prints the sogod GNUstep domain configuration as a property list
-          expire-autoreply    -- disable auto reply for reached end dates
-          expire-sessions     -- Expires user sessions without activity for specified number of minutes
-          remove              -- remove user data and settings from the db
-          remove-doubles      -- remove duplicate contacts from the specified user addressbook
-          rename-user         -- update records pertaining to a user after a change of user id
-          restore             -- restore user folders
-          user-preferences    -- set user defaults / settings in the database
-         */
         \$dom_no_point = str_replace('.', '_', \$dom);
         \$sqlres = \$this->_sqlConnect();
         \$sqlres->query('DROP VIEW \`sogo_users_' . \$dom_no_point . '\`');
@@ -511,7 +600,7 @@ class sogo_config_plugin {
         \$sqlres = \$this->_sqlConnect();
 
         \$dom_no_point = str_replace('.', '_', \$dom);
-        \$sql1 = \"SELECT \`TABLE_NAME\` FROM \`information_schema\`.\`VIEWS\` WHERE \`TABLE_SCHEMA\`='{\$this->sogodb}' AND \`TABLE_NAME\`='sogo_users_\" . \$dom_no_point . \"'\";
+        \$sql1 = "SELECT \`TABLE_NAME\` FROM \`information_schema\`.\`VIEWS\` WHERE \`TABLE_SCHEMA\`='{\$this->sogodb}' AND \`TABLE_NAME\`='sogo_users_" . \$dom_no_point . "'";
 
         \$tmp = \$sqlres->query(\$sql1);
         while (\$obj = \$tmp->fetch_object()) {
@@ -519,88 +608,57 @@ class sogo_config_plugin {
                 return true;
             }
         }
+
         \$sqlres->query('CREATE VIEW sogo_users_' . \$dom_no_point . ' AS SELECT
 	\`login\` AS c_uid,
 	\`login\` AS c_name,
 	\`password\` AS c_password,
 	\`name\` AS c_cn,
 	\`email\` AS mail,
-	(SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 LIMIT 1) AS imap_host 
-        FROM ' . \$this->ispcdb . '.\`mail_user\` WHERE \`email\` LIKE \'%' . \$dom_no_point . '\' AND disableimap=\'n\'');
+	(SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 AND ispcmu.\`login\`=\`mail_user\`.\`login\` LIMIT 1) AS imap_host 
+        FROM ' . \$this->ispcdb . '.\`mail_user\` AS ispcmu  WHERE \`email\` LIKE \'%' . \$dom_no_point . '\' AND disableimap=\'n\'');
         if (!empty(\$sqlres->error))
             \$app->log('ERROR. unable to create SOGo view[sogo_users_' . \$dom_no_point . '].. ' . \$sqlres->error, LOGLEVEL_ERROR);
         /* Broke my connection??? */
         /* @\$sqlres->close(); */
         return true;
     }
-    
+
     function build_conf_sogo_maildomain(\$dom) {
         global \$app, \$conf;
         \$dom_no_point = str_replace('.', '_', \$dom);
-        /*For mail aliases..
-         <key>MailFieldNames</key>
-         <array>
-            <string>Col1</string>
-            <string>Col2</string>
-            <string>Col3</string>
-         </array>
+        /* For mail aliases..
+          <key>MailFieldNames</key>
+          <array>
+          <string>Col1</string>
+          <string>Col2</string>
+          <string>Col3</string>
+          </array>
          */
-        \$sogo_conf = <<< EOF
-
-                <key>\$dom</key>
-                <dict>
-                    <key>SOGoDraftsFolderName</key>
-                    <string>Drafts</string>
-                    <key>SOGoSentFolderName</key>
-                    <string>Sent</string>
-                    <key>SOGoTrashFolderName</key>
-                    <string>Trash</string>
-                    <key>SOGoMailShowSubscribedFoldersOnly</key>
-                    <string>NO</string>
-                    <key>SOGoLanguage</key>
-                    <string>${SOGOLANGUAGE}</string>
-                    <key>SOGoMailDomain</key>
-                    <string>\$dom</string>
-                    <key>SOGoSuperUsernames</key>
-                    <array>
-                        <string>postmaster@\$dom</string>
-                    </array>
-                    <key>SOGoUserSources</key>
-                    <array>
-                        <dict>
-                            <key>userPasswordAlgorithm</key>
-                            <string>${IMAPPWALGORITHM}</string>
-                            <key>prependPasswordScheme</key>
-                            <string>NO</string>
-                            <key>LoginFieldNames</key>
-                            <array>
-                                <string>c_uid</string>
-                                <string>mail</string>
-                            </array>
-                            <key>IMAPHostFieldName</key>
-                            <string>imap_host</string>
-                            <key>IMAPLoginFieldName</key>
-                            <string>c_uid</string>
-                            <key>type</key>
-                            <string>sql</string>
-                            <key>isAddressBook</key>
-                            <string>NO</string>
-                            <key>canAuthenticate</key>
-                            <string>YES</string>
-                            <key>displayName</key>
-                            <string>Users in \$dom</string>
-                            <key>hostname</key>
-                            <string>localhost</string>
-                            <key>id</key>
-                            <string>\$dom_no_point</string>
-                            <key>SOGoEnableEMailAlarms</key>
-                            <string>YES</string>
-                            <key>viewURL</key>
-                            <string>mysql://{\$this->sogouser}:{\$this->sogopw}@{\$this->mysql_server_host}/{\$this->sogodb}/sogo_users_{\$dom_no_point}</string>
-                        </dict>
-                    </array>
-                </dict>
-EOF;
+        \$sogo_conf = "";
+        \$sogo_conf_vars = array(
+            '{{DOMAIN}}' => \$dom,
+            '{{DOMAINADMIN}}' => 'postmaster@' . \$dom,
+            '{{SOGOUNIQID}}' => \$dom_no_point,
+            '{{CONNECTIONVIEWURL}}'=>"mysql://{\$this->sogouser}:{\$this->sogopw}@{\$this->mysql_server_host}/{\$this->sogodb}/sogo_users_{\$dom_no_point}"
+        );
+        if (file_exists("{\$this->templ_domains_dir}/{\$dom}.conf")) {
+            \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/{\$dom}.conf");
+        } else {
+            if (!file_exists("{\$this->templ_domains_dir}/{\$dom}.conf"))
+                \$app->log('ERROR. loading domains config.. file: '."{\$this->templ_domains_dir}/{\$dom}.conf", LOGLEVEL_DEBUG);
+            if (file_exists("{\$this->templ_domains_dir}/domains_default.conf")) {
+                \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/domains_default.conf");
+            }  else {
+                \$app->log('ERROR. loading domain config.. file: ' . "{\$this->templ_domains_dir}/domains_default.conf", LOGLEVEL_ERROR);
+                return;
+            }
+        }
+        if (!empty(\$sogo_conf)) {
+            foreach (\$sogo_conf_vars as \$key => \$value) {
+                \$sogo_conf = preg_replace("/{\$key}/i", \$value, \$sogo_conf);
+            }
+        }
         return \$sogo_conf;
     }
 
@@ -608,15 +666,15 @@ EOF;
         \$_sqlserver = explode(':', \$this->mysql_server_host);
         \$sqlres = new mysqli(\$_sqlserver[0], \$this->sogouser, \$this->sogopw, \$this->sogodb, \$_sqlserver[1]);
         if (mysqli_connect_errno()) {
-            printf(\"Connect failed: %s\n\", mysqli_connect_error());
+            printf("Connect failed: %s\n", mysqli_connect_error());
             exit();
         }
         return \$sqlres;
     }
-
 }
 ?>
-">${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php
+EOF
+chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php
 ### /usr/local/ispconfig/server/plugins-available/sogo_config_plugin.php
 ## configure sogo before restarting sogo service..
 
@@ -630,12 +688,12 @@ read SOGOVHOSTNAME
 if [ -z "${SOGOVHOSTNAME}" ]; then
     SOGOVHOSTNAME=`hostname --fqdn`
 fi
-echo -e "HTTP Protocol [http]:\c "
+echo -e "HTTP Protocol [http]: \c "
 read SOGOPROTOCAL
 if [ -z "${SOGOPROTOCAL}" ]; then
     SOGOPROTOCAL="http"
 fi
-echo -e "HTTP Port: [80]\c "
+echo -e "HTTP Port: [80]: \c "
 read SOGOHTTPPORT
 if [ -z "${SOGOHTTPPORT}" ]; then
     SOGOHTTPPORT="80"
@@ -653,7 +711,7 @@ echo "
     Alias /SOGo/WebServerResources/ \
           /usr/lib/GNUstep/SOGo/WebServerResources/
     AliasMatch /SOGo/so/ControlPanel/Products/(.*)/Resources/(.*) \
-               /usr/lib/GNUstep/SOGo/$1.SOGo/Resources/$2
+               /usr/lib/GNUstep/SOGo/\$1.SOGo/Resources/\$2
     <Directory /usr/lib/GNUstep/SOGo/>
         AllowOverride None
         Order deny,allow
@@ -724,6 +782,7 @@ echo -e "VHOST Conf:\t\t/etc/apache2/conf.d/SOGo.conf"
 echo -e ""
 echo -e "ISPC Plugin:\t\t${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php"
 echo -e "ISPC Template:\t\t${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ"
+echo -e "SOGo Domain Templates:\t\t${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/"
 echo -e "SOGo Bin:\t\t${SOGOBINARY}"
 echo -e "SOGo-Tool Bin:\t\t${SOGOTOOLBINARY}"
 echo -e "SOGo Home:\t\t${SOGOHOMEDIR}"
