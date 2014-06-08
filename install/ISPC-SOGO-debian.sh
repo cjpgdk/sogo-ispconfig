@@ -1,7 +1,13 @@
 #!/bin/sh
 
-#
+# 
 # Install SOGo on debian ISPConfig 3 server
+#
+# Update 2
+#   - added more option during the install
+#       Select imap user Password Algorithm [Default: crypt]
+#   - Debian lenny install fails so building from source (apt-get -y source sogo)
+#       FILE: SOGo-Source/debian/sogo.preinst <- useradd fails
 #
 # Update 1.
 #   - move SOGo to seperated db.
@@ -11,6 +17,11 @@
 #       Mysql Port.
 #
 # Tests.
+# - (ISPConfig 3.0.5) -- the main thing to consider for using this with other versions of ISPConfig is the ""IMAP Server"" configuration..
+# - OS
+#       Debian Lenny
+#       Debian Squeeze
+#
 # Single server inviroment
 #    - Install OK
 #    - Multi domain, user sharing/ACL restricted to @DOMAIN.TLD
@@ -31,8 +42,6 @@
 #
 # Bugs:
 #    - vhost may need tweeking before SOGo can be accessed (Default: /etc/apache2/conf.d/SOGo.conf)
-#    - Debian Lenny got error in sogo package ""debian/sogo.preinst"" useradd fails.. 
-#       Run this script until error get source for sogo fix the useradd in debian/sogo.preinst, Build install and run the script again.
 #
 # Refrenses
 #    http://wiki.debian.org/SOGo
@@ -54,17 +63,6 @@
 #    - Add SOGo OpenChange backend --- http://www.sogo.nu/files/docs/SOGo%20Native%20Microsoft%20Outlook%20Configuration.pdf
 #
 
-echo -e "update 2 is released download ad use that? (y/n) [y]: \c "
-read USEUPDATE
-if [ -z "${USEUPDATE}" ]; then
-    USEUPDATE="y"
-fi
-if [ "${USEUPDATE}" == "y" ]; then
-    wget http://cmjscripter.net/files/scripts/ispc/ISPC-SOGO-debian-u2.sh -O `pwd`/ISPC-SOGO-debian-u1.sh
-    chmod +x `pwd`/ISPC-SOGO-debian-u1.sh
-    bash `pwd`/ISPC-SOGO-debian-u1.sh
-    exit 0;
-fi
 
 OSTOCONF='debian'
 
@@ -73,10 +71,10 @@ if [ "${OSTOCONF}" == "debian" ]; then
     echo -e "select debian distro name [lenny|squeeze|wheezy]: \c "
     read DEBDISTRONAME
     ##echo -e "\ndeb http://apt.cmjscripter.net/inverse.ca/debian ${DEBDISTRONAME} ${DEBDISTRONAME}" >> /etc/apt/sources.list
-    echo "
+cat >> /etc/apt/sources.list << EOF
 deb http://inverse.ca/debian ${DEBDISTRONAME} ${DEBDISTRONAME}
 ## deb http://inverse.ca/debian-nightly ${DEBDISTRONAME} ${DEBDISTRONAME}
-" >> /etc/apt/sources.list
+EOF
 
 else
 
@@ -86,17 +84,73 @@ else
 fi
 
 
-echo "Adding inverse gnupg keys from: keys.gnupg.net"
-apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
-echo "Updateing apt packages list ..."
-aptitude update > /dev/null 2>&1
-echo "Installing sogo, sope4.9-gdl1-mysql, memcached, rpl"
-aptitude install -y memcached rpl
-aptitude install -y sogo sope4.9-gdl1-mysql
-if [ "$?" = "0" ]; then
-    echo "Installing sogo faild check the output for errors and fix them.."
-    exit 1
+if [ "${DEBDISTRONAME}" == "lenny" ]; then
+    ##echo -e "\ndeb-src http://apt.cmjscripter.net/inverse.ca/debian ${DEBDISTRONAME} ${DEBDISTRONAME}" >> /etc/apt/sources.list
+cat >> /etc/apt/sources.list << EOF
+deb-src http://inverse.ca/debian ${DEBDISTRONAME} ${DEBDISTRONAME}
+## deb-src http://inverse.ca/debian-nightly ${DEBDISTRONAME} ${DEBDISTRONAME}
+EOF
+    echo "Adding inverse gnupg keys from: keys.gnupg.net"
+    apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
+    echo "Updateing apt packages list ..."
+    aptitude update > /dev/null 2>&1
+    echo ".."
+    echo "."
+    echo "Debian lenny will fail to install sogo, thers an error in the package debian/sogo.preinst"
+    echo "so we build it from source"
+    sleep 3
+    cd /tmp/
+    aptitude install -y memcached rpl
+    aptitude install -y dpkg-dev gobjc libgnustep-base-dev libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
+    apt-get -y source sogo
+    cd sogo-*
+cat > debian/sogo.preinst << EOF
+#!/bin/bash
+
+set -x
+
+# summary of how this script can be called:
+#        * <new-preinst> \`install'
+#        * <new-preinst> \`install' <old-version>
+#        * <new-preinst> \`upgrade' <old-version>
+#        * <old-preinst> \`abort-upgrade' <new-version>
+#
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+if [ "\$1" == "install" ] || [ "\$1" == "upgrade" ]; then
+
+  if ! id sogo 1> /dev/null 2>&1; then
+    groupadd -f -r sogo
+    useradd -d /var/lib/sogo -g sogo -c "SOGo daemon" -s /usr/sbin/nologin -r sogo
+  fi
+
+  # create mandatory dirs and enforce owner/perms
+  for dir in lib log run spool; do
+    install -m 750 -o sogo -g sogo -d /var/\$dir/sogo
+  done
 fi
+
+#DEBHELPER#
+
+exit 0
+EOF
+    dpkg-buildpackage -b
+    echo "Installing tmpreaper, sogo, sope4.9-gdl1-mysql"
+    aptitude install -y sope4.9-libxmlsaxdriver tmpreaper
+    dpkg -i ../sogo_2*.deb
+    aptitude install -y sope4.9-gdl1-mysql
+else
+
+    echo "Adding inverse gnupg keys from: keys.gnupg.net"
+    apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
+    echo "Updateing apt packages list ..."
+    aptitude update > /dev/null 2>&1
+    echo "Installing sogo, sope4.9-gdl1-mysql, memcached, rpl"
+    aptitude install -y sogo sope4.9-gdl1-mysql memcached rpl
+
+fi
+
 #echo "Installing openchangeserver for SOGo..."
 #apt-get install -t squeeze-backports libwbclient-dev samba-common smbclient libsmbclient libsmbclient-dev
 #apt-get update
@@ -131,6 +185,7 @@ read ISPCONFIGDB
 if [ -z "${ISPCONFIGDB}" ]; then
     ISPCONFIGDB="dbispconfig"
 fi
+
 echo -e "SOGo database name [sogodb]\c "
 read SOGODB
 if [ -z "${SOGODB}" ]; then
@@ -172,6 +227,17 @@ read IMAPSERVER
 if [ -z "${IMAPSERVER}" ]; then
     IMAPSERVER="localhost"
 fi
+
+echo "Select IMAP user password algorithm"
+echo "plain|crypt|md5-crypt|md5|plain-md5"
+echo "Confirm with your imap server config || http://wiki.dovecot.org/Authentication/PasswordSchemes"
+echo -e "Use algorithm [crypt]\c "
+read IMAPPWALGORITHM
+if [ -z "${IMAPPWALGORITHM}" ]; then
+    IMAPPWALGORITHM="crypt"
+fi
+
+
 echo -e "Default SMTP Server Addr [localhost]\c "
 read SMTPSERVER
 if [ -z "${SMTPSERVER}" ]; then
@@ -256,7 +322,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
             <key>SOGoAppointmentSendEMailNotifcations</key>
             <string>YES</string>
             <key>SOGoAppointmentSendEMailReceipts</key>
-            <string>NO</string>
+            <string>YES</string>
             <key>SOGoAuthenticationMethod</key>
             <string>SQL</string>
             <key>SOGoCalendarDefaultRoles</key>
@@ -503,7 +569,7 @@ class sogo_config_plugin {
                     <array>
                         <dict>
                             <key>userPasswordAlgorithm</key>
-                            <string>crypt</string>
+                            <string>${IMAPPWALGORITHM}</string>
                             <key>prependPasswordScheme</key>
                             <string>NO</string>
                             <key>LoginFieldNames</key>
@@ -559,7 +625,7 @@ ln -s ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php ${
 
 echo "Allmost there wee just need to configure the vhost"
 echo "."
-echo -e "Domain vhost to configure [`hostname --fqdn`]: \c "
+echo -e "SOGo Domain vhost to configure [`hostname --fqdn`]: \c "
 read SOGOVHOSTNAME
 if [ -z "${SOGOVHOSTNAME}" ]; then
     SOGOVHOSTNAME=`hostname --fqdn`
@@ -646,7 +712,6 @@ echo "
     Redirect permanent /index.html ${SOGOPROTOCAL}://${SOGOVHOSTNAME}:${SOGOHTTPPORT}/SOGo
 </virtualhost>
 "> /etc/apache2/conf.d/SOGo.conf
-
 
 ## final restart services 
 /etc/init.d/sogo restart
