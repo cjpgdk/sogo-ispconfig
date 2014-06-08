@@ -1,8 +1,17 @@
 #!/bin/sh
 
-# 
+#
 # Install SOGo on debian ISPConfig 3 server
 #
+# Update 4.1
+#   user password algorithm,, was selectable but not used in the script..!
+#
+# Update 4
+#   - updated plugin 
+#       create view for user-example.com is allow (dash is not allowed by mysql replace with _)
+#       create view so user-example.com and example.com does not collate with each other by adding '@' to sql statement
+#   - Debian lenny needs 'debhelper' added to install packages
+# 
 # Update 3
 #   - updated plugin to remove user data and settings from sogodb upon delete of mail user
 #   - fixed plugin ''create sogo view''  now get the correct imap host if multi hosts exists...
@@ -26,10 +35,23 @@
 #       Mysql Port.
 #
 # Tests.
+# - (ISPConfig Minimum version 3.0.4)
+#       older versions are not supported by the plugin
+#       the databse table mail_user is not compatible with the current sqls,
+#       May OR !!MAY NOT!! create a version check and added working sql i have not decided that yet.
+#
 # - (ISPConfig 3.0.5) -- the main thing to consider for using this with other versions of ISPConfig is the ""IMAP Server"" configuration..
+#
 # - OS
 #       Debian Lenny
 #       Debian Squeeze
+#
+# - OS Setups
+#       Debian Lenny: ISPConfig 3.0.5:  Apache2, BIND, Dovecot
+#       Debian Squeeze: ISPConfig 3.0.5:  Apache2, BIND, Dovecot
+#       Debian Lenny: ISPConfig 3.0.4:  Apache2, MyDNS, Courier 
+#           
+#           
 #
 # Single server inviroment
 #    - Multi domain, user sharing/ACL restricted to @DOMAIN.TLD
@@ -49,6 +71,24 @@
 #        
 # Bugs:
 #    - vhost may need tweeking before SOGo can be accessed (Default: /etc/apache2/conf.d/SOGo.conf)
+#    - Courier-IMAP uses different imap folder layout thats a PROBLEM..
+#           THE FIX IS TO: !!! OR change this file before running it..
+#               open [ISPConfig Install Path]/server/conf/sogo_domains/domains_default.conf
+#               CHANGE THE KEY VARS: (At the top of the File)
+#                   <key>SOGoDraftsFolderName</key>
+#                   <string>Drafts</string>
+#                   <key>SOGoSentFolderName</key>
+#                   <string>Sent</string>
+#                   <key>SOGoTrashFolderName</key>
+#                   <string>Trash</string>
+#               TO:
+#                   <key>SOGoDraftsFolderName</key>
+#                   <string>Inbox.Drafts</string>
+#                   <key>SOGoSentFolderName</key>
+#                   <string>Inbox.Sent</string>
+#                   <key>SOGoTrashFolderName</key>
+#                   <string>Inbox.Trash</string>
+#               
 #
 # Refrenses
 #    http://wiki.debian.org/SOGo
@@ -60,6 +100,7 @@
 # TODO:
 #    - More Testing !!!!
 #    - 
+#    - Add IMAP server type check/select
 #    - get mail aliases into SOGo tables..
 #    - find a way to make sive work (i only know how to use "ManageSieve server" ) or not ISPConfig does a good job there
 #    - Auto backup of users and configs using sogo-tools.
@@ -107,7 +148,7 @@ EOF
     sleep 3
     cd /tmp/
     aptitude install -y memcached rpl
-    aptitude install -y dpkg-dev gobjc libgnustep-base-dev libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
+    aptitude install -y debhelper dpkg-dev gobjc libgnustep-base-dev libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
     apt-get -y source sogo
     cd sogo-*
 cat > debian/sogo.preinst << EOF
@@ -210,12 +251,6 @@ read ISPCONFIGINSTALLPATH
 if [ -z "${ISPCONFIGINSTALLPATH}" ]; then
     ISPCONFIGINSTALLPATH="/usr/local/ispconfig"
 fi
-#echo "ISPConfig user needs PRIVILEGES for Create view..."
-#echo -e "ISPConfig DB Username [ispconfig]\c "
-#read ISPCONFIGUSERN
-#if [ -z "${ISPCONFIGUSERN}" ]; then
-#    ISPCONFIGUSERN="ispconfig"
-#fi
 
 echo -e "SOGO DB Username [sogosysuser]: \c "
 read SOGOUSERN
@@ -435,7 +470,7 @@ cat > ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default.conf << E
                     <array>
                         <dict>
                             <key>userPasswordAlgorithm</key>
-                            <string>crypt</string>
+                            <string>${IMAPPWALGORITHM}</string>
                             <key>prependPasswordScheme</key>
                             <string>NO</string>
                             <key>LoginFieldNames</key>
@@ -587,7 +622,7 @@ class sogo_config_plugin {
             return false;
         }
 
-        \$dom_no_point = str_replace('.', '_', \$dom);
+        \$dom_no_point = str_replace('-', '_', str_replace('.', '_', \$dom));
         \$sqlres = \$this->_sqlConnect();
         \$sqlres->query('DROP VIEW \`sogo_users_' . \$dom_no_point . '\`');
         /* Broke my connection??? */
@@ -599,7 +634,7 @@ class sogo_config_plugin {
         global \$app, \$conf;
         \$sqlres = \$this->_sqlConnect();
 
-        \$dom_no_point = str_replace('.', '_', \$dom);
+        \$dom_no_point = str_replace('-', '_', str_replace('.', '_', \$dom));
         \$sql1 = "SELECT \`TABLE_NAME\` FROM \`information_schema\`.\`VIEWS\` WHERE \`TABLE_SCHEMA\`='{\$this->sogodb}' AND \`TABLE_NAME\`='sogo_users_" . \$dom_no_point . "'";
 
         \$tmp = \$sqlres->query(\$sql1);
@@ -616,7 +651,7 @@ class sogo_config_plugin {
 	\`name\` AS c_cn,
 	\`email\` AS mail,
 	(SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 AND ispcmu.\`login\`=\`mail_user\`.\`login\` LIMIT 1) AS imap_host 
-        FROM ' . \$this->ispcdb . '.\`mail_user\` AS ispcmu  WHERE \`email\` LIKE \'%' . \$dom_no_point . '\' AND disableimap=\'n\'');
+        FROM ' . \$this->ispcdb . '.\`mail_user\` AS ispcmu  WHERE \`email\` LIKE \'%@' . \$dom_no_point . '\' AND disableimap=\'n\'');
         if (!empty(\$sqlres->error))
             \$app->log('ERROR. unable to create SOGo view[sogo_users_' . \$dom_no_point . '].. ' . \$sqlres->error, LOGLEVEL_ERROR);
         /* Broke my connection??? */
@@ -626,7 +661,7 @@ class sogo_config_plugin {
 
     function build_conf_sogo_maildomain(\$dom) {
         global \$app, \$conf;
-        \$dom_no_point = str_replace('.', '_', \$dom);
+        \$dom_no_point = str_replace('-', '_', str_replace('.', '_', \$dom));
         /* For mail aliases..
           <key>MailFieldNames</key>
           <array>
@@ -642,11 +677,11 @@ class sogo_config_plugin {
             '{{SOGOUNIQID}}' => \$dom_no_point,
             '{{CONNECTIONVIEWURL}}'=>"mysql://{\$this->sogouser}:{\$this->sogopw}@{\$this->mysql_server_host}/{\$this->sogodb}/sogo_users_{\$dom_no_point}"
         );
-        if (file_exists("{\$this->templ_domains_dir}/{\$dom}.conf")) {
+        if (file_exists("{\$this->templ_domains_dir}/{\$dom_no_point}.conf")) {
             \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/{\$dom}.conf");
         } else {
-            if (!file_exists("{\$this->templ_domains_dir}/{\$dom}.conf"))
-                \$app->log('ERROR. loading domains config.. file: '."{\$this->templ_domains_dir}/{\$dom}.conf", LOGLEVEL_DEBUG);
+            if (!file_exists("{\$this->templ_domains_dir}/{\$dom_no_point}.conf"))
+                \$app->log('ERROR. loading domains config.. file: '."{\$this->templ_domains_dir}/{\$dom_no_point}.conf", LOGLEVEL_DEBUG);
             if (file_exists("{\$this->templ_domains_dir}/domains_default.conf")) {
                 \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/domains_default.conf");
             }  else {
@@ -789,7 +824,6 @@ echo -e "SOGo Home:\t\t${SOGOHOMEDIR}"
 echo -e "SOGo Config:\t\t${SOGOGNUSTEPCONFFILE}"
 echo -e "SOGo Init:\t\t${SOGOINITSCRIPT}"
 echo -e "DB Name:\t\t${SOGODB}"
-#echo -e "DB Name:\t\t${ISPCONFIGDB}"
 echo -e "DB User:\t\t${SOGOUSERN}"
 echo -e "DB Psswd:\t\t${SOGOUSERPW}"
 echo -e ""
