@@ -3,22 +3,29 @@
 #
 # Install SOGo on debian/ubuntu/centos ISPConfig 3 server
 #
+# Update 6
+#    - inverse mirror for ubuntu lucid have difrent apt layout??! NOT (lucid lucid) BUT (lucid main)
+#    - added checks to minimize dublicating of actions/content 
+#        * if you tried to run the file once and fail then run it again that makes dublicats but not any more.
+#     - removed install for ubuntu Hardy (8.04), Intrepid (8.10), Jaunty (9.04) and Karmic (9.10)
+#         * install sogo before running this script
+#
 # Update 5.1
-#   renamed the script from ISPC-SOGO-debian.sh to ISPC-SOGO.sh
+#   - renamed the script from ISPC-SOGO-debian.sh to ISPC-SOGO.sh
 #
 # Update 5
 #   - select imap server config to use (Courier | Dovecot)
 #   - added ubuntu support
 #       JUST BE Aware.
 #       quantal (12.10) will be installed using debian wheezy mirrors
-#       Jaunty (9.04) and Karmic (9.10) will be installed using debian squeeze mirrors
+#       Jaunty (9.04) and Karmic (9.10) will be installed using debian wheezy mirrors
 #       Intrepid (8.10) will be installed using debian lenny mirrors (The same install as debian lenny build from source)
 #   - added CentOS support ... thanks to howtoforge.com forum user: "lucaspr"
 #       * read all about that here: http://www.howtoforge.com/forums/showthread.php?t=51162&page=5
 #       - on centos check if we are on x86_64 or not and set apache vhost homedir to [/usr/lib64|/usr/lib]/GNUstep/SOGo/WebServerResources/
-#   - added multi server support (NOT Completely working as one may like..)
+#   - added multi server support
 #       option to create server config along with domain and default config.!
-#    - Complete rewrite of the script ;()
+#   - Complete rewrite of the script ;()
 #
 # Update 4.1
 #   - user password algorithm,, was selectable but not used in the script..!
@@ -63,8 +70,9 @@
 #       Debian Lenny (i386, amd64)
 #       Debian Squeeze (i386, amd64)
 #       CentOS 6.4 (i386, amd64)
+#       CentOS 5.9 (i386)
 #       Ubuntu quantal 12.10 (amd64)
-#        Ubuntu precise 12.04 (i386)
+#       Ubuntu precise 12.04 (i386)
 #
 # - OS Setups
 #       Debian Lenny: ISPConfig 3.0.5:  Apache2, BIND, Dovecot
@@ -74,6 +82,7 @@
 #       CentOS 6.4: ISPConfig 3.0.5.1: Apache2, BIND, Dovecot
 #       Ubuntu quantal12.10: ISPConfig 3.0.5.1: Apache2, BIND, Courier
 #       Ubuntu precise 12.04: ISPConfig 3.0.5.1: Apache2, BIND, Dovecot
+#       CentOS 5.9: ISPConfig 3.0.5.1: Apache2, BIND, Dovecot
 #           
 #
 # Single server inviroment
@@ -158,58 +167,89 @@
 ## function inverse_debian
 ## ads inverse debian mirror to source.list
 function inverse_debian() {
-    cat >> /etc/apt/sources.list << EOF
+    if grep --ignore-case -q "deb http://inverse.ca/debian" "/etc/apt/sources.list"
+    then
+        echo "Debian inverse mirror already exists in /etc/apt/sources.list"
+    else
+        cat >> /etc/apt/sources.list << EOF
 deb http://inverse.ca/debian ${1} ${1}
 ## deb http://inverse.ca/debian-nightly ${1} ${1}
 EOF
+    fi
 }
+
 ## function inverse_debian_src
 ## ads inverse debian (SOURCE) mirror to source.list
 function inverse_debian_src() {
-    cat >> /etc/apt/sources.list << EOF
+
+    if grep --ignore-case -q "deb-src http://inverse.ca/debian" "/etc/apt/sources.list"
+    then
+        echo "Debian inverse source mirror already exists in /etc/apt/sources.list"
+    else
+        cat >> /etc/apt/sources.list << EOF
 deb-src http://inverse.ca/debian ${1} ${1}
 ## deb-src http://inverse.ca/debian-nightly ${1} ${1}
 EOF
+    fi
 }
 ## function inverse_ubuntu
 ## ads inverse ubuntu mirror to source.list
 function inverse_ubuntu() {
-    cat >> /etc/apt/sources.list << EOF
+
+    if grep --ignore-case -q "deb http://inverse.ca/ubuntu" "/etc/apt/sources.list"
+    then
+        echo "Ubuntu inverse mirror already exists in /etc/apt/sources.list"
+    else
+        cat >> /etc/apt/sources.list << EOF
 deb http://inverse.ca/ubuntu ${1} ${1}
 ## deb http://inverse.ca/ubuntu-nightly ${1} ${1}
 EOF
+    fi
 }
 ## function inverse_ubuntu_src
 ## ads inverse ubuntu mirror to source.list
 function inverse_ubuntu_src() {
+    if grep --ignore-case -q "deb-src http://inverse.ca/ubuntu" "/etc/apt/sources.list"
+    then
+        echo "Ubuntu inverse source mirror already exists in /etc/apt/sources.list"
+    else
     cat >> /etc/apt/sources.list << EOF
 deb-src http://inverse.ca/ubuntu ${1} ${1}
 ## deb-src http://inverse.ca/ubuntu-nightly ${1} ${1}
 EOF
+    fi
 }
 ## function inverse_rhel6
 ## ads inverse RHEL6 mirror to /etc/yum.repos.d/SOGo.repo
 function inverse_rhel6(){
-    echo "Adding SOGo Mirrors to repos [/etc/yum.repos.d/SOGo.repo]"
-    cat >> /etc/yum.repos.d/SOGo.repo << EOF
+    if [ ! -f /etc/yum.repos.d/SOGo.repo ]; then
+        echo "Adding SOGo Mirrors to repos [/etc/yum.repos.d/SOGo.repo]"
+        cat >> /etc/yum.repos.d/SOGo.repo << EOF
 [sogo-Centos6]
 name=Inverse SOGo Repository
 baseurl=http://inverse.ca/downloads/SOGo/RHEL6/\$basearch
 enabled=1
 gpgcheck=0
 EOF
+    else
+        echo "SOGo Mirror file /etc/yum.repos.d/SOGo.repo already exists"
+    fi
 }
 ## function inverse_centos5
 ## ads inverse CentOS5 mirror to /etc/yum.repos.d/SOGo.repo
 function inverse_centos5(){
-    echo "Adding SOGo Mirrors to repos [/etc/yum.repos.d/SOGo.repo]"
-    cat >> /etc/yum.repos.d/SOGo.repo << EOF
+    if [ ! -f /etc/yum.repos.d/SOGo.repo ]; then
+        echo "Adding SOGo Mirrors to repos [/etc/yum.repos.d/SOGo.repo]"
+        cat >> /etc/yum.repos.d/SOGo.repo << EOF
 [sogo-Centos5]
 name=Inverse SOGo Repository
 baseurl=http://inverse.ca/downloads/SOGo/CentOS5/\$basearch
 enabled=1
 gpgcheck=0
 EOF
+    else
+        echo "SOGo Mirror file /etc/yum.repos.d/SOGo.repo already exists"
+    fi
 }
 ## function epel_exclude_gnustep
 ## ads exclude=gnustep-* to '[epel]' mirror
@@ -219,50 +259,61 @@ function epel_exclude_gnustep(){
     if [ -z "${EPELREPOFILE}" ]; then
         EPELREPOFILE="/etc/yum.repos.d/epel.repo"
     fi
-
-    cp ${EPELREPOFILE} ${EPELREPOFILE}.bak
-    echo "Adding exclude=gnustep-* to '[epel]'"
-    sed -i '/\[epel\]/ a\
+    if [ -f ${EPELREPOFILE} ]; then
+        cp ${EPELREPOFILE} ${EPELREPOFILE}.bak
+        echo "Adding exclude=gnustep-* to '[epel]'"
+        sed -i '/\[epel\]/ a\
 exclude=gnustep-*' ${EPELREPOFILE}
+    else
+        echo "file ${EPELREPOFILE} not Found..!"
+        sleep 5
+    fi
 }
 function install_sogo_build_from_src(){
-    echo "Adding inverse gnupg keys from: keys.gnupg.net"
-    apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
-    echo "Update apt packages list ..."
-    aptitude update > /dev/null 2>&1
-    echo ".."
-    echo "."
-    echo "Building SOGo from source"
-    sleep 3
-    cd /tmp/
-    aptitude install -y memcached rpl
-    aptitude install -y debhelper dpkg-dev gobjc libgnustep-base-dev libsbjson2.3 libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
-    apt-get -y source sogo
-    cd sogo-*
-    dpkg-buildpackage -b
-    echo "Installing tmpreaper, sogo, sope4.9-gdl1-mysql"
-    aptitude install -y sope4.9-libxmlsaxdriver tmpreaper
-    dpkg -i ../sogo_2*.deb
-    aptitude install -y sope4.9-gdl1-mysql
+    local TMPWITCHBIN=`which sogod`
+    if [ -z "${TMPWITCHBIN}" ]; then
+        echo "Adding inverse gnupg keys from: keys.gnupg.net"
+        apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
+        echo "Update apt packages list ..."
+        aptitude update > /dev/null 2>&1
+        echo ".."
+        echo "."
+        echo "Building SOGo from source"
+        sleep 3
+        cd /tmp/
+        aptitude install -y memcached rpl
+        aptitude install -y debhelper dpkg-dev gobjc libgnustep-base-dev libsbjson2.3 libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
+        apt-get -y source sogo
+        cd sogo-*
+        dpkg-buildpackage -b
+        echo "Installing tmpreaper, sogo, sope4.9-gdl1-mysql"
+        aptitude install -y sope4.9-libxmlsaxdriver tmpreaper
+        dpkg -i ../sogo_2*.deb
+        aptitude install -y sope4.9-gdl1-mysql
+    else
+        echo "SOGo is installed..!"
+    fi
 }
 ## function install_sogo_debian_lenny
 ## installs sogo debian lenny
 function install_sogo_debian_lenny(){
-    echo "Adding inverse gnupg keys from: keys.gnupg.net"
-    apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
-    echo "Updateing apt packages list ..."
-    aptitude update > /dev/null 2>&1
-    echo ".."
-    echo "."
-    echo "Debian lenny will fail to install sogo, thers an error in the package debian/sogo.preinst"
-    echo "so we build it from source"
-    sleep 3
-    cd /tmp/
-    aptitude install -y memcached rpl
-    aptitude install -y debhelper dpkg-dev gobjc libgnustep-base-dev libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
-    apt-get -y source sogo
-    cd sogo-*
-cat > debian/sogo.preinst << EOF
+    local TMPWITCHBIN=`which sogod`
+    if [ -z "${TMPWITCHBIN}" ]; then
+        echo "Adding inverse gnupg keys from: keys.gnupg.net"
+        apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
+        echo "Updateing apt packages list ..."
+        aptitude update > /dev/null 2>&1
+        echo ".."
+        echo "."
+        echo "Debian lenny will fail to install sogo, thers an error in the package debian/sogo.preinst"
+        echo "so we build it from source"
+        sleep 3
+        cd /tmp/
+        aptitude install -y memcached rpl
+        aptitude install -y debhelper dpkg-dev gobjc libgnustep-base-dev libsope-appserver4.9-dev libsope-core4.9-dev libsope-gdl1-4.9-dev libsope-ldap4.9-dev libsope-mime4.9-dev libsope-xml4.9-dev libmemcached-dev libxml2-dev libsbjson-dev libssl-dev libcurl4-openssl-dev
+        apt-get -y source sogo
+        cd sogo-*
+        cat > debian/sogo.preinst << EOF
 #!/bin/bash
 
 set -x
@@ -293,11 +344,14 @@ fi
 
 exit 0
 EOF
-    dpkg-buildpackage -b
-    echo "Installing tmpreaper, sogo, sope4.9-gdl1-mysql"
-    aptitude install -y sope4.9-libxmlsaxdriver tmpreaper
-    dpkg -i ../sogo_2*.deb
-    aptitude install -y sope4.9-gdl1-mysql
+        dpkg-buildpackage -b
+        echo "Installing tmpreaper, sogo, sope4.9-gdl1-mysql"
+        aptitude install -y sope4.9-libxmlsaxdriver tmpreaper
+        dpkg -i ../sogo_2*.deb
+        aptitude install -y sope4.9-gdl1-mysql
+    else
+        echo "SOGo is installed..!"
+    fi
 }
 ## function removeing_warning_of_tmpreaper
 ## removes warning of tmpreaper
@@ -311,12 +365,13 @@ function removeing_warning_of_tmpreaper(){
 function memcached_deb_config(){
     #### memcached not happy w. IPv6
     echo "memcached not happy w. IPv6, settings to 127.0.0.1"
-    rpl '127.0.0.1' localhost /etc/memcached.conf  > /dev/null 2>&1
+    rpl 'localhost' '127.0.0.1' /etc/memcached.conf  > /dev/null 2>&1
     /etc/init.d/memcached restart  > /dev/null 2>&1
 }
 ## function memcached_centos_config
 ## configuration for memcached 
 function memcached_centos_config(){
+    if [ -f /etc/sysconfig/memcached ]; then
     cat > /etc/sysconfig/memcached << EOF
 # Running on Port 11211
 PORT="11211"
@@ -329,6 +384,9 @@ CACHESIZE="128"
 #Set server IP address
 OPTIONS="-l 127.0.0.1"
 EOF
+    else
+        echo "Unable to configure memcached file /etc/sysconfig/memcached not found.."
+    fi
 }
 ## function default_settings
 ## get all the default settings needed for this script to complete 
@@ -470,19 +528,48 @@ function default_settings(){
 ## function mysql_db
 ## creates mysql database to use for sogo and adds user with read permissions on ISPConfig database.
 function mysql_db(){
-
-    mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE DATABASE ${SOGODB};";
-    mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE USER '${SOGOUSERN}'@'${MYSQLHOST}' IDENTIFIED BY '${SOGOUSERPW}';";
-    mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${SOGODB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
-    mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}';";
-    mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "FLUSH PRIVILEGES;";
+    if [[ ! -z "`mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "SHOW DATABASES LIKE '${ISPCONFIGDB}';"; 2>&1`" ]];
+    then
+        if [[ ! -z "`mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "SHOW DATABASES LIKE '${SOGODB}';"; 2>&1`" ]];
+        then
+            echo "${SOGODB} DATABASE EXIST"
+        else
+            echo "CREATE DATABASE ${SOGODB}"
+            mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE DATABASE IF NOT EXISTS ${SOGODB};";
+            echo "CREATE USER ${SOGOUSERN}"
+            mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE USER '${SOGOUSERN}'@'${MYSQLHOST}' IDENTIFIED BY '${SOGOUSERPW}';";
+            echo "SET GRANTS for user ${SOGOUSERN}"
+            mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${SOGODB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
+            mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}';";
+            echo "FLUSH PRIVILEGES"
+            mysql -u ${MYSQLADMUSER} -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "FLUSH PRIVILEGES;";
+        fi
+    else
+      echo "${ISPCONFIGDB} DATABASE DOES NOT EXIST"
+      exit 1
+    fi
 
 }
+
+
+
+
+
 ## function sogoconf_templs
 ## creates the sogo configuration template file. and templates directory
 function sogoconf_templs(){
-
-    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    if [ -f ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ ]; then
+        echo -e "A Template for sogo configuration EXIST OVERIDE IT? (y/n) [n]: \c"
+        read LOCALOVERIDETMLP
+        if [ -z "${LOCALOVERIDETMLP}" ]; then
+            LOCALOVERIDETMLP="n"
+        fi
+    else
+        LOCALOVERIDETMLP="y"
+    fi
+    
+    if [ "${LOCALOVERIDETMLP}" == "y" ]; then
+        echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//GNUstep//DTD plist 0.9//EN\" \"http://www.gnustep.org/plist-0_9.xml\">
 <plist version=\"0.9\">
     <dict>
@@ -596,11 +683,16 @@ function sogoconf_templs(){
         </dict>
     </dict>
 </plist>" >${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ
+    fi
     chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ
 
-    mkdir -p ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains
+    if [ ! -d "${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains" ]; then
+        mkdir -p ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains
+    fi
+    
     sogo_domains_conf_dovecot
     sogo_domains_conf_courier
+    
     if [ "${IMAPSERVERDEFAULT}" == "courier" ]; then
         cp ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default_courier.conf ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default.conf
     else
@@ -934,12 +1026,12 @@ class sogo_config_plugin {
         }
 
         \$sqlres->query('CREATE VIEW sogo_users_' . \$dom_no_point . ' AS SELECT
-	\`login\` AS c_uid,
-	\`login\` AS c_name,
-	\`password\` AS c_password,
-	\`name\` AS c_cn,
-	\`email\` AS mail,
-	(SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 AND ispcmu.\`login\`=\`mail_user\`.\`login\` LIMIT 1) AS imap_host 
+    \`login\` AS c_uid,
+    \`login\` AS c_name,
+    \`password\` AS c_password,
+    \`name\` AS c_cn,
+    \`email\` AS mail,
+    (SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 AND ispcmu.\`login\`=\`mail_user\`.\`login\` LIMIT 1) AS imap_host 
         FROM ' . \$this->ispcdb . '.\`mail_user\` AS ispcmu  WHERE \`email\` LIKE \'%@' . \$dom_no_point . '\' AND disableimap=\'n\'');
         if (!empty(\$sqlres->error))
             \$app->log('ERROR. unable to create SOGo view[sogo_users_' . \$dom_no_point . '].. ' . \$sqlres->error, LOGLEVEL_ERROR);
@@ -1004,7 +1096,9 @@ EOF
 
     chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php
     # enable the plugin..
-    ln -s ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php ${ISPCONFIGINSTALLPATH}/server/plugins-enabled/sogo_config_plugin.inc.php
+    if [ ! -L "${ISPCONFIGINSTALLPATH}/server/plugins-enabled/sogo_config_plugin.inc.php" ]; then
+        ln -s ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php ${ISPCONFIGINSTALLPATH}/server/plugins-enabled/sogo_config_plugin.inc.php
+    fi
 
 }
 
@@ -1014,34 +1108,40 @@ function apache2_vhost(){
 
     echo "Allmost there wee just need to configure the vhost"
     echo "."
-    echo -e "SOGo Domain vhost to configure [`hostname --fqdn`]: \c "
-    read SOGOVHOSTNAME
-    if [ -z "${SOGOVHOSTNAME}" ]; then
-        SOGOVHOSTNAME=`hostname --fqdn`
+    echo -e "Continue with vhost config? (n/y) [y]: \c "
+    read SOGOVHOSTCONIUE
+    if [ -z "${SOGOVHOSTCONIUE}" ]; then
+        SOGOVHOSTCONIUE="y"
     fi
-    echo -e "HTTP Protocol [http]: \c "
-    read SOGOPROTOCAL
-    if [ -z "${SOGOPROTOCAL}" ]; then
-        SOGOPROTOCAL="http"
-    fi
-    echo -e "HTTP Port: [80]: \c "
-    read SOGOHTTPPORT
-    if [ -z "${SOGOHTTPPORT}" ]; then
-        SOGOHTTPPORT="80"
-    fi
-    OSARC=`uname -m`;
-    VHOSTLIBDIR="/usr/lib";
-    if [ "${OSTOCONF}" == "centos" ]; then
-        if [ "${OSARC}" == "x86_64" ]; then
-            VHOSTLIBDIR="/usr/lib64";
+    if [ "${SOGOVHOSTCONIUE}" == "y" ]; then
+        echo -e "SOGo Domain vhost to configure [`hostname --fqdn`]: \c "
+        read SOGOVHOSTNAME
+        if [ -z "${SOGOVHOSTNAME}" ]; then
+            SOGOVHOSTNAME=`hostname --fqdn`
         fi
-    fi
-    echo -e "Apache2/Httpd config directory: [/etc/apache2/conf.d/]: \c "
-    read HTTPDCONFDIR
-    if [ -z "${HTTPDCONFDIR}" ]; then
-        HTTPDCONFDIR="/etc/apache2/conf.d/"
-    fi
-    echo "
+        echo -e "HTTP Protocol [http]: \c "
+        read SOGOPROTOCAL
+        if [ -z "${SOGOPROTOCAL}" ]; then
+            SOGOPROTOCAL="http"
+        fi
+        echo -e "HTTP Port: [80]: \c "
+        read SOGOHTTPPORT
+        if [ -z "${SOGOHTTPPORT}" ]; then
+            SOGOHTTPPORT="80"
+        fi
+        OSARC=`uname -m`;
+        VHOSTLIBDIR="/usr/lib";
+        if [ "${OSTOCONF}" == "centos" ]; then
+            if [ "${OSARC}" == "x86_64" ]; then
+                VHOSTLIBDIR="/usr/lib64";
+            fi
+        fi
+        echo -e "Apache2/Httpd config directory: [/etc/apache2/conf.d/]: \c "
+        read HTTPDCONFDIR
+        if [ -z "${HTTPDCONFDIR}" ]; then
+            HTTPDCONFDIR="/etc/apache2/conf.d/"
+        fi
+        echo "
 <VirtualHost *:${SOGOHTTPPORT}>
    Servername ${SOGOVHOSTNAME}:${SOGOHTTPPORT}
    DocumentRoot ${VHOSTLIBDIR}/GNUstep/SOGo/WebServerResources/
@@ -1113,16 +1213,32 @@ function apache2_vhost(){
     Redirect permanent /index.html ${SOGOPROTOCAL}://${SOGOVHOSTNAME}:${SOGOHTTPPORT}/SOGo
 </virtualhost>
 "> ${HTTPDCONFDIR}SOGo.conf
+    fi
 }
 ## function inverse_debubun_install
 ## install sogo on debian/ubuntu
 function inverse_debubun_install(){
-    echo "Adding inverse gnupg keys from: keys.gnupg.net"
-    apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
-    echo "Updateing apt packages list ..."
-    aptitude update > /dev/null 2>&1
-    echo "Installing sogo, sope4.9-gdl1-mysql, memcached, rpl"
-    aptitude install -y sogo sope4.9-gdl1-mysql memcached rpl
+    local TMPWITCHBIN=`which sogod`
+    if [ -z "${TMPWITCHBIN}" ]; then
+        echo "Adding inverse gnupg keys from: keys.gnupg.net"
+        apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
+        echo "Updateing apt packages list ..."
+        aptitude update > /dev/null 2>&1
+        echo "Installing sogo, sope4.9-gdl1-mysql, memcached, rpl"
+        aptitude install -y sogo sope4.9-gdl1-mysql memcached rpl
+    else
+        echo "SOGo is installed.."
+    fi
+}
+function os_no_install(){
+    LOCALSOGOHOMEDIR=$(getent passwd sogo | cut -d: -f6)
+    if [ -z "${LOCALSOGOHOMEDIR}" ]; then
+        echo "Found SOGo in: ${LOCALSOGOHOMEDIR}"
+        echo "Moving on.."
+    else
+        echo "Sorry to see you go like this. :(. install sogo with out this script and i will be happy to setup the rest for you.! :)"
+        exit 1
+     fi
 }
 
 #
@@ -1162,23 +1278,11 @@ elif [ "${OSTOCONF}" == "ubuntu" ]; then
     echo -e "...."
     echo -e ".."
     echo -e "quantal (12.10) will be installed using debian wheezy mirrors"
-    echo -e "Jaunty (9.04) and Karmic (9.10) will be installed using debian squeeze mirrors"
-    echo -e "Intrepid (8.10) will be installed using debian lenny mirrors"
-    echo -e "[quantal|precise|oneiric|natty|maverick|lucid|jaunty|karmic|intrepid]"
+    echo -e "[quantal|precise|oneiric|natty|maverick|lucid|no_install]"
     echo -e "select ubuntu distro name: []: \c "
     read UBUNDISTRONAME
-    if [ "${UBUNDISTRONAME}" == "intrepid" ]; then
-        inverse_debian 'lenny'
-        inverse_debian_src 'lenny'
-        install_sogo_debian_lenny
-    elif [ "${UBUNDISTRONAME}" == "karmic" ]; then
-        inverse_debian 'squeeze'
-        inverse_debian_src 'squeeze'
-        inverse_debubun_install
-    elif [ "${UBUNDISTRONAME}" == "jaunty" ]; then
-        inverse_debian 'squeeze'
-        inverse_debian_src 'squeeze'
-        inverse_debubun_install
+    if [ "${UBUNDISTRONAME}" == "no_install" ]; then
+        os_no_install
 #    elif [ "${UBUNDISTRONAME}" == "Precise" ]; then
 #        inverse_debian 'wheezy'
 #        inverse_debian_src 'wheezy'
@@ -1186,6 +1290,16 @@ elif [ "${OSTOCONF}" == "ubuntu" ]; then
     elif [ "${UBUNDISTRONAME}" == "quantal" ]; then
         inverse_debian 'wheezy'
         inverse_debian_src 'wheezy'
+        inverse_debubun_install
+    elif [ "${UBUNDISTRONAME}" == "lucid" ]; then
+        cat >> /etc/apt/sources.list << EOF
+deb http://inverse.ca/ubuntu lucid main
+## deb http://inverse.ca/ubuntu-nightly lucid main
+EOF
+        cat >> /etc/apt/sources.list << EOF
+deb-src http://inverse.ca/ubuntu lucid main
+## deb-src http://inverse.ca/ubuntu-nightly lucid main
+EOF
         inverse_debubun_install
     else
         inverse_ubuntu ${UBUNDISTRONAME}
