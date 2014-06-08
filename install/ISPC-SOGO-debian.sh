@@ -3,10 +3,18 @@
 #
 # Install SOGo on debian ISPConfig 3 server
 #
+# Update 1.
+#   - move SOGo to seperated db.
+#   - small cleaning of plugin script 
+#   - added more option during the install
+#       Mysql host.
+#       Mysql Port.
+#
 # Tests.
 # Single server inviroment
 #    - Install OK
 #    - Multi domain, user sharing/ACL restricted to @DOMAIN.TLD
+#       (User can't add other users ACLs unless allowed to by admin or other user.)
 #    - Administrator of A domain is postmaster@DOMAIN.TLD
 #    - ISPConfig plugin: 
 #        i say BETA add/update/delete domain will trigger event to rebuild SOGo config.
@@ -16,12 +24,15 @@
 #        auto create sogo users view if none existing.
 #        Remove SOGo view if domain is deleted: 50%, needs to use "sogo-tools" to remove the tables created for individual users.
 #        
+#        
 # Multi server inviroment
 #        not tested, + i dont have the capacity to do the tests needed..
 #        
 #
 # Bugs:
 #    - vhost may need tweeking before SOGo can be accessed (Default: /etc/apache2/conf.d/SOGo.conf)
+#    - Debian Lenny got error in sogo package ""debian/sogo.preinst"" useradd fails.. 
+#       Run this script until error get source for sogo fix the useradd in debian/sogo.preinst, Build install and run the script again.
 #
 # Refrenses
 #    http://wiki.debian.org/SOGo
@@ -35,14 +46,6 @@
 #    - 
 #    - get mail aliases into SOGo tables..
 #    - find a way to make sive work (i only know how to use "ManageSieve server" ) or not ISPConfig does a good job there
-#    - Allow sogo to use private db (Keep sogo and ispconfg seperated...)
-#        vi /etc/mysql/my.cnf
-#        [mysqld]
-#        federated
-#        ?? if not finding a better way the sql is at the bottom of the script..
-#        !!! Plugin is not able to use that yet..
-#
-#
 #    - Auto backup of users and configs using sogo-tools.
 #    - 
 #    - Make the script upon install create and pack plugins for thunderbird
@@ -51,13 +54,13 @@
 #    - Add SOGo OpenChange backend --- http://www.sogo.nu/files/docs/SOGo%20Native%20Microsoft%20Outlook%20Configuration.pdf
 #
 
-echo -e "update 1 is released download ad use that? (y/n) [y]: \c "
+echo -e "update 2 is released download ad use that? (y/n) [y]: \c "
 read USEUPDATE
 if [ -z "${USEUPDATE}" ]; then
     USEUPDATE="y"
 fi
 if [ "${USEUPDATE}" == "y" ]; then
-    wget http://cmjscripter.net/files/scripts/ispc/ISPC-SOGO-debian-u1.sh -O `pwd`/ISPC-SOGO-debian-u1.sh
+    wget http://cmjscripter.net/files/scripts/ispc/ISPC-SOGO-debian-u2.sh -O `pwd`/ISPC-SOGO-debian-u1.sh
     chmod +x `pwd`/ISPC-SOGO-debian-u1.sh
     bash `pwd`/ISPC-SOGO-debian-u1.sh
     exit 0;
@@ -65,20 +68,35 @@ fi
 
 OSTOCONF='debian'
 
-echo -e "select debian distro name [lenny|squeeze|wheezy]: \c "
-read DEBDISTRONAME
-echo "
+if [ "${OSTOCONF}" == "debian" ]; then
+
+    echo -e "select debian distro name [lenny|squeeze|wheezy]: \c "
+    read DEBDISTRONAME
+    ##echo -e "\ndeb http://apt.cmjscripter.net/inverse.ca/debian ${DEBDISTRONAME} ${DEBDISTRONAME}" >> /etc/apt/sources.list
+    echo "
 deb http://inverse.ca/debian ${DEBDISTRONAME} ${DEBDISTRONAME}
 ## deb http://inverse.ca/debian-nightly ${DEBDISTRONAME} ${DEBDISTRONAME}
 " >> /etc/apt/sources.list
+
+else
+
+    echo "Distro not supported yet use debian"
+    exit 1;
+
+fi
+
 
 echo "Adding inverse gnupg keys from: keys.gnupg.net"
 apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4  > /dev/null 2>&1
 echo "Updateing apt packages list ..."
 aptitude update > /dev/null 2>&1
 echo "Installing sogo, sope4.9-gdl1-mysql, memcached, rpl"
-aptitude install -y sogo sope4.9-gdl1-mysql memcached rpl
-
+aptitude install -y memcached rpl
+aptitude install -y sogo sope4.9-gdl1-mysql
+if [ "$?" = "0" ]; then
+    echo "Installing sogo faild check the output for errors and fix them.."
+    exit 1
+fi
 #echo "Installing openchangeserver for SOGo..."
 #apt-get install -t squeeze-backports libwbclient-dev samba-common smbclient libsmbclient libsmbclient-dev
 #apt-get update
@@ -96,16 +114,28 @@ rpl '127.0.0.1' localhost /etc/memcached.conf  > /dev/null 2>&1
 echo -e "mysql root password: \c "
 read MYSQLROOTPW
 
+echo -e "mysql host [127.0.0.1]: \c "
+read MYSQLHOST
+if [ -z "${MYSQLHOST}" ]; then
+    MYSQLHOST="127.0.0.1"
+fi
+
+echo -e "mysql port [3306]: \c "
+read MYSQLPORT
+if [ -z "${MYSQLPORT}" ]; then
+    MYSQLPORT="3306"
+fi
+
 echo -e "ISPCONFIG database name [dbispconfig]\c "
 read ISPCONFIGDB
 if [ -z "${ISPCONFIGDB}" ]; then
     ISPCONFIGDB="dbispconfig"
 fi
-#echo -e "SOGo database name [sogodb]\c "
-#read SOGODB
-#if [ -z "${SOGODB}" ]; then
-#    SOGODB="sogodb"
-#fi
+echo -e "SOGo database name [sogodb]\c "
+read SOGODB
+if [ -z "${SOGODB}" ]; then
+    SOGODB="sogodb"
+fi
 
 echo -e "ISPCONFIG install path [/usr/local/ispconfig]\c "
 read ISPCONFIGINSTALLPATH
@@ -113,13 +143,12 @@ read ISPCONFIGINSTALLPATH
 if [ -z "${ISPCONFIGINSTALLPATH}" ]; then
     ISPCONFIGINSTALLPATH="/usr/local/ispconfig"
 fi
-echo "ISPConfig user needs PRIVILEGES for Create view..."
-echo -e "ISPConfig DB Username [ispconfig]\c "
-read ISPCONFIGUSERN
-
-if [ -z "${ISPCONFIGUSERN}" ]; then
-    ISPCONFIGUSERN="ispconfig"
-fi
+#echo "ISPConfig user needs PRIVILEGES for Create view..."
+#echo -e "ISPConfig DB Username [ispconfig]\c "
+#read ISPCONFIGUSERN
+#if [ -z "${ISPCONFIGUSERN}" ]; then
+#    ISPCONFIGUSERN="ispconfig"
+#fi
 
 echo -e "SOGO DB Username [sogosysuser]\c "
 read SOGOUSERN
@@ -129,32 +158,33 @@ if [ -z "${SOGOUSERN}" ]; then
 fi
 
 SOGOUSERPW=`< /dev/urandom tr -dc A-Za-z0-9_ | head -c15`
-##mysql -u root -p${MYSQLROOTPW} -e "CREATE DATABASE ${SOGODB};";
-mysql -u root -p${MYSQLROOTPW} -e "CREATE USER '${SOGOUSERN}'@'localhost' IDENTIFIED BY '${SOGOUSERPW}';";
-mysql -u root -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'localhost' WITH GRANT OPTION;";
-#mysql -u root -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${SOGODB}\`.* TO '${SOGOUSERN}'@'localhost' WITH GRANT OPTION;";
-mysql -u root -p${MYSQLROOTPW} -e "REVOKE ALL PRIVILEGES ON \`${ISPCONFIGDB}\`.* FROM '${ISPCONFIGUSERN}'@'localhost';";
-mysql -u root -p${MYSQLROOTPW} -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE VIEW ON \`${ISPCONFIGDB}\`.* TO '${ISPCONFIGUSERN}'@'localhost';";
-mysql -u root -p${MYSQLROOTPW} -e "FLUSH PRIVILEGES;";
+mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE DATABASE ${SOGODB};";
+mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "CREATE USER '${SOGOUSERN}'@'${MYSQLHOST}' IDENTIFIED BY '${SOGOUSERPW}';";
+mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${SOGODB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
+mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}';";
+#mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT ALL PRIVILEGES ON \`${ISPCONFIGDB}\`.* TO '${SOGOUSERN}'@'${MYSQLHOST}' WITH GRANT OPTION;";
+#mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "REVOKE ALL PRIVILEGES ON \`${ISPCONFIGDB}\`.* FROM '${ISPCONFIGUSERN}'@'${MYSQLHOST}';";
+#mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE VIEW ON \`${ISPCONFIGDB}\`.* TO '${ISPCONFIGUSERN}'@'${MYSQLHOST}';";
+mysql -u root -h ${MYSQLHOST} -p${MYSQLROOTPW} -e "FLUSH PRIVILEGES;";
 
-echo -e "IMAP Server Addr [localhost]\c "
+echo -e "Default IMAP Server Addr [localhost]\c "
 read IMAPSERVER
 if [ -z "${IMAPSERVER}" ]; then
     IMAPSERVER="localhost"
 fi
-echo -e "SMTP Server Addr [localhost]\c "
+echo -e "Default SMTP Server Addr [localhost]\c "
 read SMTPSERVER
 if [ -z "${SMTPSERVER}" ]; then
     SMTPSERVER="localhost"
 fi
 
-echo -e "SOGo Language [English]\c "
+echo -e "Default SOGo Language [English]\c "
 read SOGOLANGUAGE
 if [ -z "${SOGOLANGUAGE}" ]; then
     SOGOLANGUAGE="English"
 fi
 
-echo -e "SOGo TimeZone [Europe/Berlin]\c "
+echo -e "Default SOGo TimeZone [Europe/Berlin]\c "
 read SOGOTIMEZONE
 if [ -z "${SOGOTIMEZONE}" ]; then
     SOGOTIMEZONE="Europe/Berlin"
@@ -213,12 +243,14 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
             </array>
             <key>NGImap4ConnectionStringSeparator</key>
             <string>.</string>
+            <key>OCSEMailAlarmsFolderURL</key>
+            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@${MYSQLHOST}:${MYSQLPORT}/${SOGODB}/sogo_mailalarms_folder</string>
             <key>OCSFolderInfoURL</key>
-            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@localhost:3306/${ISPCONFIGDB}/sogo_folder_info</string>
+            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@${MYSQLHOST}:${MYSQLPORT}/${SOGODB}/sogo_folder_info</string>
             <key>OCSSessionsFolderURL</key>
-            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@localhost:3306/${ISPCONFIGDB}/sogo_sessions_folder</string>
+            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@${MYSQLHOST}:${MYSQLPORT}/${SOGODB}/sogo_sessions_folder</string>
             <key>SOGoProfileURL</key>
-            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@localhost:3306/${ISPCONFIGDB}/sogo_user_profile</string>
+            <string>mysql://${SOGOUSERN}:${SOGOUSERPW}@${MYSQLHOST}:${MYSQLPORT}/${SOGODB}/sogo_user_profile</string>
             <key>SOGoACLsSendEMailNotifcations</key>
             <string>YES</string>
             <key>SOGoAppointmentSendEMailNotifcations</key>
@@ -288,79 +320,81 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 echo "
 <?php
 
-class sogo_config_plugin { 
-    var \$plugin_name = 'sogo_config_plugin'; 
-    var \$class_name  = 'sogo_config_plugin';
-    var \$sogopw  = '${SOGOUSERPW}';
-    var \$sogouser  = '${SOGOUSERN}';
-    /*var \$sogodb  = '${SOGODB}';*/
-    var \$sogodb  = '${ISPCONFIGDB}';
-    var \$sogobinary  = '${SOGOBINARY}';
-    var \$sogotoolbinary  = '${SOGOTOOLBINARY}';
+class sogo_config_plugin {
+
+    var \$plugin_name = 'sogo_config_plugin';
+    var \$class_name = 'sogo_config_plugin';
+    var \$sogopw = '${SOGOUSERPW}';
+    var \$sogouser = '${SOGOUSERN}';
+    var \$sogodb = '${SOGODB}';
+    var \$ispcdb = '${ISPCONFIGDB}';
+    var \$sogobinary = '${SOGOBINARY}';
+    var \$sogotoolbinary = '${SOGOTOOLBINARY}';
     var \$sogohomedir = '${SOGOHOMEDIR}';
     var \$sogoconffile = '${SOGOGNUSTEPCONFFILE}';
     var \$sogoinitscript = '${SOGOINITSCRIPT}';
-    
     var \$templ_file = '${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ';
+    var \$mysql_server_host = '${MYSQLHOST}:${MYSQLPORT}';
 
     function onInstall() {
         global \$conf;
-        if(\$conf['services']['mail'] == true) {
+        if (\$conf['services']['mail'] == true) {
             return true;
         } else {
             return false;
         }
     }
-    
-    function onLoad() { 
+
+    function onLoad() {
         global \$app;
-        \$app->plugins->registerEvent('mail_domain_delete',\$this->plugin_name,'reconfigure');
-        \$app->plugins->registerEvent('mail_domain_insert',\$this->plugin_name,'reconfigure');
-        \$app->plugins->registerEvent('mail_domain_update',\$this->plugin_name,'reconfigure');
-    } 
-/*
-mail_domain_insert
-    [new] => Array
-    [old] => Array
-        (
-            [domain_id] => 6
-            [sys_userid] => 1
-            [sys_groupid] => 0
-            [sys_perm_user] => riud
-            [sys_perm_group] => ru
-            [sys_perm_other] =>
-            [server_id] => 1
-            [domain] => example.us
-            [active] => y
-        )
-*/
-    function reconfigure(\$event_name,\$data) {
+        \$app->plugins->registerEvent('mail_domain_delete', \$this->plugin_name, 'reconfigure');
+        \$app->plugins->registerEvent('mail_domain_insert', \$this->plugin_name, 'reconfigure');
+        \$app->plugins->registerEvent('mail_domain_update', \$this->plugin_name, 'reconfigure');
+    }
+
+    /*
+      mail_domain_insert
+      [new] => Array
+      [old] => Array
+      (
+      [domain_id] => 6
+      [sys_userid] => 1
+      [sys_groupid] => 0
+      [sys_perm_user] => riud
+      [sys_perm_group] => ru
+      [sys_perm_other] =>
+      [server_id] => 1
+      [domain] => example.us
+      [active] => y
+      )
+     */
+
+    function reconfigure(\$event_name, \$data) {
         global \$app, \$conf;
-        \$flag=false;
-        if(\$event_name == 'mail_domain_delete') {
-            \$flag=\$this->remove_sogo_maildomain((isset(\$data['new']['domain']) ? \$data['new']['domain'] : \$data['old']['domain']));
-        } else if(\$event_name == 'mail_domain_insert') {
-            \$flag=true;
-        } else if(\$event_name == 'mail_domain_update') {
-            \$flag=true;
-        }else{
+        \$flag = false;
+        if (\$event_name == 'mail_domain_delete') {
+            \$flag = \$this->remove_sogo_maildomain((isset(\$data['new']['domain']) ? \$data['new']['domain'] : \$data['old']['domain']));
+        } else if (\$event_name == 'mail_domain_insert') {
+            \$flag = true;
+        } else if (\$event_name == 'mail_domain_update') {
+            \$flag = true;
+        } else {
             //* i can't work with that give me a command...
             // /PATH/to/ISPConfig_DIR/server/SOGO-reconfigure.log
             // file_put_contents('SOGO-reconfigure.log', print_r(\$event_name,true).\"\n\n\".print_r(\$data,true));
         }
-        if(\$flag){
+        if (\$flag) {
             \$active_mail_domains = \$app->db->queryAllRecords('SELECT \`domain\` FROM \`mail_domain\` WHERE \`active\`=\'y\'');
             \$sogo_conf = file_get_contents(\$this->templ_file);
             \$tmp_conf = \"\";
-            foreach(\$active_mail_domains as \$vd){
+            foreach (\$active_mail_domains as \$vd) {
                 \$tmp_conf .= \$this->build_conf_sogo_maildomain(\$vd['domain']);
                 //* create if not exist
                 \$this->create_sogo_view(\$vd['domain']);
             }
             \$sogo_conf = str_replace('{{SOGODOMAINSCONF}}', \$tmp_conf, \$sogo_conf);
-            
             if (!file_put_contents(\$this->sogoconffile, \$sogo_conf)) {
-                \$app->log('ERROR. unable to reconfigure SOGo..',LOGLEVEL_ERROR);
+                \$app->log('ERROR. unable to reconfigure SOGo..', LOGLEVEL_ERROR);
                 return;
             } else {
                 exec(\$this->sogoinitscript . ' restart');
@@ -370,64 +404,81 @@ mail_domain_insert
         }
     }
 
-    function remove_sogo_maildomain(\$dom){
+    function remove_sogo_maildomain(\$dom) {
         global \$app, \$conf;
         //* TODO: validate domain the correct way not by filter_var
-        if(empty(\$dom) || filter_var('http://'.\$dom, FILTER_VALIDATE_URL)===false){
-            \$app->log('ERROR. removeing sogo mail domain.. domain invalid ['.\$dom.']',LOGLEVEL_ERROR);
+        if (empty(\$dom) || filter_var('http://' . \$dom, FILTER_VALIDATE_URL) === false) {
+            \$app->log('ERROR. removeing sogo mail domain.. domain invalid [' . \$dom . ']', LOGLEVEL_ERROR);
             return false;
         }
-/*
-/usr/sbin/sogo-tool --help
-2013-03-02 16:46:56.893 sogo-tool[5257] ERROR(+[GCSFolderManager defaultFolderManager]): default 'OCSFolderInfoURL' is not configured.
-2013-03-02 16:46:56.904 sogo-tool[5257] sogo-tool [-v|--verbose] [-h|--help] command [argument1] ...
-  -v, --verbose enable verbose mode
-  -h, --help    display this help information
+        /*
+          /usr/sbin/sogo-tool --help
+          2013-03-02 16:46:56.893 sogo-tool[5257] ERROR(+[GCSFolderManager defaultFolderManager]): default 'OCSFolderInfoURL' is not configured.
+          2013-03-02 16:46:56.904 sogo-tool[5257] sogo-tool [-v|--verbose] [-h|--help] command [argument1] ...
+          -v, --verbose enable verbose mode
+          -h, --help    display this help information
 
-  argument1, ...        arguments passed to the specified command
+          argument1, ...        arguments passed to the specified command
 
-  Available commands:
-        backup              -- backup user folders
-        check-doubles       -- check user addressbooks with duplicate contacts
-        dump-defaults       -- Prints the sogod GNUstep domain configuration as a property list
-        expire-autoreply    -- disable auto reply for reached end dates
-        expire-sessions     -- Expires user sessions without activity for specified number of minutes
-        remove              -- remove user data and settings from the db
-        remove-doubles      -- remove duplicate contacts from the specified user addressbook
-        rename-user         -- update records pertaining to a user after a change of user id
-        restore             -- restore user folders
-        user-preferences    -- set user defaults / settings in the database
-*/
+          Available commands:
+          backup              -- backup user folders
+          check-doubles       -- check user addressbooks with duplicate contacts
+          dump-defaults       -- Prints the sogod GNUstep domain configuration as a property list
+          expire-autoreply    -- disable auto reply for reached end dates
+          expire-sessions     -- Expires user sessions without activity for specified number of minutes
+          remove              -- remove user data and settings from the db
+          remove-doubles      -- remove duplicate contacts from the specified user addressbook
+          rename-user         -- update records pertaining to a user after a change of user id
+          restore             -- restore user folders
+          user-preferences    -- set user defaults / settings in the database
+         */
         \$dom_no_point = str_replace('.', '_', \$dom);
-        \$app->db->query('DROP VIEW \`sogo_users_'.\$dom_no_point.'\`');
+        \$sqlres = \$this->_sqlConnect();
+        \$sqlres->query('DROP VIEW \`sogo_users_' . \$dom_no_point . '\`');
+        /* Broke my connection??? */
+        /* @\$sqlres->close(); */
+        return true;
+    }
+
+    function create_sogo_view(\$dom) {
+        global \$app, \$conf;
+        \$sqlres = \$this->_sqlConnect();
+
+        \$dom_no_point = str_replace('.', '_', \$dom);
+        \$sql1 = \"SELECT \`TABLE_NAME\` FROM \`information_schema\`.\`VIEWS\` WHERE \`TABLE_SCHEMA\`='{\$this->sogodb}' AND \`TABLE_NAME\`='sogo_users_\" . \$dom_no_point . \"'\";
+
+        \$tmp = \$sqlres->query(\$sql1);
+        while (\$obj = \$tmp->fetch_object()) {
+            if (\$obj->TABLE_NAME == 'sogo_users_' . \$dom_no_point) {
+                return true;
+            }
+        }
+        \$sqlres->query('CREATE VIEW sogo_users_' . \$dom_no_point . ' AS SELECT
+	\`login\` AS c_uid,
+	\`login\` AS c_name,
+	\`password\` AS c_password,
+	\`name\` AS c_cn,
+	\`email\` AS mail,
+	(SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 LIMIT 1) AS imap_host 
+        FROM ' . \$this->ispcdb . '.\`mail_user\` WHERE \`email\` LIKE \'%' . \$dom_no_point . '\' AND disableimap=\'n\'');
+        if (!empty(\$sqlres->error))
+            \$app->log('ERROR. unable to create SOGo view[sogo_users_' . \$dom_no_point . '].. ' . \$sqlres->error, LOGLEVEL_ERROR);
+        /* Broke my connection??? */
+        /* @\$sqlres->close(); */
         return true;
     }
     
-    function create_sogo_view(\$dom){
+    function build_conf_sogo_maildomain(\$dom) {
         global \$app, \$conf;
         \$dom_no_point = str_replace('.', '_', \$dom);
-        \$sql1=\"SELECT \`TABLE_NAME\` FROM \`information_schema\`.\`VIEWS\` WHERE \`TABLE_SCHEMA\`='${ISPCONFIGDB}' AND \`TABLE_NAME\`='sogo_users_\".\$dom_no_point.\"'\";
-        \$tmp = \$app->db->queryOneRecord(\$sql1);
-        if(isset(\$tmp['TABLE_NAME']) && \$tmp['TABLE_NAME'] == 'sogo_users_'.\$dom_no_point){
-            return true;
-        }else{
-            \$sql2=\"CREATE VIEW sogo_users_{\$dom_no_point}
-AS SELECT
-\`login\` AS c_uid,
-\`login\` AS c_name,
-\`password\` AS c_password,
-\`name\` AS c_cn,
-\`email\` AS mail,
-(SELECT \`server_name\` FROM \`server\`,\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`mail_server\`=1 LIMIT 1) AS imap_host
-FROM \`mail_user\` WHERE \`email\` LIKE '%\$dom' AND disableimap='n';\";
-            \$app->db->query(\$sql2);
-            return true;
-        }
-    }
-
-    function build_conf_sogo_maildomain(\$dom){
-        global \$app, \$conf;
-        \$dom_no_point = str_replace('.', '_', \$dom);
+        /*For mail aliases..
+         <key>MailFieldNames</key>
+         <array>
+            <string>Col1</string>
+            <string>Col2</string>
+            <string>Col3</string>
+         </array>
+         */
         \$sogo_conf = <<< EOF
 
                 <key>\$dom</key>
@@ -476,13 +527,25 @@ FROM \`mail_user\` WHERE \`email\` LIKE '%\$dom' AND disableimap='n';\";
                             <string>localhost</string>
                             <key>id</key>
                             <string>\$dom_no_point</string>
+                            <key>SOGoEnableEMailAlarms</key>
+                            <string>YES</string>
                             <key>viewURL</key>
-                            <string>mysql://{\$this->sogouser}:{\$this->sogopw}@127.0.0.1:3306/{\$this->sogodb}/sogo_users_{\$dom_no_point}</string>
+                            <string>mysql://{\$this->sogouser}:{\$this->sogopw}@{\$this->mysql_server_host}/{\$this->sogodb}/sogo_users_{\$dom_no_point}</string>
                         </dict>
                     </array>
                 </dict>
 EOF;
         return \$sogo_conf;
+    }
+
+    function _sqlConnect() {
+        \$_sqlserver = explode(':', \$this->mysql_server_host);
+        \$sqlres = new mysqli(\$_sqlserver[0], \$this->sogouser, \$this->sogopw, \$this->sogodb, \$_sqlserver[1]);
+        if (mysqli_connect_errno()) {
+            printf(\"Connect failed: %s\n\", mysqli_connect_error());
+            exit();
+        }
+        return \$sqlres;
     }
 
 }
@@ -501,10 +564,10 @@ read SOGOVHOSTNAME
 if [ -z "${SOGOVHOSTNAME}" ]; then
     SOGOVHOSTNAME=`hostname --fqdn`
 fi
-echo -e "HTTP Protocol: [https]\c "
+echo -e "HTTP Protocol [http]:\c "
 read SOGOPROTOCAL
 if [ -z "${SOGOPROTOCAL}" ]; then
-    SOGOPROTOCAL="https"
+    SOGOPROTOCAL="http"
 fi
 echo -e "HTTP Port: [80]\c "
 read SOGOHTTPPORT
@@ -601,8 +664,8 @@ echo -e "SOGo-Tool Bin:\t\t${SOGOTOOLBINARY}"
 echo -e "SOGo Home:\t\t${SOGOHOMEDIR}"
 echo -e "SOGo Config:\t\t${SOGOGNUSTEPCONFFILE}"
 echo -e "SOGo Init:\t\t${SOGOINITSCRIPT}"
-#echo -e "DB:\t\t${SOGODB}"
-echo -e "DB Name:\t\t${ISPCONFIGDB}"
+echo -e "DB Name:\t\t${SOGODB}"
+#echo -e "DB Name:\t\t${ISPCONFIGDB}"
 echo -e "DB User:\t\t${SOGOUSERN}"
 echo -e "DB Psswd:\t\t${SOGOUSERPW}"
 echo -e ""
@@ -611,107 +674,4 @@ echo -e "if postmaster mail addr is not added go add it and login to SOGo to sta
 echo -e "Enable SOGo logins by update/delete or add a mail domain"
 echo -e "----------------------------------------"
 
-exit 1;
-
-
-
-
-
-
-
-
-##### MySQL federated ####
-
-MYSQL_FEDERATED_SQL = << EOF
-CREATE TABLE IF NOT EXISTS \`ispc_servers\` (
-  \`server_id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  \`sys_userid\` int(11) unsigned NOT NULL DEFAULT '0',
-  \`sys_groupid\` int(11) unsigned NOT NULL DEFAULT '0',
-  \`sys_perm_user\` varchar(5) NOT NULL DEFAULT '',
-  \`sys_perm_group\` varchar(5) NOT NULL DEFAULT '',
-  \`sys_perm_other\` varchar(5) NOT NULL DEFAULT '',
-  \`server_name\` varchar(255) NOT NULL DEFAULT '',
-  \`mail_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`web_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`dns_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`file_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`db_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`vserver_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`proxy_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`firewall_server\` tinyint(1) NOT NULL DEFAULT '0',
-  \`config\` text NOT NULL,
-  \`updated\` bigint(20) unsigned NOT NULL DEFAULT '0',
-  \`mirror_server_id\` int(11) unsigned NOT NULL DEFAULT '0',
-  \`dbversion\` int(11) unsigned NOT NULL DEFAULT '1',
-  \`active\` tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY (\`server_id\`)
-) 
-ENGINE=FEDERATED
-DEFAULT CHARSET=utf8
-CONNECTION='mysql://ispconfig:5bf4ef0201133d78c148fb4126d65768@127.0.0.1:3306/dbispconfig/server';
-
-CREATE TABLE IF NOT EXISTS \`ispc_mailusers\` (
-  \`mailuser_id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  \`sys_userid\` int(11) unsigned NOT NULL DEFAULT '0',
-  \`sys_groupid\` int(11) unsigned NOT NULL DEFAULT '0',
-  \`sys_perm_user\` varchar(5) NOT NULL DEFAULT '',
-  \`sys_perm_group\` varchar(5) NOT NULL DEFAULT '',
-  \`sys_perm_other\` varchar(5) NOT NULL DEFAULT '',
-  \`server_id\` int(11) unsigned NOT NULL DEFAULT '0',
-  \`email\` varchar(255) NOT NULL DEFAULT '',
-  \`login\` varchar(255) NOT NULL,
-  \`password\` varchar(255) NOT NULL,
-  \`name\` varchar(255) NOT NULL DEFAULT '',
-  \`uid\` int(11) unsigned NOT NULL DEFAULT '5000',
-  \`gid\` int(11) unsigned NOT NULL DEFAULT '5000',
-  \`maildir\` varchar(255) NOT NULL DEFAULT '',
-  \`quota\` bigint(20) NOT NULL DEFAULT '-1',
-  \`cc\` varchar(255) NOT NULL DEFAULT '',
-  \`homedir\` varchar(255) NOT NULL,
-  \`autoresponder\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`autoresponder_start_date\` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  \`autoresponder_end_date\` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  \`autoresponder_subject\` varchar(255) NOT NULL DEFAULT 'Out of office reply',
-  \`autoresponder_text\` mediumtext,
-  \`move_junk\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`custom_mailfilter\` mediumtext,
-  \`postfix\` enum('n','y') NOT NULL,
-  \`access\` enum('n','y') NOT NULL,
-  \`disableimap\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`disablepop3\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`disabledeliver\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`disablesmtp\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`disablesieve\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`disablelda\` enum('n','y') NOT NULL DEFAULT 'n',
-  \`disabledoveadm\` enum('n','y') NOT NULL DEFAULT 'n',
-  PRIMARY KEY (\`mailuser_id\`),
-  KEY \`server_id\` (\`server_id\`,\`email\`),
-  KEY \`email_access\` (\`email\`,\`access\`)
-)
-ENGINE=FEDERATED
-DEFAULT CHARSET=utf8
-CONNECTION='mysql://ispconfig:5bf4ef0201133d78c148fb4126d65768@127.0.0.1:3306/dbispconfig/mail_user';
-
-CREATE VIEW 
-sogo_users_example_com
-AS SELECT
-\`ispc_mailusers\`.\`login\` AS c_uid,
-\`ispc_mailusers\`.\`login\` AS c_name,
-\`ispc_mailusers\`.\`password\` AS c_password,
-\`ispc_mailusers\`.\`name\` AS c_cn,
-\`ispc_mailusers\`.\`email\` AS mail,
-(SELECT \`ispc_servers\`.\`server_name\` FROM \`ispc_servers\`, \`ispc_mailusers\` WHERE \`ispc_mailusers\`.\`server_id\`=\`ispc_servers\`.\`server_id\` AND \`ispc_servers\`.\`mail_server\`=1 LIMIT 1) AS imap_host
-FROM \`ispc_mailusers\` WHERE \`ispc_mailusers\`.\`email\` LIKE '%example.com' AND \`ispc_mailusers\`.disableimap='n'
-EOF
-
-
-
-
-
-
-
-
-
-
-
-
+exit 0;
