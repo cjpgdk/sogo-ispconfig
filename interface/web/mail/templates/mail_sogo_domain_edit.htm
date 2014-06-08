@@ -1,0 +1,40 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_mail_sogo_domain">
+
+    <div class="pnl_formsarea">
+        <fieldset class="inlineLabels"><legend>SOGo Domain</legend>
+            <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" type="hidden"/>
+            <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}" type="hidden"/>
+            <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}" type="hidden"/>
+
+            <div class="ctrlHolder">
+                <label for="SOGoMailShowSubscribedFoldersOnly">{tmpl_var name='SOGoMailShowSubscribedFoldersOnly_txt'}</label>
+                <select name="SOGoMailShowSubscribedFoldersOnly" id="SOGoMailShowSubscribedFoldersOnly" class="selectInput">
+                    {tmpl_var name='SOGoMailShowSubscribedFoldersOnly'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoLanguage">{tmpl_var name='SOGoLanguage_txt'}</label>
+                <select name="SOGoLanguage" id="SOGoLanguage" class="selectInput">
+                    {tmpl_var name='SOGoLanguage'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoSuperUsernames_txt'}</p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoSuperUsernames'}
+                </div>
+            </div>
+        </fieldset>
+
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+
+        <div class="buttonHolder buttons">
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'mail/mail_sogo_domain_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('mail/mail_sogo_domain_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,10 @@
+<?php
+$wb["list_head_txt"] = '';
+$wb["list_desc_txt"] = '';
+$wb["SOGoDraftsFolderName_txt"] = 'Drafts Folder Name';
+$wb["SOGoSentFolderName_txt"] = 'Sent Folder Name';
+$wb["SOGoTrashFolderName_txt"] = 'Trash Folder Name';
+$wb["SOGoMailShowSubscribedFoldersOnly_txt"] = 'Show Subscribed Folders Only';
+$wb["SOGoLanguage_txt"] = 'Language';
+$wb["SOGoSuperUsernames_txt"] = 'Mail Admins';
+
