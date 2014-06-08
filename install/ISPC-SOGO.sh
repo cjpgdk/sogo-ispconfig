@@ -1,11 +1,38 @@
 #!/bin/sh
 
+## this is just to use private mirrors, no reason to use public mirrors while testing
+#TESTING=1
+TESTING=0
+
 #
 # Install SOGo on debian/ubuntu/centos ISPConfig 3 server
 #
+# Update 8
+#   - INGORE UPDATE 7 :)
+#   - Added my todo list again, as i were hired to install this exact setup i realized it needs some attention (it's bean a year since i last looked at this)
+#   - ONLY Supporting debian/ubuntu
+#        * But i will leave the centos as is no need to remove it.!
+#   - updated plugin
+#        * better validation of mail domains
+#        * use more functions
+#        * added simple interface addon that allows all users with access to maildomins to edit some parts of the config for there own domains
+#            - For the simple users/resellers..
+#            - Default Langues (Only added official supported)
+#            - Show only subscribed folders (YES or NO)
+#            - And more important what emails are admins, so now we don't rely on a postmaster@ email address to exists
+#            - 
+#            - For admins (all the above)
+#            - +Setting the imap folder layout, see "Common Problems:" further down this file
+#
+#        * fixed config dir layout to follow ISP Config standarts (use conf-custom/sogo, for overrides)
+#        * moved plugin from the script to website using wget to fetch it.!
+#        * Renamed sogo.conf-templ to sogo.conf
+#   - im not going to install openchange at all from a simple script first it dont support multi domains, for that we need to run multi samba4 instances on the same server!
+#        * i see the need for users using outlook but come on if you pay for outlook you can pay for an ms exchange server, we are using opensource why kill it with something like outlook
+#
 # Update 7
-#	 - removed the todo list i'm done this works on EVERY test i do, 
-#	 - as fare as installing openchange setting up samba and openchange from a script will NOT be ideal..!
+#     - removed the todo list i'm done this works on EVERY test i do, 
+#     - as fare as installing openchange setting up samba and openchange from a script will NOT be ideal..!
 #
 # Update 6
 #    - inverse mirror for ubuntu lucid have difrent apt layout??! NOT (lucid lucid) BUT (lucid main)
@@ -29,14 +56,14 @@
 #       - on centos check if we are on x86_64 or not and set apache vhost homedir to [/usr/lib64|/usr/lib]/GNUstep/SOGo/WebServerResources/
 #   - added multi server support
 #       option to create server config along with domain and default config.!
-#   - Complete rewrite of the script ;()
+#   - Complete rewrite of the script :()
 #
 # Update 4.1
 #   - user password algorithm,, was selectable but not used in the script..!
 #
 # Update 4
 #   - updated plugin 
-#       create view for user-example.com is allow (dash is not allowed by mysql replace with _)
+#       create view for user-example.com is allowed (dash is not allowed by mysql replace with _)
 #       create view so user-example.com and example.com does not collate with each other by adding '@' to sql statement
 #   - Debian lenny needs 'debhelper' added to install packages
 # 
@@ -65,22 +92,32 @@
 # Tests.
 # - (ISPConfig Minimum version 3.0.4)
 #       older versions are not supported by the plugin
-#       the databse table mail_user is not compatible with the current sqls,
-#       May OR !!MAY NOT!! create a version check and added working sql i have not decided that yet.
+#       the databse table mail_user is not compatible with the current sqls, will not fix that update your system or alter the sql in the plugin!
 #
 # - (ISPConfig 3.0.5) -- the main thing to consider for using this with other versions of ISPConfig is the ""IMAP Server"" configuration..
 #
 # - OS
 #       Debian Lenny (i386, amd64)
 #       Debian Squeeze (i386, amd64)
+#       Debian wheezy (i386, amd64)
+#
+# - OS Setups
+#       Debian Lenny: ISPConfig 3.0.5.4p1:  Apache2, BIND, Dovecot 
+#       Debian Lenny: ISPConfig 3.0.5.4p1:  Apache2, BIND, Courier 
+#       Debian Lenny: ISPConfig 3.0.4:  Apache2, BIND, Courier
+#       Debian Squeeze: ISPConfig 3.0.5.4p1:  Apache2, BIND, Dovecot 
+#       Debian Squeeze: ISPConfig 3.0.5.4p1:  Apache2, BIND, Courier 
+#       Debian wheezy: ISPConfig 3.0.5.4p1:  Apache2, BIND, Dovecot 
+#
+# Up to update 7 i also tested on the following
+# 
+# - OS
 #       CentOS 6.4 (i386, amd64)
 #       CentOS 5.9 (i386)
 #       Ubuntu quantal 12.10 (amd64)
 #       Ubuntu precise 12.04 (i386)
-#       Debian wheezy (amd64)
 #
 # - OS Setups
-#       Debian Lenny: ISPConfig 3.0.5:  Apache2, BIND, Dovecot
 #       Debian Squeeze: ISPConfig 3.0.5:  Apache2, BIND, Dovecot
 #       Debian Lenny: ISPConfig 3.0.4:  Apache2, MyDNS, Courier 
 #       CentOS 6.4: ISPConfig 3.0.5.1: Apache2, BIND, Courier
@@ -94,15 +131,23 @@
 # Single server inviroment
 #    - Multi domain, user sharing/ACL restricted to @DOMAIN.TLD
 #       (User can't add other users ACLs unless allowed to by admin or other user.)
-#    - Administrator of A domain is postmaster@DOMAIN.TLD
+#    - Administrator of A domain defaults to postmaster@DOMAIN.TLD (use interface addon to set the admin mails.)
 #    - ISPConfig plugin: 
 #        i say BETA add/update/delete domain will trigger event to rebuild SOGo config.
 #        - BuildConfig - 
 #        only configure enabled domains :: OK
 #        only allow IMAP enabled user to use SOGo :: OK
-#        auto create sogo users view if none existing. :: OK
+#        create sogo users view if none existing. :: OK
 #        Remove SOGo view if domain is deleted :: OK
-#        Remove user data from sogodb if user is deletet.. (if no data for user exists CRON log will show ''sogo-tool[nnn] No folder returned for user 'USER@DOMAIN.TLD') THATS not an error it just means the user never used sogo.. :: OK
+#        Remove user data from sogodb if user is deleted.. (if no data for user exists CRON log will show ''sogo-tool[nnn] No folder returned for user 'USER@DOMAIN.TLD') THATS not an error it just means the user never used sogo.. :: OK
+#    - ISPConfig Interface Addon: 
+#         Allow users/resellers to edit parts of the domain config, save to conf-custom (only domains they have as maildomins):: OK
+#         Allow admins to edit all parts of the domain config except for user source lookup settings (do that in the plugin file) :: OK
+#            * this means an admin can set imap folder layout as an extra option on a domain.
+#         Allow admins to edit the global sogo config file :: NO not yet.
+#         Allow admins to edit the default domain config file :: NO not yet.
+#         Allow admins to edit/add a default config file for the server :: NO not yet.
+#
 #        
 # Multi server inviroment --- this is not working to well.!
 #   server1.example.dk (CentOS 6.4 i386 ISPConfig 3.0.5.1) :: apache2,dovecot,bind,pure-ftp,mysql
@@ -156,6 +201,42 @@
 #    http://www.sogo.nu/english/downloads/frontends.html
 #    http://www.sogo.nu/english/downloads/backend.html
 #
+# TODO:
+#    - 
+#    - Add admins only menu config setting in the addon
+#    - Add multiserver settings in the addon
+#    - Add option to build/rebuild the sogo config in the addon
+#    - Add option to build/rebuild the thunderbird plugins in the addon (http://www.sogo.nu/development/source_code.html)
+#        * Thunderbird 24*
+#        * https://github.com/inverse-inc/sogo-integrator.tb24
+#        * https://github.com/inverse-inc/sogo-connector.tb24
+#        * Thunderbird Extended Support Releases (ESR) have now been merged into the mainstream releases.
+#        * so do we evan need this!
+#        * Thunderbird ESR 17*
+#        * https://github.com/inverse-inc/sogo-integrator.tb17
+#        * https://github.com/inverse-inc/sogo-connector.tb17
+#        * Thunderbird ESR 10*
+#        * https://github.com/inverse-inc/sogo-integrator.tb10
+#        * https://github.com/inverse-inc/sogo-connector.tb10
+#        * Thunderbird ESR 3*
+#        * https://github.com/inverse-inc/sogo-connector.tb3
+#        * https://github.com/inverse-inc/sogo-integrator.tb3
+#        * https://github.com/inverse-inc/calendar.tb3
+#        * Thunderbird ESR 2*
+#        * https://github.com/inverse-inc/sogo-integrator.tb2
+#        * https://github.com/inverse-inc/sogo-connector.tb2
+#        * https://github.com/inverse-inc/calendar.tb2
+#    - get mail aliases into SOGo tables, maby make this special option in the addon.
+#
+# Unable TO / Won't:
+#    - backup of users and configs using sogo-tool.
+#    - Make the script upon install create and pack plugins for thunderbird (going into the addon)
+#
+# TO make sieve work in SOGo and ispconfig follow this howto
+# -------------------------------------------
+# it requires some modifications to the ispconfig core plugin. and dovecot
+#
+
 
 ## function inverse_debian
 ## ads inverse debian mirror to source.list
@@ -164,10 +245,17 @@ function inverse_debian() {
     then
         echo "Debian inverse mirror already exists in /etc/apt/sources.list"
     else
-        cat >> /etc/apt/sources.list << EOF
+        if [ "${TESTING}" == "1" ]; then
+            cat >> /etc/apt/sources.list << EOF
+deb http://apt.cmjscripter.net/inverse.ca/debian ${1} ${1}
+## deb http://inverse.ca/debian-nightly ${1} ${1}
+EOF
+        else
+            cat >> /etc/apt/sources.list << EOF
 deb http://inverse.ca/debian ${1} ${1}
 ## deb http://inverse.ca/debian-nightly ${1} ${1}
 EOF
+        fi
     fi
 }
 
@@ -179,10 +267,17 @@ function inverse_debian_src() {
     then
         echo "Debian inverse source mirror already exists in /etc/apt/sources.list"
     else
-        cat >> /etc/apt/sources.list << EOF
+        if [ "${TESTING}" == "1" ]; then
+            cat >> /etc/apt/sources.list << EOF
+deb-src http://apt.cmjscripter.net/inverse.ca/debian ${1} ${1}
+## deb-src http://inverse.ca/debian-nightly ${1} ${1}
+EOF
+        else
+            cat >> /etc/apt/sources.list << EOF
 deb-src http://inverse.ca/debian ${1} ${1}
 ## deb-src http://inverse.ca/debian-nightly ${1} ${1}
 EOF
+        fi
     fi
 }
 ## function inverse_ubuntu
@@ -193,10 +288,17 @@ function inverse_ubuntu() {
     then
         echo "Ubuntu inverse mirror already exists in /etc/apt/sources.list"
     else
-        cat >> /etc/apt/sources.list << EOF
+        if [ "${TESTING}" == "1" ]; then
+            cat >> /etc/apt/sources.list << EOF
+deb http://apt.cmjscripter.net/inverse.ca/ubuntu ${1} ${1}
+## deb http://inverse.ca/ubuntu-nightly ${1} ${1}
+EOF
+        else
+            cat >> /etc/apt/sources.list << EOF
 deb http://inverse.ca/ubuntu ${1} ${1}
 ## deb http://inverse.ca/ubuntu-nightly ${1} ${1}
 EOF
+        fi
     fi
 }
 ## function inverse_ubuntu_src
@@ -206,10 +308,17 @@ function inverse_ubuntu_src() {
     then
         echo "Ubuntu inverse source mirror already exists in /etc/apt/sources.list"
     else
-    cat >> /etc/apt/sources.list << EOF
+        if [ "${TESTING}" == "1" ]; then
+            cat >> /etc/apt/sources.list << EOF
+deb-src http://apt.cmjscripter.net/inverse.ca/ubuntu ${1} ${1}
+## deb-src http://inverse.ca/ubuntu-nightly ${1} ${1}
+EOF
+        else
+            cat >> /etc/apt/sources.list << EOF
 deb-src http://inverse.ca/ubuntu ${1} ${1}
 ## deb-src http://inverse.ca/ubuntu-nightly ${1} ${1}
 EOF
+        fi
     fi
 }
 ## function inverse_rhel6
@@ -272,6 +381,7 @@ function install_sogo_build_from_src(){
         echo ".."
         echo "."
         echo "Building SOGo from source"
+        echo "."
         sleep 3
         cd /tmp/
         aptitude install -y memcached rpl
@@ -544,15 +654,11 @@ function mysql_db(){
 
 }
 
-
-
-
-
 ## function sogoconf_templs
 ## creates the sogo configuration template file. and templates directory
 function sogoconf_templs(){
-    if [ -f ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ ]; then
-        echo -e "A Template for sogo configuration EXIST OVERIDE IT? (y/n) [n]: \c"
+    if [ -f ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf ]; then
+        echo -e "A Template for sogo configuration EXISTS OVERIDE IT? (y/n) [n]: \c"
         read LOCALOVERIDETMLP
         if [ -z "${LOCALOVERIDETMLP}" ]; then
             LOCALOVERIDETMLP="n"
@@ -675,22 +781,32 @@ function sogoconf_templs(){
             </dict>
         </dict>
     </dict>
-</plist>" >${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ
+</plist>" >${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf
     fi
-    chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ
-
+    chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf
+    ## Create sogo_domains config dir
     if [ ! -d "${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains" ]; then
         mkdir -p ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains
     fi
-    
+    ## Create sogo override config dir
+    if [ ! -d "${ISPCONFIGINSTALLPATH}/server/conf-custom/sogo" ]; then
+        mkdir -p ${ISPCONFIGINSTALLPATH}/server/conf-custom/sogo
+    fi
+    ## Create sogo_domains override config dir
+    if [ ! -d "${ISPCONFIGINSTALLPATH}/server/conf-custom/sogo/domains" ]; then
+        mkdir -p ${ISPCONFIGINSTALLPATH}/server/conf-custom/sogo/domains
+    fi
+    ## create default imap conf layout for dovecot and courier
     sogo_domains_conf_dovecot
     sogo_domains_conf_courier
     
+    ## copy selected default imap config layout file to domains_default.conf
     if [ "${IMAPSERVERDEFAULT}" == "courier" ]; then
         cp ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default_courier.conf ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default.conf
     else
         cp ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default_dovecot.conf ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_default.conf
     fi
+    ## create a small read me file in sogo_domains folder
     cat > ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/read_me << EOF
 for how to configure the config file and the format(XML Format) of the files see SOGo documentation
 the file names must be as follow (must end with .conf)
@@ -706,6 +822,8 @@ EOF
 
     chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} -R ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains
 }
+## function sogo_domains_conf_dovecot_serverex
+## creates the sogo configuration template example file for default domains (on server "serverNnN.example.dk")
 function sogo_domains_conf_dovecot_serverex(){
     cat > ${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/domains_serverNnN.example.dk.conf << EOF
 
@@ -883,214 +1001,57 @@ EOF
 ## function sogo_config_plugin
 ## creates the sogo plugin.
 function sogo_config_plugin(){
-    cat > ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php << EOF
-<?php
-
-/*
- * Copyright (C) 2013 Christian M. Jensen
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * 
- * NOTE* for more info, modifications etc.. contact me at http://www.howtoforge.com/forums my user name: 'psykosen'
- */
-
-class sogo_config_plugin {
-
-    var \$plugin_name = 'sogo_config_plugin';
-    var \$class_name = 'sogo_config_plugin';
-    var \$sogo_su_cmd = "sudo -u sogo";
-    var \$sogopw = '${SOGOUSERPW}';
-    var \$sogouser = '${SOGOUSERN}';
-    var \$sogodb = '${SOGODB}';
-    var \$ispcdb = '${ISPCONFIGDB}';
-    var \$sogobinary = '${SOGOBINARY}';
-    var \$sogotoolbinary = '${SOGOTOOLBINARY}';
-    var \$sogohomedir = '${SOGOHOMEDIR}';
-    var \$sogoconffile = '${SOGOGNUSTEPCONFFILE}';
-    var \$sogoinitscript = '${SOGOINITSCRIPT}';
-    var \$templ_file = '${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ';
-    var \$templ_domains_dir = '${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains';
-    var \$mysql_server_host = '${MYSQLHOST}:${MYSQLPORT}';
-
-
-    function onInstall() {
-        global \$conf;
-        if (\$conf['services']['mail'] == true) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function onLoad() {
-        global \$app;
-        \$app->plugins->registerEvent('mail_domain_delete', \$this->plugin_name, 'reconfigure');
-        \$app->plugins->registerEvent('mail_domain_insert', \$this->plugin_name, 'reconfigure');
-        \$app->plugins->registerEvent('mail_domain_update', \$this->plugin_name, 'reconfigure');
-        \$app->plugins->registerEvent('mail_user_delete', \$this->plugin_name, 'remove_sogo_mail_user');
-    }
-
-    function remove_sogo_mail_user(\$event_name, \$data) {
-        global \$app, \$conf;
-        if (\$event_name == 'mail_user_delete') {
-            exec(\$this->sogo_su_cmd . ' ' . \$this->sogotoolbinary . ' remove ' . escapeshellarg(\$data['old']['login']));
-            sleep(1);
-        }
-    }
-
-    function reconfigure(\$event_name, \$data) {
-        global \$app, \$conf;
-        \$flag = false;
-        if (\$event_name == 'mail_domain_delete') {
-            \$flag = \$this->remove_sogo_maildomain((isset(\$data['new']['domain']) ? \$data['new']['domain'] : \$data['old']['domain']));
-        } else if (\$event_name == 'mail_domain_insert') {
-            \$flag = true;
-        } else if (\$event_name == 'mail_domain_update') {
-            \$flag = true;
-        } else {
-            //* i can't work with that give me a command...
-            // /PATH/to/ISPConfig_DIR/server/SOGO-reconfigure.log
-            // file_put_contents('SOGO-reconfigure.log', print_r(\$event_name,true)."\n\n".print_r(\$data,true));
-        }
-        if (\$flag) {
-            \$active_mail_domains = \$app->db->queryAllRecords('SELECT \`domain\`,\`server_id\` FROM \`mail_domain\` WHERE \`active\`=\'y\'');
-            \$sogo_conf = file_get_contents(\$this->templ_file);
-            \$tmp_conf = "";
-            foreach (\$active_mail_domains as \$vd) {
-                \$tmp_conf .= \$this->build_conf_sogo_maildomain(\$vd['domain'], \$vd['server_id']);
-                //* create if not exist
-                \$this->create_sogo_view(\$vd['domain']);
-            }
-            \$sogo_conf = str_replace('{{SOGODOMAINSCONF}}', \$tmp_conf, \$sogo_conf);
-            if (!file_put_contents(\$this->sogoconffile, \$sogo_conf)) {
-                \$app->log('ERROR. unable to reconfigure SOGo..', LOGLEVEL_ERROR);
-                return;
-            } else {
-                exec(\$this->sogoinitscript . ' restart');
-                //** make the system wait..
-                sleep(2);
-            }
-        }
-    }
-
-    function remove_sogo_maildomain(\$dom) {
-        global \$app, \$conf;
-        //* TODO: validate domain the correct way not by filter_var
-        if (empty(\$dom) || filter_var('http://' . \$dom, FILTER_VALIDATE_URL) === false) {
-            \$app->log('ERROR. removeing sogo mail domain.. domain invalid [' . \$dom . ']', LOGLEVEL_ERROR);
-            return false;
-        }
-
-        \$dom_no_point = str_replace('-', '_', str_replace('.', '_', \$dom));
-        \$sqlres = \$this->_sqlConnect();
-        \$sqlres->query('DROP VIEW \`sogo_users_' . \$dom_no_point . '\`');
-        if (file_exists("{\$this->templ_domains_dir}/{\$dom}.conf")) {
-            @unlink("{\$this->templ_domains_dir}/{\$dom}.conf");
-        }
-        /* Broke my connection??? */
-        /* @\$sqlres->close(); */
-        return true;
-    }
-
-    function create_sogo_view(\$dom) {
-        global \$app, \$conf;
-        \$sqlres = \$this->_sqlConnect();
-
-        \$dom_no_point = str_replace('-', '_', str_replace('.', '_', \$dom));
-        \$sql1 = "SELECT \`TABLE_NAME\` FROM \`information_schema\`.\`VIEWS\` WHERE \`TABLE_SCHEMA\`='{\$this->sogodb}' AND \`TABLE_NAME\`='sogo_users_" . \$dom_no_point . "'";
-
-        \$tmp = \$sqlres->query(\$sql1);
-        while (\$obj = \$tmp->fetch_object()) {
-            if (\$obj->TABLE_NAME == 'sogo_users_' . \$dom_no_point) {
-                return true;
-            }
-        }
-
-        \$sqlres->query('CREATE VIEW sogo_users_' . \$dom_no_point . ' AS SELECT
-    \`login\` AS c_uid,
-    \`login\` AS c_name,
-    \`password\` AS c_password,
-    \`name\` AS c_cn,
-    \`email\` AS mail,
-    (SELECT \`server_name\` FROM ' . \$this->ispcdb . '.\`server\`, ' . \$this->ispcdb . '.\`mail_user\` WHERE \`mail_user\`.\`server_id\`=\`server\`.\`server_id\` AND \`server\`.\`mail_server\`=1 AND ispcmu.\`login\`=\`mail_user\`.\`login\` LIMIT 1) AS imap_host 
-        FROM ' . \$this->ispcdb . '.\`mail_user\` AS ispcmu  WHERE \`email\` LIKE \'%@' . \$dom_no_point . '\' AND disableimap=\'n\'');
-        if (!empty(\$sqlres->error))
-            \$app->log('ERROR. unable to create SOGo view[sogo_users_' . \$dom_no_point . '].. ' . \$sqlres->error, LOGLEVEL_ERROR);
-        /* Broke my connection??? */
-        /* @\$sqlres->close(); */
-        return true;
-    }
-
-    function build_conf_sogo_maildomain(\$dom, \$sid = 1) {
-        global \$app, \$conf;
-        \$dom_no_point = str_replace('-', '_', str_replace('.', '_', \$dom));
-        /* For mail aliases..
-          <key>MailFieldNames</key>
-          <array>
-          <string>Col1</string>
-          <string>Col2</string>
-          <string>Col3</string>
-          </array>
-         */
-        \$sogo_conf = "";
-        \$sogo_conf_vars = array(
-            '{{DOMAIN}}' => \$dom,
-            '{{DOMAINADMIN}}' => 'postmaster@' . \$dom,
-            '{{SOGOUNIQID}}' => \$dom_no_point,
-            '{{CONNECTIONVIEWURL}}' => "mysql://{\$this->sogouser}:{\$this->sogopw}@{\$this->mysql_server_host}/{\$this->sogodb}/sogo_users_{\$dom_no_point}"
-        );
-        if (file_exists("{\$this->templ_domains_dir}/{\$dom}.conf")) {
-            \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/{\$dom}.conf");
-        } else {
-            \$server_name_result = \$app->db->queryOneRecord("SELECT \`server_name\` FROM \`server\` WHERE \`server_id\`=" . intval(\$sid));
-            if (isset(\$server_name_result['server_name']) && !empty(\$server_name_result['server_name']) && file_exists("{\$this->templ_domains_dir}/{\$server_name_result['server_name']}.conf")) {
-                \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/{\$server_name_result['server_name']}.conf");
-            } else if (file_exists("{\$this->templ_domains_dir}/domains_default.conf")) {
-                \$sogo_conf = file_get_contents("{\$this->templ_domains_dir}/domains_default.conf");
-            } else {
-                \$app->log('ERROR. loading domain config.. file: ' . "{\$this->templ_domains_dir}/domains_default.conf", LOGLEVEL_ERROR);
-                return;
-            }
-        }
-        if (!empty(\$sogo_conf)) {
-            foreach (\$sogo_conf_vars as \$key => \$value) {
-                \$sogo_conf = preg_replace("/{\$key}/i", \$value, \$sogo_conf);
-            }
-        }
-        return \$sogo_conf;
-    }
-
-    function _sqlConnect() {
-        \$_sqlserver = explode(':', \$this->mysql_server_host);
-        \$sqlres = new mysqli(\$_sqlserver[0], \$this->sogouser, \$this->sogopw, \$this->sogodb, \$_sqlserver[1]);
-        if (mysqli_connect_errno()) {
-            printf("Connect failed: %s\n", mysqli_connect_error());
-            exit;
-        }
-        return \$sqlres;
-    }
-
-}
-
-?>
-EOF
-
-    chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php
+    ## fetch the plugin from the web.!
+    wget http://cmjscripter.net/files/scripts/ispc/ISPC-SOGO-Plugin.txt -O ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    
+    _SOGOGNUSTEPCONFFILE="${SOGOGNUSTEPCONFFILE//\//\\/}"
+    _ISPCONFIGINSTALLPATH="${ISPCONFIGINSTALLPATH//\//\\/}"
+    _SOGOHOMEDIR="${SOGOHOMEDIR//\//\\/}"
+    _SOGOBINARY="${SOGOBINARY//\//\\/}"
+    _SOGOTOOLBINARY="${SOGOTOOLBINARY//\//\\/}"
+    _SOGOUSERPW="${SOGOUSERPW//\//\\/}"
+    _ISPCONFIGDB="${ISPCONFIGDB//\//\\/}"
+    _SOGOUSERN="${SOGOUSERN//\//\\/}"
+    _SOGODB="${SOGODB//\//\\/}"
+    _SOGOINITSCRIPT="${SOGOINITSCRIPT//\//\\/}"
+    _MYSQLHOST="${MYSQLHOST//\//\\/}"
+    _MYSQLPORT="${MYSQLPORT//\//\\/}"
+    
+    sed -i "s/{ISPCONFIGINSTALLPATH}/${_ISPCONFIGINSTALLPATH}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOGNUSTEPCONFFILE}/${_SOGOGNUSTEPCONFFILE}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOHOMEDIR}/${_SOGOHOMEDIR}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOBINARY}/${_SOGOBINARY}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOTOOLBINARY}/${_SOGOTOOLBINARY}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOUSERPW}/${_SOGOUSERPW}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOUSERN}/${_SOGOUSERN}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGODB}/${_SOGODB}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{ISPCONFIGDB}/${_ISPCONFIGDB}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{SOGOINITSCRIPT}/${_SOGOINITSCRIPT}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{MYSQLHOST}/${_MYSQLHOST}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    sed -i "s/{MYSQLPORT}/${_MYSQLPORT}/g" ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
+    
+    chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php
     # enable the plugin..
     if [ ! -L "${ISPCONFIGINSTALLPATH}/server/plugins-enabled/sogo_config_plugin.inc.php" ]; then
-        ln -s ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php ${ISPCONFIGINSTALLPATH}/server/plugins-enabled/sogo_config_plugin.inc.php
+        ln -s ${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php ${ISPCONFIGINSTALLPATH}/server/plugins-enabled/sogo_config_plugin.inc.php
+    fi
+    #install the interface plugin
+    echo -e "You like to install the ISPConfig interface plugin?"
+    echo -e "no files gets overridden only adds new files!"
+    echo -e "refer to the file list in http://cmjscripter.net/files/scripts/ispc/interface_simple.zip"
+    echo -e "(y/n) [y]: \c "
+    read SOGOINTERFACEPLUGIN
+    if [ -z "${SOGOINTERFACEPLUGIN}" ]; then
+        SOGOINTERFACEPLUGIN="y"
+    fi
+    if [ "${SOGOINTERFACEPLUGIN}" == "y" ]; then
+        cd  /tmp/
+        wget http://cmjscripter.net/files/scripts/ispc/interface_simple.zip -O /tmp/interface_simple.zip
+        unzip interface_simple.zip
+        rm -fr interface_simple/server
+        cp -rr interface_simple/* ${ISPCONFIGINSTALLPATH}/
+        rm -fr interface_simple*
+        chown ${ISPCSYSTEMUSER}:${ISPCSYSTEMUSER} -R ${ISPCONFIGINSTALLPATH}/
     fi
 
 }
@@ -1100,6 +1061,7 @@ EOF
 function apache2_vhost(){
 
     echo "Allmost there wee just need to configure the vhost"
+    echo "By default sogo comes with a vhost config if you plan on using ssl type n for no and edit the file by hand"
     echo "."
     echo -e "Continue with vhost config? (n/y) [y]: \c "
     read SOGOVHOSTCONIUE
@@ -1358,9 +1320,10 @@ echo -e "------------ SOGo Installed ------------"
 echo -e "Web:\t\t${SOGOPROTOCAL}://${SOGOVHOSTNAME}:${SOGOHTTPPORT}/SOGo"
 echo -e "VHOST Conf:\t\t${HTTPDCONFDIR}SOGo.conf"
 echo -e ""
-echo -e "ISPC Plugin:\t\t${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.php"
-echo -e "ISPC Template:\t\t${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf-templ"
+echo -e "ISPC Plugin:\t\t${ISPCONFIGINSTALLPATH}/server/plugins-available/sogo_config_plugin.inc.php"
+echo -e "ISPC Template:\t\t${ISPCONFIGINSTALLPATH}/server/conf/sogo.conf"
 echo -e "SOGo Domain Templates:\t\t${ISPCONFIGINSTALLPATH}/server/conf/sogo_domains/"
+echo -e "SOGo Override dir:\t\t${ISPCONFIGINSTALLPATH}/server/conf-custom/sogo"
 echo -e "SOGo Bin:\t\t${SOGOBINARY}"
 echo -e "SOGo-Tool Bin:\t\t${SOGOTOOLBINARY}"
 echo -e "SOGo Home:\t\t${SOGOHOMEDIR}"
@@ -1379,14 +1342,5 @@ echo -e "before you can login to sogo.....!"
 echo -e "----------------------------------------"
 
 exit 0;
-
-
-#echo "Installing openchangeserver for SOGo..."
-#apt-get install -t squeeze-backports libwbclient-dev samba-common smbclient libsmbclient libsmbclient-dev
-#apt-get update
-#apt-get install samba4
-#apt-get install openchangeserver sogo-openchange openchangeproxy openchange-ocsmanager openchange-rpcproxy
-
-
 
 
