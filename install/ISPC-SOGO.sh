@@ -3,6 +3,10 @@
 #
 # Install SOGo on debian/ubuntu/centos ISPConfig 3 server
 #
+# Update 7
+#	 - removed the todo list i'm done this works on EVERY test i do, 
+#	 - as fare as installing openchange setting up samba and openchange from a script will NOT be ideal..!
+#
 # Update 6
 #    - inverse mirror for ubuntu lucid have difrent apt layout??! NOT (lucid lucid) BUT (lucid main)
 #    - added checks to minimize dublicating of actions/content 
@@ -73,6 +77,7 @@
 #       CentOS 5.9 (i386)
 #       Ubuntu quantal 12.10 (amd64)
 #       Ubuntu precise 12.04 (i386)
+#       Debian wheezy (amd64)
 #
 # - OS Setups
 #       Debian Lenny: ISPConfig 3.0.5:  Apache2, BIND, Dovecot
@@ -83,6 +88,7 @@
 #       Ubuntu quantal12.10: ISPConfig 3.0.5.1: Apache2, BIND, Courier
 #       Ubuntu precise 12.04: ISPConfig 3.0.5.1: Apache2, BIND, Dovecot
 #       CentOS 5.9: ISPConfig 3.0.5.1: Apache2, BIND, Dovecot
+#       Debian wheezy: ISPConfig 3.0.5.2:  Apache2, BIND, Dovecot
 #           
 #
 # Single server inviroment
@@ -117,7 +123,6 @@
 #        
 # Bugs:
 #    - in a multi server inviroment a sogo plugin needs to be pressent on all mail servers..!
-#       * i have not figured that out yet but maybe scp or do it Copy & Paste Styles :)
 #    - vhost may need tweeking before SOGo can be accessed (Default: /etc/apache2/conf.d/SOGo.conf)
 #
 # Common Problems:
@@ -150,18 +155,6 @@
 #    ----
 #    http://www.sogo.nu/english/downloads/frontends.html
 #    http://www.sogo.nu/english/downloads/backend.html
-#
-# TODO:
-#    - More Testing !!!!
-#    - 
-#    - Make the script upon install create and pack plugins for thunderbird
-#    - Create a web module for ispconfig in order to allow a per domain configuration insted of a predefined for all (See: http://cmjscripter.net/files/scripts/ispc/ISPC-SOGO-debian-v2/) 
-#    - Add SOGo OpenChange backend -- MAY BE -- http://www.sogo.nu/files/docs/SOGo%20Native%20Microsoft%20Outlook%20Configuration.pdf
-#
-# Unable TO / Won't:
-#    - Auto backup of users and configs using sogo-tools. (will be avail in the web module)
-#    - get mail aliases into SOGo tables..
-#    - find a way to make sive work (i only know how to use "ManageSieve server" ) or not ISPConfig does a good job there
 #
 
 ## function inverse_debian
