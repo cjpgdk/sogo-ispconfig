@@ -9,11 +9,13 @@
             <th class="tbl_col_active" scope="col"><tmpl_var name="active_txt"></th>
             <th class="tbl_col_server_id" scope="col"><tmpl_var name="server_id_txt"></th>
             <th class="tbl_col_domain" scope="col"><tmpl_var name="domain_txt"></th>
+            <th class="tbl_col_buttons" scope="col">&nbsp;</th>
           </tr>
           <tr>
             <td class="tbl_col_active"><select name="search_active" onChange="submitForm('pageForm','mail/mail_sogo_domain_list.php');">{tmpl_var name='search_active'}</select></td>
             <td class="tbl_col_server_id"><select name="search_server_id" onChange="submitForm('pageForm','mail/mail_sogo_domain_list.php');">{tmpl_var name='search_server_id'}</select></td>
             <td class="tbl_col_domain"><input type="text" name="search_domain" value="{tmpl_var name='search_domain'}" /></td>
+            <td class="tbl_col_buttons"><div class="buttons"><button type="button" class="icons16 icoFilter" name="Filter" id="Filter" value="{tmpl_var name="filter_txt"}" onClick="submitForm('pageForm','mail/mail_sogo_domain_list.php');"><span>{tmpl_var name="filter_txt"}</span></button></div></td>
           </tr>
         </thead>
         <tbody>
@@ -22,11 +24,14 @@
             <td class="tbl_col_active"><a href="#" onclick="loadContent('mail/mail_sogo_domain_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="active"}</a></td>
             <td class="tbl_col_server_id"><a href="#" onclick="loadContent('mail/mail_sogo_domain_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="server_id"}</a></td>
             <td class="tbl_col_domain"><a href="#" onclick="loadContent('mail/mail_sogo_domain_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="domain"}</a></td>
+            <td class="tbl_col_buttons">
+              <div class="buttons icons16"></div>
+            </td>
           </tr>
           </tmpl_loop>
           <tmpl_unless name="records">
               <tr class="tbl_row_noresults tbl_row_<tmpl_if name='__EVEN__'}even<tmpl_else>uneven</tmpl_if>">
-                  <td colspan="3">{tmpl_var name='globalsearch_noresults_text_txt'}</td>
+                  <td colspan="4">{tmpl_var name='globalsearch_noresults_text_txt'}</td>
               </tr>
           </tmpl_unless>
         </tbody>

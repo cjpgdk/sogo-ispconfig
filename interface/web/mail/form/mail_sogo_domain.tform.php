@@ -6,6 +6,7 @@ $form["name"] = "mail_sogo_domain";
 $form["action"] = "mail_sogo_domain_edit.php";
 $form["db_table"] = "mail_domain";
 $form["db_table_idx"] = "domain_id";
+$form["db_history"] = "yes";
 $form["tab_default"] = "sogo_domain";
 $form["list_default"] = "mail_sogo_domain_list.php";
 $form["auth"] = 'yes'; // yes / no
@@ -16,24 +17,23 @@ $form["auth_preset"]["perm_user"] = 'riud'; //r = read, i = insert, u = update, 
 $form["auth_preset"]["perm_group"] = 'riud'; //r = read, i = insert, u = update, d = delete
 $form["auth_preset"]["perm_other"] = ''; //r = read, i = insert, u = update, d = delete
 
-$domain = $app->db->queryOneRecord('SELECT `domain` FROM `mail_domain` WHERE `domain_id`=' . @$app->functions->intval($_REQUEST["id"]));
-
 $form["tabs"]['sogo_domain'] = array(
     'title' => "SOGo Domain",
-    'template' => (($_SESSION['s']['user']['typ'] == 'admin') ? "templates/mail_sogo_domain_admin_edit.htm" :"templates/mail_sogo_domain_edit.htm" ),
+    'width' => 100,
+    'template' => ($app->auth->is_admin() ? "templates/mail_sogo_domain_admin_edit.htm" : ($app->auth->has_clients($app->auth->get_user_id()) ? "templates/mail_sogo_domain_reseller_edit.htm" : "templates/mail_sogo_domain_edit.htm")),
     'fields' => array(
         /*
          * Wee lookup the domain on save..
-        'SOGoMailDomain' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' =>  @$domain['domain'],
-            'value' => @$domain['domain'],
-            'width' => '30',
-            'maxlength' => '255',
-            'searchable' => 1
-        ),
-        */
+          'SOGoMailDomain' => array(
+          'datatype' => 'VARCHAR',
+          'formtype' => 'TEXT',
+          'default' =>  @$domain['domain'],
+          'value' => @$domain['domain'],
+          'width' => '30',
+          'maxlength' => '255',
+          'searchable' => 1
+          ),
+         */
         'SOGoDraftsFolderName' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
@@ -41,7 +41,6 @@ $form["tabs"]['sogo_domain'] = array(
             'value' => '',
             'width' => '30',
             'maxlength' => '255',
-            'searchable' => 1
         ),
         'SOGoSentFolderName' => array(
             'datatype' => 'VARCHAR',
@@ -50,7 +49,6 @@ $form["tabs"]['sogo_domain'] = array(
             'value' => '',
             'width' => '30',
             'maxlength' => '255',
-            'searchable' => 1
         ),
         'SOGoTrashFolderName' => array(
             'datatype' => 'VARCHAR',
@@ -59,58 +57,55 @@ $form["tabs"]['sogo_domain'] = array(
             'value' => '',
             'width' => '30',
             'maxlength' => '255',
-            'searchable' => 1
         ),
         'SOGoMailShowSubscribedFoldersOnly' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO'=>'NO', 'YES'=>'YES'
+                'NO' => 'NO', 'YES' => 'YES'
             ),
-            'searchable' => 1
         ),
         'SOGoLanguage' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => 'English',
             'value' => array(
-                'English'=>'English',
-                'Arabic'=>'Arabic',
-                'Brazilian'=>'Brazilian',
-                'Catalan'=>'Catalan',
-                'Czech'=>'Czech',
-                'Danish'=>'Danish',
-                'Dutch'=>'Dutch',
-                'French'=>'French',
-                'German'=>'German',
-                'Hungarian'=>'Hungarian',
-                'Icelandic'=>'Icelandic',
-                'Italian'=>'Italian',
-                'Norwegian Bokmål'=>'Norwegian Bokmål',
-                'Polish'=>'Polish',
-                'Russian'=>'Russian',
-                'Slovak'=>'Slovak',
-                'Swedish'=>'Swedish',
-                'Ukrainian'=>'Ukrainian',
-                'Welsh'=>'Welsh',
+                'English' => 'English',
+                'Arabic' => 'Arabic',
+                'Brazilian' => 'Brazilian',
+                'Catalan' => 'Catalan',
+                'Czech' => 'Czech',
+                'Danish' => 'Danish',
+                'Dutch' => 'Dutch',
+                'French' => 'French',
+                'German' => 'German',
+                'Hungarian' => 'Hungarian',
+                'Icelandic' => 'Icelandic',
+                'Italian' => 'Italian',
+                'Norwegian Bokmål' => 'Norwegian Bokmål',
+                'Polish' => 'Polish',
+                'Russian' => 'Russian',
+                'Slovak' => 'Slovak',
+                'Swedish' => 'Swedish',
+                'Ukrainian' => 'Ukrainian',
+                'Welsh' => 'Welsh',
             ),
-            'searchable' => 1
         ),
-        //* do select
         'SOGoSuperUsernames' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'CHECKBOXARRAY',
             'default' => '',
-            'datasource' => array('type' => 'SQL',
-                'querystring' => 'SELECT `email` FROM `mail_user` WHERE {AUTHSQL} AND `email` LIKE \'%@' . $domain['domain'] . '\' ORDER BY email',
+            'datasource' => array(
+                'type' => 'SQL',
+                'querystring' => 'SELECT `mail_user`.`email` FROM `mail_user`, `mail_domain` WHERE ' . $this->getAuthSQL('r', 'mail_user') . ' AND `mail_user`.`email` LIKE CONCAT(\'%@\',`mail_domain`.`domain`) AND `mail_domain`.`domain_id`=\'{RECORDID}\' ORDER BY `mail_user`.email',
                 'keyfield' => 'email',
                 'valuefield' => 'email'
             ),
-            'separator'=>'|',
+            'separator' => '|',
             'value' => '',
-            'searchable' => 2
         ),
     )
 );
-?>
+//** wee it works. :):)
+//echo $form["tabs"]['sogo_domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'];

@@ -1,0 +1,61 @@
+<tmpl_if name="msg">
+    <div id="OKMsg"><p><tmpl_var name="msg"></p></div>
+</tmpl_if>
+<h2><tmpl_var name="list_head_txt"></h2>
+
+<div class="panel panel_list_sogo_server">
+
+<div class="pnl_toolsarea">
+    <fieldset><legend>{tmpl_var name="toolsarea_head_txt"}</legend>
+        <div class="buttons">
+            <button class="iconstxt" style='background-image: url("admin/templates/ico/drill.png")' type="button" onClick="loadContent('admin/sogo_config_rebuild.php?id=ALL');">
+                <span>{tmpl_var name="issue_global_rebuild_txt"}</span>
+            </button>
+            <!--<a class="iconstxt" style='background-image: url("admin/templates/ico/download.png")' href="admin/sogo_config_download.php?id=ALL" target="download_sogo_config" >
+                <span>{tmpl_var name="download_configuration_txt"}</span>
+            </a>-->
+        </div>
+    </fieldset>
+</div>
+<div class="pnl_listarea">
+    <fieldset>
+        <legend><tmpl_var name="list_head_txt"></legend>
+        <table class="list">
+            <thead>
+                <tr>
+                    <th class="tbl_col_server_id" scope="col"><tmpl_var name="server_id_txt"></th>
+                    <th class="tbl_col_server_name" scope="col"><tmpl_var name="server_name_txt"></th>
+                    <th class="tbl_col_buttons" scope="col">&nbsp;</th>
+                </tr>
+                <tr>
+                    <td class="tbl_col_server_id"><input type="text" name="search_server_id" value="{tmpl_var name='search_server_id'}" /></td>
+                    <td class="tbl_col_server_name"><input type="text" name="search_server_name" value="{tmpl_var name='search_server_name'}" /></td>
+                    <td class="tbl_col_buttons"><div class="buttons"><button type="button" class="icons16 icoFilter" name="Filter" id="Filter" value="{tmpl_var name="filter_txt"}" onClick="submitForm('pageForm','admin/sogo_config.php');"><span>{tmpl_var name="filter_txt"}</span></button></div></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tmpl_loop name="records">
+                    <tr class="tbl_row_<tmpl_if name='__EVEN__'}even<tmpl_else>uneven</tmpl_if>">
+                        <td class="tbl_col_server_id"><a href="#" onClick="loadContent('admin/sogo_config_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="server_id"}</a></td>
+                        <td class="tbl_col_server_name"><a href="#" onClick="loadContent('admin/sogo_config_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="server_name"}</a></td>
+                        <td class="tbl_col_buttons">
+                            <div class="buttons icons16">
+                                <a class="button icons16 icoEdit" href="#" onClick="loadContent('admin/sogo_config_rebuild.php?id={tmpl_var name='id'}');"><span>{tmpl_var name='issue_config_rebuild_txt'}</span></a>
+                            <!--    
+                                <a class="button icons16" style='background-image: url("admin/templates/ico/download.png")' target="download_sogo_config" href="admin/sogo_config_download.php?id={tmpl_var name='id'}"><span>{tmpl_var name='download_configuration_txt'}</span></a>
+                            -->
+                            </div>
+                        </td>
+                    </tr>
+                </tmpl_loop>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="tbl_footer tbl_paging" colspan="3"><tmpl_var name="paging"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </fieldset>
+</div>
+
+</div>

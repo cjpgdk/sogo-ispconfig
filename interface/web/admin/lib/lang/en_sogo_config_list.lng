@@ -1,0 +1,6 @@
+<?php
+$wb["list_head_txt"] = 'SOGo server config';
+$wb["server_id_txt"] = 'Server';
+$wb["last_edit_txt"] = 'Last Edit';
+$wb["edit_by_txt"] = 'Edit by';
+?>

@@ -35,7 +35,7 @@ class page_action extends tform_actions {
         $this->dataRecord = $record;
         //* /END FROM parent::onShowEdit()
 
-        $server = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . @$app->functions->intval($this->dataRecord['server_id']));
+        $server = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . @intval($this->dataRecord['server_id']));
 
         if (file_exists(ISPC_ROOT_PATH . "/../server/conf/sogo_domains/{$this->dataRecord['domain']}.conf")) {
             //* default domain config if exists
@@ -58,16 +58,21 @@ class page_action extends tform_actions {
 
         if (isset($domain_custom)) {
             $xml = simplexml_load_string('<sogo_conf>' . $this->myTrim($domain_custom) . '</sogo_conf>');
-            $strings = (array) $xml->dict->string;
+            $_tmp = (array) $xml->dict->children();
+            $strings = $_tmp['string'];
+            unset($_tmp);
             $c = -1;
             foreach ($xml->dict->key as $key => $value) {
                 $c++;
                 if (!isset($this->dataRecord["{$value}"])) {
                     if ($value != 'SOGoSuperUsernames' && $value != 'SOGoUserSources') {
-                        $this->dataRecord["{$value}"] = (string) $strings[$c];
+                        $this->dataRecord["{$value}"] = (string) (isset($strings[$c]) ? $strings[$c] : '');
                     } else if ($value == 'SOGoSuperUsernames') {
                         foreach ($xml->dict->array[0]->string as $su) {
-                            $this->dataRecord["{$value}"] .= (string) "{$su}|";
+                            if (isset($this->dataRecord["{$value}"]))
+                                $this->dataRecord["{$value}"] .= (string) "{$su}|";
+                            else
+                                $this->dataRecord["{$value}"] = (string) "{$su}|";
                         }
                         $this->dataRecord["{$value}"] = rtrim($this->dataRecord["{$value}"], '|');
                     }
@@ -76,24 +81,31 @@ class page_action extends tform_actions {
         }
         if (isset($domain_default)) {
             $xml = simplexml_load_string('<sogo_conf>' . $this->myTrim($domain_default) . '</sogo_conf>');
-            $strings = (array) $xml->dict->string;
+            $_tmp = (array) $xml->dict->children();
+            $strings = $_tmp['string'];
+            unset($_tmp);
             $c = -1;
             foreach ($xml->dict->key as $key => $value) {
                 $c++;
                 if (!isset($this->dataRecord["{$value}"])) {
                     if ($value != 'SOGoSuperUsernames' && $value != 'SOGoUserSources') {
-                        $this->dataRecord["{$value}"] = (string) $strings[$c];
+                        $this->dataRecord["{$value}"] = (string) (isset($strings[$c]) ? $strings[$c] : '');
                     } else if ($value == 'SOGoSuperUsernames') {
                         foreach ($xml->dict->array[0]->string as $su) {
-                            $this->dataRecord["{$value}"] .= (string) "{$su}|";
+                            if (isset($this->dataRecord["{$value}"]))
+                                $this->dataRecord["{$value}"] .= (string) "{$su}|";
+                            else
+                                $this->dataRecord["{$value}"] = (string) "{$su}|";
                         }
                         $this->dataRecord["{$value}"] = rtrim($this->dataRecord["{$value}"], '|');
                     }
                 }
             }
+            unset($xml);
         }
         $record = $app->tform->getHTML($this->dataRecord, $this->active_tab, 'EDIT');
         $record['id'] = $this->id;
+        $record['server_id'] = $this->dataRecord['server_id'];
         $app->tpl->setVar($record);
     }
 
@@ -104,8 +116,18 @@ class page_action extends tform_actions {
         return $str;
     }
 
+    /**
+     * 
+     * @global app $app
+     * @global type $conf
+     */
     public function onUpdate() {
         global $app, $conf;
+        //* if no mails are selected set {{DOMAINADMIN}} so the update is actually performed
+        if (!isset($_REQUEST['SOGoSuperUsernames']) || !is_array($_REQUEST['SOGoSuperUsernames']) || empty($_REQUEST['SOGoSuperUsernames'])) {
+            $_REQUEST['SOGoSuperUsernames'] = array();
+            $_REQUEST['SOGoSuperUsernames'][] = "{{DOMAINADMIN}}";
+        }
         if (!empty($_REQUEST['SOGoDraftsFolderName']) &&
                 !empty($_REQUEST['SOGoSentFolderName']) &&
                 !empty($_REQUEST['SOGoTrashFolderName']) &&
@@ -120,7 +142,7 @@ class page_action extends tform_actions {
             $su_names = "";
             if (is_array($_REQUEST['SOGoSuperUsernames'])) {
                 foreach ($_REQUEST['SOGoSuperUsernames'] as $key => $value) {
-                    $su_names .= "<string>{$value}</string>";
+                    $su_names .= "                        <string>{$value}</string>".PHP_EOL;
                 }
             } else {
                 $su_names = "<string>{{DOMAINADMIN}}</string>";
@@ -142,8 +164,7 @@ class page_action extends tform_actions {
                     <string>{{DOMAIN}}</string>
                     <key>SOGoSuperUsernames</key>
                     <array>
-                        {$su_names}
-                    </array>
+{$su_names}                    </array>
                     <key>SOGoUserSources</key>
                     <array>
                         <dict>
@@ -170,6 +191,7 @@ class page_action extends tform_actions {
                             <string>Users in {{DOMAIN}}</string>
                             <key>hostname</key>
                             <string>localhost</string>
+{{MAILALIAS}}
                             <key>id</key>
                             <string>{{SOGOUNIQID}}</string>
                             <key>viewURL</key>
@@ -179,8 +201,8 @@ class page_action extends tform_actions {
                 </dict>
 EOF;
 
-            $domain = $app->db->queryOneRecord('SELECT `domain` FROM `mail_domain` WHERE `domain_id`=' . @$app->functions->intval($_REQUEST["id"]));
-            
+            $domain = $app->db->queryOneRecord('SELECT `domain` FROM `mail_domain` WHERE `domain_id`=' . @intval($_REQUEST["id"]));
+
             //* wee only save to conf-custom, on the safe side make sure the dirs are there.!
             if (!is_dir(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/domains/")) {
                 if (!is_dir(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/")) {
@@ -192,15 +214,28 @@ EOF;
                 mkdir(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/domains/");
             }
             //* save it.!
-            file_put_contents(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/domains/{$domain['domain']}.conf", $sogo_conf);
+            if (!file_put_contents(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/domains/{$domain['domain']}.conf", $sogo_conf)) {
+                $app->log('Unable to write new sogo domain config for '.$domain['domain'], LOGLEVEL_ERROR);
+            }
             //* lets create a fake update to make the chages afectiv (DO NOTE WE SET THE DOMAIN TO SAME VALUE!)
-            $app->db->datalogUpdate('mail_domain', "domain='{$domain['domain']}'", 'domain_id', @$app->functions->intval($_REQUEST["id"]), true);
+            $this->_fake_update_datalog(@intval($_REQUEST['server_id']));
         }
         header("Location: " . $app->tform->formDef['list_default']);
+    }
+    /**
+     * the method creats a FAKE datalog update wee need this to force the system to 
+     * think it needs to run the cron data on mail_domain table on ISPConfig > 3.0.4 we can use $app->db->datalogSave($tablename, 'UPDATE', $index_field, $index_value, $old_rec, $new_rec, $force_update); with $force_update set to true
+     * after much testing this will not to my knowledge do anything to your system other than run the cron job..
+     * @global app $app
+     */
+    private function _fake_update_datalog($server_id) {
+        global $app;
+        $diffstr = $app->db->quote(serialize(array('old'=>array('server_id'=>$server_id),'new'=>array('server_id'=>$server_id))));
+        $app->db->query("INSERT INTO sys_datalog (dbtable,dbidx,server_id,action,tstamp,user,data) VALUES ('fake_tb_sogo','server_id:{$server_id}','{$server_id}','u','" . time() . "','{$app->db->quote($_SESSION['s']['user']['username'])}','{$diffstr}')");
     }
 
 }
 
-$page = new page_action();
-$page->onLoad();
+$app->tform_actions = new page_action();
+$app->tform_actions->onLoad();
 ?>
