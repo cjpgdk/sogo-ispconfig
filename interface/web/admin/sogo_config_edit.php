@@ -62,7 +62,7 @@ class page_action extends tform_actions {
         $record = array();
 
 
-        $SERVERSOGOCONFIG = $this->getConfig();
+        $SERVERSOGOCONFIG = $this->getConfig($serverec);
         //* if we have a config file loaded
         if (!is_null($SERVERSOGOCONFIG) && is_string($SERVERSOGOCONFIG)) {
             $app->uses('sogo_config');
@@ -94,12 +94,13 @@ class page_action extends tform_actions {
 
         //* we allways need a post
         if (count($_POST) > 1) {
-            $old_config = $this->getConfig();
+            $old_config = $this->getConfig(array('server_name'=>@$_POST['server_name']));
             //* if we have a config file loaded
             if (!is_null($old_config) && is_string($old_config))
                 $app->sogo_config->loadSOGoConfigString($old_config);
             $old_config = $app->sogo_config->getConfigArray();
-            $new_config = $old_config;
+            //$new_config = $old_config;
+            $new_config = array();
             
             foreach ($_POST as $key => $value) {
                 //* no not them
@@ -216,7 +217,8 @@ class page_action extends tform_actions {
         return str_replace('###ERRORMSG###', $msg, $content);
     }
 
-    function getConfig() {
+    function getConfig($serverec=array('server_name'=>'NO NOTHING')) {
+        global $app;
 
         if (file_exists(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/sogo.conf")) {
             //* default SOGo "CUSTOM" config if exists, wee allways use the main server a template for new servers
