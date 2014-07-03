@@ -4,10 +4,11 @@
 <div class="panel panel_sogo_config">
 
     <div class="pnl_formsarea">
-        <fieldset class="inlineLabels"><legend>SOGo Defaults on: {tmpl_var name='server_name'} (#{tmpl_var name='id'})</legend>
+        <fieldset class="inlineLabels" id="sogoconffields">
+            <legend>{tmpl_var name='SOGo_Defaults_on_txt'} {tmpl_var name='server_name'} (#{tmpl_var name='id'})</legend>
             
             {tmpl_loop name="records"}
-            <div class="ctrlHolder">
+            <div class="ctrlHolder" id="rm{tmpl_var name='name'}">
                 <label for="{tmpl_var name='name'}">{tmpl_var name='text'}</label>
                 {tmpl_if name="type" op="==" value="TEXT"}
                     <input name="{tmpl_var name='name'}" id="{tmpl_var name='name'}" value="{tmpl_var name='value'}" type="text" class="textInput" />
@@ -40,6 +41,9 @@
                         {tmpl_var name='value'}
                     </select>
                 {/tmpl_if}
+                <div style="float: right;">
+                    <a href="#" onclick="return rmFieldOption('{tmpl_var name='name'}');">{tmpl_var name='remove_txt'}</a>
+                </div>
             </div>
             {/tmpl_loop name="records"}
 
@@ -51,7 +55,62 @@
         <div class="buttonHolder buttons">
             <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onClick="submitForm('pageForm', 'admin/sogo_config_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
             <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onClick="loadContent('admin/sogo_config.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+            <button class="positive iconstxt icoAdd" type="button" onClick="return addFieldOption();" value="{tmpl_var name='btn_add_option_txt'}"><span>{tmpl_var name='btn_add_option_txt'}</span></button>
         </div>
     </div>
 
 </div>
+<script type="text/javascript">
+    $(function() {});
+    function addFieldOption(){
+        $('body').append('<div id="bodyOverlayCustom" style="position: fixed;top: 0;left: 0;width: 100%;height: 100%;z-index: 10;background-color: rgba(0,0,0,0.5);"></div>');
+        
+        var _htmlDialog = '<div id="bodyDialogCustom" style="position: fixed;top: 50%;left: 50%;width: 300px;height: 200px;margin-left: -150px;margin-top: -100px;background-color: #FFFFFF;text-align: center;border-radius: 5px;z-index: 10;box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);">'
+                + ' <form>'
+                + '     <fieldset style="margin: 10px;">'
+        
+                + '         <label for="option_name" style="display: block; float: none; text-align: left;">{tmpl_var name="prompt_option_name_txt"}</label>'
+                + '         <input type="text" name="option_name" id="option_name" value="" style="display: block; float: none; text-align: left; width: 100%;"><br />'
+        
+                + '         <label for="option_value" style="display: block; float: none; text-align: left;">{tmpl_var name="prompt_option_value_txt"}</label>'
+                + '         <textarea name="option_value" id="option_value" value="" style="display: block; float: none; text-align: left; width: 100%;height: 50px;"></textarea><br />'
+        
+                + '     </fieldset>'
+        
+                + '     <div class="buttonHolder buttons" style="bottom: 0px; position: absolute; margin: 10px;">'
+                + '         <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name="btn_save_txt"}" onClick="return addFieldOptionSubmit();"><span>{tmpl_var name="btn_save_txt"}</span></button>'
+                + '         <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name="btn_cancel_txt"}" onClick="return addFieldOptionClose();"><span>{tmpl_var name="btn_cancel_txt"}</span></button>'
+                + '     </div>'
+        
+                + ' </form>'
+                + '</div>';
+        $('body').append(_htmlDialog);
+        return false;
+    }
+    function addFieldOptionClose(){
+        $('#bodyOverlayCustom').remove();
+        $('#bodyDialogCustom').remove();
+        return false;
+    }
+    function addFieldOptionSubmit(){
+        var rField = $('#option_name').val();
+        var rValue = $('#option_value').val();
+        var _html = '<div class="ctrlHolder" id="rm'+rField+'">'
+        +'<label for="'+rField+'">'+rField+'</label>'
+        +'<input name="'+rField+'" id="'+rField+'" value="'+rValue+'" type="text" class="textInput" />'
+        +'<div style="float: right;">'
+        +'<a href="#" onclick="return rmFieldOption(\''+rField+'\');">{tmpl_var name='remove_txt'}</a>'
+        +'</div>'
+        +'</div>';
+        $('fieldset#sogoconffields').append(_html);
+        $('#bodyOverlayCustom').remove();
+        $('#bodyDialogCustom').remove();
+        return false;
+    }
+    function rmFieldOption(name){
+        if (name !== undefined) {
+            $('div#rm'+name).remove();
+        }
+        return false;
+    }
+</script>
