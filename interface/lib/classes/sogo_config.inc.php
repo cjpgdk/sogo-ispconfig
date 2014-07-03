@@ -183,12 +183,16 @@ class sogo_config {
             if (!isset($this->sogodplist) || empty($this->sogodplist) || is_null($this->sogodplist)) {
                 return 0;
             }
-            return file_put_contents(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/{$name}", $this->sogodplist);
+            $return = file_put_contents(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/{$name}", $this->sogodplist);
+            @chmod(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/{$name}", 0777); // fix on ISPC 3.0.4
+            return $return;
         } else {
             if (!isset($this->newconf) || empty($this->newconf) || is_null($this->newconf)) {
                 return 0;
             }
-            return file_put_contents(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/{$name}", $this->newconf);
+            $return = file_put_contents(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/{$name}", $this->newconf);
+            @chmod(ISPC_ROOT_PATH . "/../server/conf-custom/sogo/{$name}", 0777); // fix on ISPC 3.0.4
+            return $return;
         }
     }
 
