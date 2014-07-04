@@ -135,6 +135,22 @@ class sogo_config {
         'FirstFullWeek' => 'First Full Week',
     );
     /**
+     * Values available in SOGoIMAPAclStyle
+     * @var array 
+     */
+    private $SOGoIMAPAclStyleFields = array(
+        'rfc2086' => 'RFC 2086',
+        'rfc4314' => 'RFC 4314',
+    );
+    /**
+     * Values available in SOGoSieveFolderEncoding
+     * @var array 
+     */
+    private $SOGoSieveFolderEncodingFields = array(
+        'UTF-7' => 'UTF-7',
+        'UTF-8' => 'UTF-8',
+    );
+    /**
      * the main config.
      * @var string 
      */
@@ -295,6 +311,7 @@ class sogo_config {
      */
     public function getISPConfigFormField($name, $value) {
         global $app;
+        $app->load('tform');
         //* default and som required fileds
         $ret = array(
             'datatype' => 'VARCHAR',
@@ -306,20 +323,28 @@ class sogo_config {
             'width' => 100,
         );
         switch ($name) {
+            case 'SOGoSearchMinimumWordLength':
+                $ret['datatype'] = 'INTEGER';
+                break;
             case 'SOGoPasswordChangeEnabled':
             case 'SOGoMailUseOutlookStyleReplies':
             case 'SOGoMailAuxiliaryUserAccountsEnabled':
             case 'SOGoMailCustomFromEnabled':
             case 'SOGoEnableEMailAlarms':
             case 'SOGoACLsSendEMailNotifcations':
-            case 'SOGoAppointmentSendEMailNotifcations':
+            case 'SOGoAppointmentSendEMailNotifications':
             case 'SOGoAppointmentSendEMailReceipts':
-            case 'SOGoFoldersSendEMailNotifcations':
+            case 'SOGoFoldersSendEMailNotifications':
             case 'WOUseRelativeURLs':
             case 'SOGoVacationEnabled':
             case 'SOGoSieveScriptsEnabled':
             case 'SOGoIMAPAclConformsToIMAPExt':
             case 'SOGoForwardEnabled':
+            case 'SOGoMailShowSubscribedFoldersOnly':
+            case 'SOGoForceIMAPLoginWithEmail':
+            case 'SOGoForceExternalLoginWithEmail':
+            case 'SOGoNotifyOnPersonalModifications':
+            case 'SOGoNotifyOnExternalModifications':
                 $ret['datatype'] = 'VARCHAR';
                 $ret['formtype'] = 'SELECT';
                 $ret['value'] = $this->runTranslate($this->YesNoFields);
@@ -329,15 +354,20 @@ class sogo_config {
                 $ret['formtype'] = 'SELECT';
                 $ret['value'] = $this->runTranslate($this->SOGoLoginModuleFields);
                 break;
-            case 'SOGoForceIMAPLoginWithEmail':
-                $ret['datatype'] = 'VARCHAR';
-                $ret['formtype'] = 'SELECT';
-                $ret['value'] = $this->runTranslate($this->YesNoFields);
-                break;
             case 'SOGoLanguage':
                 $ret['datatype'] = 'VARCHAR';
                 $ret['formtype'] = 'SELECT';
                 $ret['value'] = $this->runTranslate($this->SOGoLanguageAvailable);
+                break;
+            case 'SOGoIMAPAclStyle':
+                $ret['datatype'] = 'VARCHAR';
+                $ret['formtype'] = 'SELECT';
+                $ret['value'] = $this->runTranslate($this->SOGoIMAPAclStyleFields);
+                break;
+            case 'SOGoSieveFolderEncoding':
+                $ret['datatype'] = 'VARCHAR';
+                $ret['formtype'] = 'SELECT';
+                $ret['value'] = $this->runTranslate($this->SOGoSieveFolderEncodingFields);
                 break;
             case 'SOGoMailingMechanism':
                 $ret['datatype'] = 'VARCHAR';
@@ -403,7 +433,7 @@ class sogo_config {
                 $ret['formtype'] = 'CHECKBOXARRAY';
                 if (is_array($value))
                     $ret['default'] = implode(',', $value);
-                $ret['value'] = $this->runTranslate($this->SOGoContactsDefaultRolesAvailable);
+                $ret['value'] = implode(',', $value);
                 $ret['separator'] = ',';
 //                $ret['validators'] = array(
 //                array(
@@ -415,6 +445,25 @@ class sogo_config {
 //            ),
 
                 break;
+            case 'SOGoSuperUsernames':
+                $ret['datatype'] = 'VARCHAR';
+                $ret['formtype'] = 'CHECKBOXARRAY';
+                if (is_array($value['VALUE']))
+                    $ret['default'] = implode(',', $value['VALUE']);
+                else
+                    $ret['default'] = $value['VALUE'];
+                $tform = new tform();
+                $ret['datasource'] = array(
+                    'type' => 'SQL',
+                    'querystring' => 'SELECT `mail_user`.`email` FROM `mail_user`, `mail_domain` WHERE ' . $tform->getAuthSQL('r', 'mail_user') . ' AND `mail_user`.`email` LIKE CONCAT(\'%@\',`mail_domain`.`domain`) AND `mail_domain`.`domain_id`=\''.$value['RECORDID'].'\' ORDER BY `mail_user`.email',
+                    'keyfield' => 'email',
+                    'valuefield' => 'email'
+                );
+                $ret['separator'] = '|';
+                if (is_array($value['VALUE']))
+                    $ret['value'] = implode(',', $value['VALUE']);
+                else
+                    $ret['value'] = $value['VALUE'];
             case 'domains':
                 break;
             default:

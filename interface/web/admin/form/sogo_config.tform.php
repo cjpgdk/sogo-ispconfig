@@ -213,7 +213,7 @@ $form["tabs"]['sogo'] = array(
             'required'=>0,
             'width'=>100,
         ),
-        'SOGoACLsSendEMailNotifcations' => array(
+        'SOGoACLsSendEMailNotifications' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => 'YES',
@@ -225,7 +225,7 @@ $form["tabs"]['sogo'] = array(
             'required'=>0,
             'width'=>100,
         ),
-        'SOGoAppointmentSendEMailNotifcations' => array(
+        'SOGoAppointmentSendEMailNotifications' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => 'YES',
@@ -249,7 +249,7 @@ $form["tabs"]['sogo'] = array(
             'required'=>0,
             'width'=>100,
         ),
-        'SOGoFoldersSendEMailNotifcations' => array(
+        'SOGoFoldersSendEMailNotifications' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => 'No',
