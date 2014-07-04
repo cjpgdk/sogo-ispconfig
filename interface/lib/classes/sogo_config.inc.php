@@ -449,7 +449,7 @@ class sogo_config {
                 $ret['datatype'] = 'VARCHAR';
                 $ret['formtype'] = 'CHECKBOXARRAY';
                 if (is_array($value['VALUE']))
-                    $ret['default'] = implode(',', $value['VALUE']);
+                    $ret['default'] = implode('|', $value['VALUE']);
                 else
                     $ret['default'] = $value['VALUE'];
                 $tform = new tform();
@@ -461,7 +461,7 @@ class sogo_config {
                 );
                 $ret['separator'] = '|';
                 if (is_array($value['VALUE']))
-                    $ret['value'] = implode(',', $value['VALUE']);
+                    $ret['value'] = implode('|', $value['VALUE']);
                 else
                     $ret['value'] = $value['VALUE'];
             case 'domains':
