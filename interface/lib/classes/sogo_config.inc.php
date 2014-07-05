@@ -134,6 +134,7 @@ class sogo_config {
         'First4DayWeek' => 'First 4 Day Week',
         'FirstFullWeek' => 'First Full Week',
     );
+
     /**
      * Values available in SOGoIMAPAclStyle
      * @var array 
@@ -142,6 +143,7 @@ class sogo_config {
         'rfc2086' => 'RFC 2086',
         'rfc4314' => 'RFC 4314',
     );
+
     /**
      * Values available in SOGoSieveFolderEncoding
      * @var array 
@@ -150,11 +152,13 @@ class sogo_config {
         'UTF-7' => 'UTF-7',
         'UTF-8' => 'UTF-8',
     );
+
     /**
      * the main config.
      * @var string 
      */
     private $newconf = NULL;
+
     /**
      * the sogod.plist config.
      * @var string 
@@ -213,10 +217,60 @@ class sogo_config {
     }
 
     /**
+     * create the domain config layout
+     * @param array $array
+     * @return string the domain config string.
+     * @todo some sort of walidation..
+     */
+    public function createDomainConfig($array) {
+        $dconf = "";
+        foreach ($array as $key => $value) {
+            $dconf .= "\t\t\t\t<key>{$key}</key>" . PHP_EOL;
+            $dconf .= "\t\t\t\t<dict>" . PHP_EOL;
+            foreach ($value as $key2 => $value2) {
+                $dconf .= "\t\t\t\t\t<key>{$key2}</key>" . PHP_EOL;
+                if ($key2 == 'SOGoUserSources') {
+                    $dconf .= "\t\t\t\t\t<array>" . PHP_EOL;
+                    foreach ($value2 as $key3 => $value3) {
+                        $dconf .= "\t\t\t\t\t\t<dict>" . PHP_EOL;
+                        foreach ($value3 as $key4 => $value4) {
+                            $dconf .= "\t\t\t\t\t\t\t<key>{$key4}</key>" . PHP_EOL;
+                            if (is_array($value4)) {
+                                $dconf .= "\t\t\t\t\t\t\t<array>" . PHP_EOL;
+                                foreach ($value4 as $key5 => $value5) {
+                                    $dconf .= "\t\t\t\t\t\t\t\t<string>{$value5}</string>" . PHP_EOL;
+                                }
+                                $dconf .= "\t\t\t\t\t\t\t</array>" . PHP_EOL;
+                            } else {
+                                $dconf .= "\t\t\t\t\t\t\t<string>{$value4}</string>" . PHP_EOL;
+                            }
+                        }
+                        $dconf .= "{{MAILALIAS}}" . PHP_EOL;
+                        $dconf .= "\t\t\t\t\t\t</dict>" . PHP_EOL;
+                    }
+                    $dconf .= "\t\t\t\t\t</array>" . PHP_EOL;
+                } else {
+                    if (is_array($value2)) {
+                        $dconf .= "\t\t\t\t\t<array>" . PHP_EOL;
+                        foreach ($value2 as $key3 => $value3) {
+                            $dconf .= "\t\t\t\t\t\t<string>{$value3}</string>" . PHP_EOL;
+                        }
+                        $dconf .= "\t\t\t\t\t</array>" . PHP_EOL;
+                    } else {
+                        $dconf .= "\t\t\t\t\t<string>{$value2}</string>" . PHP_EOL;
+                    }
+                }
+            }
+            $dconf .= "\t\t\t\t</dict>" . PHP_EOL;
+        }
+        return $dconf;
+    }
+
+    /**
      * create the config layout
      * @param array $array
      * @return boolean
-     * @todo som sort of walidation..
+     * @todo some sort of walidation..
      */
     public function createConfig($array) {
         //* sogod.plist
@@ -455,7 +509,7 @@ class sogo_config {
                 $tform = new tform();
                 $ret['datasource'] = array(
                     'type' => 'SQL',
-                    'querystring' => 'SELECT `mail_user`.`email` FROM `mail_user`, `mail_domain` WHERE ' . $tform->getAuthSQL('r', 'mail_user') . ' AND `mail_user`.`email` LIKE CONCAT(\'%@\',`mail_domain`.`domain`) AND `mail_domain`.`domain_id`=\''.$value['RECORDID'].'\' ORDER BY `mail_user`.email',
+                    'querystring' => 'SELECT `mail_user`.`email` FROM `mail_user`, `mail_domain` WHERE ' . $tform->getAuthSQL('r', 'mail_user') . ' AND `mail_user`.`email` LIKE CONCAT(\'%@\',`mail_domain`.`domain`) AND `mail_domain`.`domain_id`=\'' . $value['RECORDID'] . '\' ORDER BY `mail_user`.email',
                     'keyfield' => 'email',
                     'valuefield' => 'email'
                 );
