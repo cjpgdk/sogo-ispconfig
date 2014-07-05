@@ -1,42 +1,131 @@
 <h2><tmpl_var name="list_head_txt"></h2>
 <p><tmpl_var name="list_desc_txt"></p>
 
-<div class="panel panel_mail_sogo_domain">
+<div class="panel panel_mail_domain">
 
     <div class="pnl_formsarea">
-        <fieldset class="inlineLabels"><legend>SOGo Domain</legend>
-
-            <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" type="hidden"/>
-            <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}" type="hidden"/>
-            <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}" type="hidden"/>
-
-            <div class="ctrlHolder">
-                <label for="SOGoMailShowSubscribedFoldersOnly">{tmpl_var name='SOGoMailShowSubscribedFoldersOnly_txt'}</label>
-                <select name="SOGoMailShowSubscribedFoldersOnly" id="SOGoMailShowSubscribedFoldersOnly" class="selectInput">
-                    {tmpl_var name='SOGoMailShowSubscribedFoldersOnly'}
-                </select>
-            </div>
-            <div class="ctrlHolder">
-                <label for="SOGoLanguage">{tmpl_var name='SOGoLanguage_txt'}</label>
-                <select name="SOGoLanguage" id="SOGoLanguage" class="selectInput">
-                    {tmpl_var name='SOGoLanguage'}
-                </select>
-            </div>
-            <div class="ctrlHolder">
-                <p class="label">{tmpl_var name='SOGoSuperUsernames_txt'}</p>
-                <div class="multiField">
-                    {tmpl_var name='SOGoSuperUsernames'}
+        <fieldset class="inlineLabels" id="sogoconffields"><legend>SOGo Domain</legend>
+            {tmpl_loop name="records"}
+                <div class="ctrlHolder" id="rm{tmpl_var name='name'}">
+                    <label for="{tmpl_var name='name'}">{tmpl_var name='text'}</label>
+                    {tmpl_if name="type" op="==" value="TEXT"}
+                        <input name="{tmpl_var name='name'}" id="{tmpl_var name='name'}" value="{tmpl_var name='value'}" type="text" class="textInput" />
+                    {/tmpl_if}
+                    {tmpl_if name="type" op="==" value="CHECKBOXARRAY"}
+                        <div class="multiField">
+                            {tmpl_var name='value'}
+                        </div>
+                    {/tmpl_if}
+                    {tmpl_if name="type" op="==" value="SELECT"}
+                        <select name="{tmpl_var name='name'}" id="{tmpl_var name='name'}" class="selectInput">
+                            {tmpl_var name='value'}
+                        </select>
+                    {/tmpl_if}
+                    <div style="float: right;">
+                        <a href="#" onclick="return rmFieldOption('{tmpl_var name='name'}');">{tmpl_var name='remove_txt'}</a>
+                    </div>
                 </div>
-            </div>
+            {/tmpl_loop name="records"}
         </fieldset>
 
+        {tmpl_loop name="hidden_fields"}
+            <input type="hidden" name="{tmpl_var name='name'}" value="{tmpl_var name='name'}">
+        {/tmpl_loop name="hidden_fields"}
         <input type="hidden" name="id" value="{tmpl_var name='id'}">
         <input type="hidden" name="server_id" value="{tmpl_var name='server_id'}">
+        <input type="hidden" name="domain" value="{tmpl_var name='domain'}">
 
         <div class="buttonHolder buttons">
-            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onClick="submitForm('pageForm', 'mail/mail_sogo_domain_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
-            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onClick="loadContent('mail/mail_sogo_domain_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'mail/mail_sogo_domain_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('mail/mail_sogo_domain_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+            <button class="positive iconstxt icoAdd" type="button" onClick="return addFieldOption();" value="{tmpl_var name='btn_add_option_txt'}"><span>{tmpl_var name='btn_add_option_txt'}</span></button>
         </div>
     </div>
 
 </div>
+
+<script type="text/javascript">
+    $(function() {});
+    var _fields = [
+    {tmpl_loop name="allowed_fields"}
+        {name:"{tmpl_var name='name'}",name_txt:"{tmpl_var name='name_txt'}",type:"{tmpl_var name='type'}",values:"{tmpl_var name='values'}",'default':"{tmpl_var name='default'}"},
+    {/tmpl_loop name="allowed_fields"}
+    ];
+    function addFieldOption(){
+        $('body').append('<div id="bodyOverlayCustom" style="position: fixed;top: 0;left: 0;width: 100%;height: 100%;z-index: 10;background-color: rgba(0,0,0,0.5);"></div>');
+        
+        var _htmlDialog = '<div id="bodyDialogCustom" style="position: fixed;top: 50%;left: 50%;width: 300px;height: 200px;margin-left: -150px;margin-top: -100px;background-color: #FFFFFF;text-align: center;border-radius: 5px;z-index: 10;box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);">'
+                + ' <form>'
+                + '     <fieldset style="margin: 10px;">'
+                + '         <label for="option_name" style="display: block; float: none; text-align: left;">{tmpl_var name="prompt_option_name_txt"}</label>'
+                + '         <select onchange="setSelectFromType($(\'#option_name\').val());" name="option_name" id="option_name" style="display: block; float: none; text-align: left; width: 100%;">'
+                + '             <option value="" disabled selected style="display:none;">{tmpl_var name="prompt_option_name_txt"}</option>'
+        for (i = 0; i < _fields.length; i++) {
+            _htmlDialog += '             <option value="'+_fields[i].name+'" id="option-'+_fields[i].name+'" fieldindex="'+i+'">'+_fields[i].name_txt+'</option>'
+        }
+        _htmlDialog += ''
+                + '         </select>'
+               
+                + '         <label for="option_value" style="display: block; float: none; text-align: left;">{tmpl_var name="prompt_option_value_txt"}</label>'
+                + '         <div id="option_value_wrapper"><div><br />'
+        
+                + '     </fieldset>'
+        
+                + '     <div class="buttonHolder buttons" style="bottom: 0px; position: absolute; margin: 10px;">'
+                + '         <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name="btn_save_txt"}" onClick="return addFieldOptionSubmit();"><span>{tmpl_var name="btn_save_txt"}</span></button>'
+                + '         <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name="btn_cancel_txt"}" onClick="return addFieldOptionClose();"><span>{tmpl_var name="btn_cancel_txt"}</span></button>'
+                + '     </div>'
+        
+                + ' </form>'
+                + '</div>';
+        $('body').append(_htmlDialog);
+        setSelectFromType(_fields[0].name);
+        return false;
+    }
+    function setSelectFromType(name){
+        var _fieldId = $('#option-'+name).attr('fieldindex');
+        switch(_fields[_fieldId].type) {
+            case 'SELECT':
+                var _selectO = '<select name="option_value" id="option_value" style="display: block; float: none; text-align: left; width: 100%;">';
+                var _vals = _fields[_fieldId].values.split(',');
+                 for (i = 0; i < _vals.length; i++) {
+                     var _val = _vals[i].split(':');
+                     _selectO += '<option value="'+_val[0]+'">'+_val[1]+'</option>';
+                 }
+                _selectO += '</select>';
+                $('#option_value_wrapper').html(_selectO);
+                break;
+            case 'TEXT':
+                $('#option_value_wrapper').html('<textarea name="option_value" id="option_value" style="display: block; float: none; text-align: left; width: 100%;height: 50px;">'+(_fields[_fieldId].default !== '' ? _fields[_fieldId].default : _fields[_fieldId].values)+'</textarea>');
+                break;
+            default:
+                break;
+        }
+    }
+    function addFieldOptionClose(){
+        $('#bodyOverlayCustom').remove();
+        $('#bodyDialogCustom').remove();
+        return false;
+    }
+    function addFieldOptionSubmit(){
+        var rField = $('#option_name').val();
+        var rValue = $('#option_value').val();
+        var _html = '<div class="ctrlHolder" id="rm'+rField+'">'
+        +'<label for="'+rField+'">'+rField+'</label>'
+        +'<input name="'+rField+'" id="'+rField+'" value="'+rValue+'" type="text" class="textInput" />'
+        +'<div style="float: right;">'
+        +'<a href="#" onclick="return rmFieldOption(\''+rField+'\');">{tmpl_var name='remove_txt'}</a>'
+        +'</div>'
+        +'</div>';
+        $('fieldset#sogoconffields').append(_html);
+        $('#bodyOverlayCustom').remove();
+        $('#bodyDialogCustom').remove();
+        return false;
+    }
+    function rmFieldOption(name){
+        if (name !== undefined) {
+            $('div#rm'+name).remove();
+        }
+        return false;
+    }
+</script>
