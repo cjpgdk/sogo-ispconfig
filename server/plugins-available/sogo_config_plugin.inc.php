@@ -51,6 +51,13 @@ class sogo_config_plugin {
      * @var boolean 
      */
     var $write_sogodplist = false;
+    
+    /**
+     * delete old backups after x days
+     * default: 7
+     * @var string 
+     */
+    var $delete_old_backups_after = "7";
 
     function onInstall() {
         global $conf;
@@ -105,50 +112,61 @@ class sogo_config_plugin {
         }
     }
 
+
     /**
      * Backup configuration files.!
      * @global app $app
      */
     function backupConf($file_postfix = "") {
-        global $app;
-        $app->uses('getconf');
+        global $app, $conf;
+        $app->uses('getconf, system');
         $app->log("Started sogo_config_plugin::backupConf($file_postfix)", LOGLEVEL_DEBUG);
 
         $server_config = $app->getconf->get_server_config($conf['server_id'], 'server');
+
+        $backup_dir_is_ready = true;
+        //* check if is_mounted exists
+        if (method_exists($app->system, 'is_mounted')) {
+            //* -- BORROWED FROM BACKUP PLUGIN (plugins-available\backup_plugin.inc.php)
+            //* mount backup directory, if necessary
+            $server_config['backup_dir_mount_cmd'] = trim($server_config['backup_dir_mount_cmd']);
+            if ($server_config['backup_dir_is_mount'] == 'y' && $server_config['backup_dir_mount_cmd'] != '') {
+                if (!$app->system->is_mounted($server_config['backup_dir'])) {
+                    exec(escapeshellcmd($server_config['backup_dir_mount_cmd']));
+                    sleep(1);
+                    if (!$app->system->is_mounted($server_config['backup_dir']))
+                        $backup_dir_is_ready = false;
+                }
+            }
+            //* -- /BORROWED FROM BACKUP PLUGIN (plugins-available\backup_plugin.inc.php)
+        }
+        if (!$backup_dir_is_ready)
+            return;
+        if (!is_dir($server_config['backup_dir'])) {
+            return;
+        }
+
         $backup_dir = $server_config['backup_dir'] . '/sogo';
         @mkdir($backup_dir);
         if (!is_dir($backup_dir)) {
             return;
         }
+
+        //* delete old backups
+        exec('find ' . $backup_dir . ' -mtime +' . $this->delete_old_backups_after . '/* | xargs rm -rf');
+
         $backup_dir = $backup_dir . '/' . date('Y-m-d');
         @mkdir($backup_dir);
-
         @mkdir($backup_dir . '/conf');
-        copy($this->templ_file, $backup_dir . '/conf/' . date('H.i.s') . '-sogo.conf' . $file_postfix);
-
-        @mkdir($backup_dir . '/conf/sogo_domains');
-        if ($handle = opendir($this->templ_domains_dir)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry != "." && $entry != ".." && !is_dir($this->templ_domains_dir . '/' . $entry)) {
-                    copy($this->templ_domains_dir . '/' . $entry, $backup_dir . '/conf/sogo_domains/' . date('H.i.s') . '-' . $entry . $file_postfix);
-                }
-            }
-            closedir($handle);
-        }
+        //* backup all default config files not just SOGo
+        exec('tar -zcvf ' . $backup_dir . '/conf/sogo-conf-' . date('H.i.s') . $file_postfix . '.tar.gz ' . str_replace('sogo.conf', '', $this->templ_file), $output);
+        $app->log("\t\t - OUTPUT[conf]: " . print_r($output, true), LOGLEVEL_DEBUG);
+        unset($output);
 
         @mkdir($backup_dir . '/conf-custom');
         @mkdir($backup_dir . '/conf-custom/sogo');
-        copy($this->templ_override_file, $backup_dir . '/conf-custom/sogo/' . date('H.i.s') . '-sogo.conf' . $file_postfix);
-
-        @mkdir($backup_dir . '/conf-custom/sogo/domains');
-        if ($handle = opendir($this->templ_override_domains_dir)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry != "." && $entry != ".." && !is_dir($this->templ_override_domains_dir . '/' . $entry)) {
-                    copy($this->templ_override_domains_dir . '/' . $entry, $backup_dir . '/conf-custom/sogo/domains/' . date('H.i.s') . '-' . $entry . $file_postfix);
-                }
-            }
-            closedir($handle);
-        }
+        exec('tar -zcvf ' . $backup_dir . '/conf-custom/sogo/sogo-conf-' . date('H.i.s') . $file_postfix . '.tar.gz ' . $this->templ_override_domains_dir, $output);
+        $app->log("\t\t - OUTPUT[conf-custom]: " . print_r($output, true), LOGLEVEL_DEBUG);
 
         $app->log("Ended sogo_config_plugin::backupConf($file_postfix)", LOGLEVEL_DEBUG);
     }
@@ -160,13 +178,31 @@ class sogo_config_plugin {
      * @param boolean $compress
      */
     function backupDb($file, $compress = TRUE) {
-        global $app;
-        $app->uses('getconf');
+        global $app, $conf;
+        $app->uses('getconf, system');
         $app->log("Started sogo_config_plugin::backupDb({$file}, " . ($compress ? 'TRUE' : 'FALSE') . ")", LOGLEVEL_DEBUG);
 
         $server_config = $app->getconf->get_server_config($conf['server_id'], 'server');
+
+        $backup_dir_is_ready = true;
+        if (method_exists($app->system, 'is_mounted')) {
+            //* -- BORROWED FROM BACKUP PLUGIN (plugins-available\backup_plugin.inc.php)
+            //* mount backup directory, if necessary
+            $server_config['backup_dir_mount_cmd'] = trim($server_config['backup_dir_mount_cmd']);
+            if ($server_config['backup_dir_is_mount'] == 'y' && $server_config['backup_dir_mount_cmd'] != '') {
+                if (!$app->system->is_mounted($server_config['backup_dir'])) {
+                    exec(escapeshellcmd($server_config['backup_dir_mount_cmd']));
+                    sleep(1);
+                    if (!$app->system->is_mounted($server_config['backup_dir']))
+                        $backup_dir_is_ready = false;
+                }
+            }
+            //* -- /BORROWED FROM BACKUP PLUGIN (plugins-available\backup_plugin.inc.php)
+        }
+        if (!$backup_dir_is_ready)
+            return;
         if (!is_dir($server_config['backup_dir'])) {
-            @mkdir($server_config['backup_dir']);
+            return;
         }
         $backup_dir = $server_config['backup_dir'] . '/sogo';
         @mkdir($backup_dir);
