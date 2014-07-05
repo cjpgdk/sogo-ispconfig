@@ -165,7 +165,7 @@ class sogo_config_plugin {
 
         @mkdir($backup_dir . '/conf-custom');
         @mkdir($backup_dir . '/conf-custom/sogo');
-        exec('tar -zcvf ' . $backup_dir . '/conf-custom/sogo/sogo-conf-' . date('H.i.s') . $file_postfix . '.tar.gz ' . $this->templ_override_domains_dir, $output);
+        exec('tar -zcvf ' . $backup_dir . '/conf-custom/sogo/sogo-conf-' . date('H.i.s') . $file_postfix . '.tar.gz ' . str_replace('sogo.conf', '', $this->templ_override_file), $output);
         $app->log("\t\t - OUTPUT[conf-custom]: " . print_r($output, true), LOGLEVEL_DEBUG);
 
         $app->log("Ended sogo_config_plugin::backupConf($file_postfix)", LOGLEVEL_DEBUG);
