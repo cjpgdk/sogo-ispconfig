@@ -1,8 +1,0 @@
-<?php
-$wb["list_head_txt"] = 'SOGo Mail Servers';
-$wb["server_id_txt"] = 'ID';
-$wb["server_name_txt"] = 'Name';
-$wb["issue_global_rebuild_txt"] = 'Rebuild SOGo config on all mail server';
-$wb["issue_config_rebuild_txt"] = 'Rebuild SOGo config';
-$wb["download_configuration_txt"] = 'Download SOGo config';
-?>

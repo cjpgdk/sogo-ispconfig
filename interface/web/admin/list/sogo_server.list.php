@@ -21,27 +21,29 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$module['nav'][] = array(
-    'title' => 'SOGo',
-    'open' => 1,
-    'items' => array(
-        array(
-            'title' => 'Configuration',
-            'target' => 'content',
-            'link' => 'admin/sogo_conifg_list.php',
-            'html_id' => 'sogo_conifg_list'
-        ),
-        array(
-            'title' => 'Domains',
-            'target' => 'content',
-            'link' => 'admin/sogo_domains_list.php',
-            'html_id' => 'sogo_domains_list'
-        ),
-        array(
-            'title' => 'Settings',
-            'target' => 'content',
-            'link' => 'admin/sogo_module_settings.php',
-            'html_id' => 'sogo_module_settings'
-        ),
-    )
-);
+$liste['name'] = 'sogo_conifg';
+$liste['table'] = 'sogo_config';
+$liste['table_idx'] = 'sogo_id';
+$liste['search_prefix'] = 'search_';
+$liste['records_per_page'] = "15";
+$liste['file'] = 'sogo_conifg_list.php';
+$liste['edit_file'] = 'sogo_conifg_edit.php';
+$liste['delete_file'] = 'sogo_conifg_del.php';
+$liste['paging_tpl'] = 'templates/paging.tpl.htm';
+$liste['auth'] = 'yes';
+$liste['item'][] = array(
+    'field' => 'server_name',
+    'datatype' => 'VARCHAR',
+    'filters' => array(
+        0 => array(
+            'event' => 'SHOW',
+            'type' => 'IDNTOUTF8'
+        )
+    ),
+    'formtype' => 'TEXT',
+    'op' => 'like',
+    'prefix' => '%',
+    'suffix' => '%',
+    'width' => '',
+    'value' => '');
+

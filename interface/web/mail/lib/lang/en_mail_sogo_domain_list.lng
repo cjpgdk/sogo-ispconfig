@@ -1,6 +1,0 @@
-<?php
-$wb["list_head_txt"] = 'SOGo Mail Domains';
-$wb["active_txt"] = 'Active';
-$wb["server_id_txt"] = 'Server';
-$wb["domain_txt"] = 'Domain';
-?>

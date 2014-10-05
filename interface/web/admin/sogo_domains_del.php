@@ -21,27 +21,24 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$module['nav'][] = array(
-    'title' => 'SOGo',
-    'open' => 1,
-    'items' => array(
-        array(
-            'title' => 'Configuration',
-            'target' => 'content',
-            'link' => 'admin/sogo_conifg_list.php',
-            'html_id' => 'sogo_conifg_list'
-        ),
-        array(
-            'title' => 'Domains',
-            'target' => 'content',
-            'link' => 'admin/sogo_domains_list.php',
-            'html_id' => 'sogo_domains_list'
-        ),
-        array(
-            'title' => 'Settings',
-            'target' => 'content',
-            'link' => 'admin/sogo_module_settings.php',
-            'html_id' => 'sogo_module_settings'
-        ),
-    )
-);
+$list_def_file = "list/sogo_domains.list.php";
+$tform_def_file = "form/sogo_domains.tform.php";
+
+require_once '../../lib/config.inc.php';
+require_once '../../lib/app.inc.php';
+
+//* Check permissions for module
+$app->auth->check_module_permissions('admin');
+$app->auth->check_security_permissions('admin_allow_server_services');
+if ($conf['demo_mode'] == true)
+    $app->error('This function is disabled in demo mode.');
+
+$app->uses("tform_actions");
+$app->load("sogo_helper,functions");
+
+$dId = (int) (isset($_REQUEST["domain_id"]) ? $app->functions->intval($_REQUEST["domain_id"]) : 0);
+$dConfId = (int) sogo_helper::get_domain_config_index($dId, $app);
+
+$_REQUEST['id'] = $dConfId;
+
+$app->tform_actions->onDelete();

@@ -1,0 +1,26 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_domains">
+
+    <div class="pnl_formsarea">
+        <fieldset class="inlineLabels"><legend>SOGo Custom</legend>
+            <div class="ctrlHolder">
+                <label for="SOGoCustomXML">{tmpl_var name='SOGoCustomXML_txt'}</label>
+                <textarea name="SOGoCustomXML" id="SOGoCustomXML" rows='20' cols='30'>{tmpl_var name='SOGoCustomXML'}</textarea>
+            </div>
+        </fieldset>
+
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+        <input name="domain_id" id="domain_id" value="{tmpl_var name='domain_id'}" type="hidden"/>
+        <input name="domain_name" id="domain_name" value="{tmpl_var name='domain_name'}" type="hidden" />
+        <input name="server_id" id="server_id" value="{tmpl_var name='server_id'}" type="hidden" />
+        <input name="server_name" id="server_name" value="{tmpl_var name='server_name'}" type="hidden" />
+
+        <div class="buttonHolder buttons">
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_domains_edit.php?id=1&domain_id=1');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_domains_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+
+</div>

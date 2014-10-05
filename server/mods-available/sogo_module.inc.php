@@ -23,14 +23,18 @@ class sogo_module {
     var $module_name = 'sogo_module';
     var $class_name = 'sogo_module';
     var $actions_available = array(
-        'fake_tb_sogo_update',
-        'fake_tb_sogo_delete',
-        'fake_tb_sogo_insert',
+        //* TB: sogo_config
+        'sogo_config_update',
+        'sogo_config_delete',
+        'sogo_config_insert',
+        //* TB: sogo_domains
+        'sogo_domains_update',
+        'sogo_domains_delete',
+        'sogo_domains_insert',
     );
 
     function onInstall() {
         global $conf;
-
         return true;
     }
 
@@ -38,10 +42,14 @@ class sogo_module {
         global $app;
 
         $app->plugins->announceEvents($this->module_name, $this->actions_available);
-
-        $app->modules->registerTableHook('fake_tb_sogo', $this->module_name, 'process');
+        
+        $app->modules->registerTableHook('sogo_config', $this->module_name, 'process');
+        
+        $app->modules->registerTableHook('sogo_domains', $this->module_name, 'process');
 
         $app->services->registerService('sogo', $this->module_name, 'restartSOGo');
+
+        $app->services->registerService('sogoForeceRestart', $this->module_name, 'foreceRestart');
     }
 
     function restartSOGo($action = 'restart') {
@@ -51,21 +59,50 @@ class sogo_module {
         else if (file_exists($conf['init_scripts'] . '/sogod'))
             exec($conf['init_scripts'] . '/sogod ' . $action);
     }
+    
+    //* in some rare cases we need to stop and start sogo and memcached to make it all work
+    function foreceRestart($action=NULL) {
+        
+        //* Stop sogo
+        if (file_exists($conf['init_scripts'] . '/sogo'))
+            exec($conf['init_scripts'] . '/sogo stop');
+        else if (file_exists($conf['init_scripts'] . '/sogod'))
+            exec($conf['init_scripts'] . '/sogod stop');
+        
+        //* Stop memcached
+        if (file_exists($conf['init_scripts'] . '/memcached'))
+            exec($conf['init_scripts'] . '/memcached stop');
+        
+        //* Start memcached
+        if (file_exists($conf['init_scripts'] . '/memcached'))
+            exec($conf['init_scripts'] . '/memcached start');
+        
+        //* Start sogo
+        if (file_exists($conf['init_scripts'] . '/sogo'))
+            exec($conf['init_scripts'] . '/sogo start');
+        else if (file_exists($conf['init_scripts'] . '/sogod'))
+            exec($conf['init_scripts'] . '/sogod start');
+    }
 
     function process($tablename, $action, $data) {
         global $app;
         switch ($tablename) {
-            case 'fake_tb_sogo':
+            case 'sogo_config':
                 if ($action == 'i')
-                    $app->plugins->raiseEvent('fake_tb_sogo_insert', $data);
+                    $app->plugins->raiseEvent('sogo_config_insert', $data);
                 if ($action == 'u')
-                    $app->plugins->raiseEvent('fake_tb_sogo_update', $data);
+                    $app->plugins->raiseEvent('sogo_config_update', $data);
                 if ($action == 'd')
-                    $app->plugins->raiseEvent('fake_tb_sogo_delete', $data);
+                    $app->plugins->raiseEvent('sogo_config_delete', $data);
+                break;
+            case 'sogo_domains':
+                if ($action == 'i')
+                    $app->plugins->raiseEvent('sogo_domains_update', $data);
+                if ($action == 'u')
+                    $app->plugins->raiseEvent('sogo_domains_update', $data);
+                if ($action == 'd')
+                    $app->plugins->raiseEvent('sogo_domains_delete', $data);
                 break;
         }
     }
-
 }
-
-?>

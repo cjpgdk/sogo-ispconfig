@@ -1,0 +1,158 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_domains">
+
+    <div class="pnl_formsarea">
+        <fieldset class="inlineLabels"><legend>SOGo Domain Defaults</legend>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveScriptsEnabled">{tmpl_var name='SOGoSieveScriptsEnabled_txt'}</label>
+                <select name="SOGoSieveScriptsEnabled" id="SOGoSieveScriptsEnabled" class="selectInput">
+                    {tmpl_var name='SOGoSieveScriptsEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveServer">{tmpl_var name='SOGoSieveServer_txt'}</label>
+                <input name="SOGoSieveServer" id="SOGoSieveServer" value="{tmpl_var name='SOGoSieveServer'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoVacationEnabled">{tmpl_var name='SOGoVacationEnabled_txt'}</label>
+                <select name="SOGoVacationEnabled" id="SOGoVacationEnabled" class="selectInput">
+                    {tmpl_var name='SOGoVacationEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoDraftsFolderName">{tmpl_var name='SOGoDraftsFolderName_txt'}</label>
+                <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSentFolderName">{tmpl_var name='SOGoSentFolderName_txt'}</label>
+                <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoTrashFolderName">{tmpl_var name='SOGoTrashFolderName_txt'}</label>
+                <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPServer">{tmpl_var name='SOGoIMAPServer_txt'}</label>
+                <input name="SOGoIMAPServer" id="SOGoIMAPServer" value="{tmpl_var name='SOGoIMAPServer'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSMTPServer">{tmpl_var name='SOGoSMTPServer_txt'}</label>
+                <input name="SOGoSMTPServer" id="SOGoSMTPServer" value="{tmpl_var name='SOGoSMTPServer'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailingMechanism">{tmpl_var name='SOGoMailingMechanism_txt'}</label>
+                <select name="SOGoMailingMechanism" id="SOGoMailingMechanism" class="selectInput">
+                    {tmpl_var name='SOGoMailingMechanism'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailSpoolPath">{tmpl_var name='SOGoMailSpoolPath_txt'}</label>
+                <input name="SOGoMailSpoolPath" id="SOGoMailSpoolPath" value="{tmpl_var name='SOGoMailSpoolPath'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSearchMinimumWordLength">{tmpl_var name='SOGoSearchMinimumWordLength_txt'}</label>
+                <input name="SOGoSearchMinimumWordLength" id="SOGoSearchMinimumWordLength" value="{tmpl_var name='SOGoSearchMinimumWordLength'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveFolderEncoding">{tmpl_var name='SOGoSieveFolderEncoding_txt'}</label>
+                <select name="SOGoSieveFolderEncoding" id="SOGoSieveFolderEncoding" class="selectInput">
+                    {tmpl_var name='SOGoSieveFolderEncoding'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSubscriptionFolderFormat">{tmpl_var name='SOGoSubscriptionFolderFormat_txt'}</label>
+                <input name="SOGoSubscriptionFolderFormat" id="SOGoSubscriptionFolderFormat" value="{tmpl_var name='SOGoSubscriptionFolderFormat'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoTimeZone">{tmpl_var name='SOGoTimeZone_txt'}</label>
+                <input name="SOGoTimeZone" id="SOGoTimeZone" value="{tmpl_var name='SOGoTimeZone'}"  type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoACLsSendEMailNotifications">{tmpl_var name='SOGoACLsSendEMailNotifications_txt'}</label>
+                <select name="SOGoACLsSendEMailNotifications" id="SOGoACLsSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoACLsSendEMailNotifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoAppointmentSendEMailNotifications">{tmpl_var name='SOGoAppointmentSendEMailNotifications_txt'}</label>
+                <select name="SOGoAppointmentSendEMailNotifications" id="SOGoAppointmentSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoAppointmentSendEMailNotifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoFoldersSendEMailNotifications">{tmpl_var name='SOGoFoldersSendEMailNotifications_txt'}</label>
+                <select name="SOGoFoldersSendEMailNotifications" id="SOGoFoldersSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoFoldersSendEMailNotifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoNotifyOnPersonalModifications">{tmpl_var name='SOGoNotifyOnPersonalModifications_txt'}</label>
+                <select name="SOGoNotifyOnPersonalModifications" id="SOGoNotifyOnPersonalModifications" class="selectInput">
+                    {tmpl_var name='SOGoNotifyOnPersonalModifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoNotifyOnExternalModifications">{tmpl_var name='SOGoNotifyOnExternalModifications_txt'}</label>
+                <select name="SOGoNotifyOnExternalModifications" id="SOGoNotifyOnExternalModifications" class="selectInput">
+                    {tmpl_var name='SOGoNotifyOnExternalModifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoForceExternalLoginWithEmail">{tmpl_var name='SOGoForceExternalLoginWithEmail_txt'}</label>
+                <select name="SOGoForceExternalLoginWithEmail" id="SOGoForceExternalLoginWithEmail" class="selectInput">
+                    {tmpl_var name='SOGoForceExternalLoginWithEmail'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailAuxiliaryUserAccountsEnabled">{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_txt'}</label>
+                <select name="SOGoMailAuxiliaryUserAccountsEnabled" id="SOGoMailAuxiliaryUserAccountsEnabled" class="selectInput">
+                    {tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailCustomFromEnabled">{tmpl_var name='SOGoMailCustomFromEnabled_txt'}</label>
+                <select name="SOGoMailCustomFromEnabled" id="SOGoMailCustomFromEnabled" class="selectInput">
+                    {tmpl_var name='SOGoMailCustomFromEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoCalendarDefaultRoles_txt'}</p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoCalendarDefaultRoles'}
+                </div>
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoContactsDefaultRoles_txt'}</p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoContactsDefaultRoles'}
+                </div>
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoSuperUsernames_txt'}</p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoSuperUsernames'}
+                </div>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPAclConformsToIMAPExt">{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_txt'}</label>
+                <select name="SOGoIMAPAclConformsToIMAPExt" id="SOGoIMAPAclConformsToIMAPExt" class="selectInput">
+                    {tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}
+                </select>
+            </div>
+        </fieldset>
+
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+        <input name="domain_id" id="domain_id" value="{tmpl_var name='domain_id'}" type="hidden"/>
+        <input name="domain_name" id="domain_name" value="{tmpl_var name='domain_name'}" type="hidden" />
+        <input name="server_id" id="server_id" value="{tmpl_var name='server_id'}" type="hidden" />
+        <input name="server_name" id="server_name" value="{tmpl_var name='server_name'}" type="hidden" />
+
+        <div class="buttonHolder buttons">
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_domains_edit.php?id=1&server_id=1');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_domains_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+
+</div>

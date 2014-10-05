@@ -21,15 +21,15 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$form["title"] = "SOGo Config";
+$form["title"] = "SOGo Domains";
 $form["description"] = "";
-$form["name"] = "sogo_config";
-$form["action"] = "sogo_conifg_edit.php";
-$form["db_table"] = "sogo_config";
+$form["name"] = "sogo_domains";
+$form["action"] = "sogo_domains_edit.php";
+$form["db_table"] = "sogo_domains";
 $form["db_table_idx"] = "sogo_id";
 $form["db_history"] = "yes";
-$form["tab_default"] = "sogo";
-$form["list_default"] = "sogo_conifg_list.php";
+$form["tab_default"] = "domain";
+$form["list_default"] = "sogo_domains_list.php";
 $form["auth"] = 'yes'; // yes / no
 $form["auth_preset"]["userid"] = 0; // 0 = id of the user, > 0 id must match with id of current user
 $form["auth_preset"]["groupid"] = 0; // 0 = default groupid of the user, > 0 id must match with groupid of current user
@@ -48,13 +48,13 @@ $form["auth_preset"]["perm_other"] = ''; //r = read, i = insert, u = update, d =
  * 
  */
 
-$form["tabs"]['sogo'] = array(
-    'title' => "SOGo Defaults",
+$form["tabs"]['domain'] = array(
+    'title' => "SOGo Domain Defaults",
     'width' => 70,
-    'template' => "templates/sogo_config_edit.htm",
+    'template' => "templates/sogo_domains_domain_edit.htm",
     'fields' => array(
-        'server_id' => array(
-            'datatype' => 'VARCHAR',
+        'domain_id' => array(
+            'datatype' => 'INTEGER',
             'formtype' => 'TEXT',
             'default' => 0,
             'value' => '',
@@ -62,7 +62,7 @@ $form["tabs"]['sogo'] = array(
             'required' => 1,
             'width' => 100,
         ),
-        'server_name' => array(
+        'domain_name' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
             'default' => '',
@@ -71,268 +71,8 @@ $form["tabs"]['sogo'] = array(
             'required' => 1,
             'width' => 100,
         ),
-        'SOGoPageTitle' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'ISPConfig 3 w/SOGo',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoMemcachedHost' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '127.0.0.1',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoZipPath' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '/usr/bin/zip',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoSoftQuotaRatio' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '0.9',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoAddressBookDAVAccessEnabled' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'YES',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoCalendarDAVAccessEnabled' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'YES',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'NGImap4ConnectionStringSeparator' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '.',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoEnableEMailAlarms' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'NO',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'OCSEMailAlarmsFolderURL' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'mysql://{SOGOUSERN}:{SOGOUSERPW}@{MYSQLHOST}:{MYSQLPORT}/{SOGODB}/sogo_mailalarms_folder',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'OCSFolderInfoURL' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'mysql://{SOGOUSERN}:{SOGOUSERPW}@{MYSQLHOST}:{MYSQLPORT}/{SOGODB}/sogo_folder_info',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'OCSSessionsFolderURL' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'mysql://{SOGOUSERN}:{SOGOUSERPW}@{MYSQLHOST}:{MYSQLPORT}/{SOGODB}/sogo_sessions_folder',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoProfileURL' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'mysql://{SOGOUSERN}:{SOGOUSERPW}@{MYSQLHOST}:{MYSQLPORT}/{SOGODB}/sogo_user_profile',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoAppointmentSendEMailReceipts' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'NO',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        //* this NEEDs to set to LDAP on old version of SOGo!!!
-        'SOGoAuthenticationMethod' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'SQL',
-            'value' => array(
-                'LDAP' => $app->lng('LDAP'),
-                'SQL' => $app->lng('MySQL/PostgreSQL'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoPasswordChangeEnabled' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'NO',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SxVMemLimit' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 384,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOWorkersCount' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 1,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOListenQueueSize' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 5,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOWatchDogRequestTimeout' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 10,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOWorkerThreadCount' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 0,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOUseRelativeURLs' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'YES',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOLogFile' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '/var/log/sogo/sogo.log',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOPidFile' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '/var/run/sogo/sogo.pid',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOPort' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '127.0.0.1:20000',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'WOSendMail' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '/usr/lib/sendmail',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-    /* We are on multi domains config so this is required and set in sogo_config_edit.php on save/update
-     * <key>domains</key>
-      <dict>{{SOGODOMAINSCONF}}
-      </dict>
-     */
-    )
-);
-
-$form["tabs"]['domain'] = array(
-    'title' => "SOGo Domain Defaults",
-    'width' => 70,
-    'template' => "templates/sogo_config_domain_edit.htm",
-    'fields' => array(
         'server_id' => array(
-            'datatype' => 'VARCHAR',
+            'datatype' => 'INTEGER',
             'formtype' => 'TEXT',
             'default' => 0,
             'value' => '',
@@ -526,7 +266,7 @@ $form["tabs"]['domain'] = array(
         'SOGoFoldersSendEMailNotifications' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
-            'default' => 'YES',
+            'default' => 'NO',
             'value' => array(
                 'NO' => $app->lng('No'),
                 'YES' => $app->lng('Yes'),
@@ -550,7 +290,7 @@ $form["tabs"]['domain'] = array(
         'SOGoNotifyOnExternalModifications' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
-            'default' => 'YES',
+            'default' => 'NO',
             'value' => array(
                 'NO' => $app->lng('No'),
                 'YES' => $app->lng('Yes'),
@@ -643,22 +383,41 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
-        'SOGoForwardEnabled' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'NO',
+        'SOGoContactsDefaultRoles' => array(
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'ObjectViewer' => 'ObjectViewer',
+                'ObjectEditor' => 'ObjectEditor',
+                'ObjectCreator' => 'ObjectCreator',
+                'ObjectEraser' => 'ObjectEraser',
+            ),
+            'datatype' => 'VARCHAR',
+            'formtype' => 'CHECKBOXARRAY',
+            'default' => 'ObjectEditor',
+            'separator' => ',',
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
+        'SOGoSuperUsernames' => array(
+            'datatype' => 'VARCHAR',
+            'formtype' => 'CHECKBOXARRAY',
+            'default' => 'postmaster@${DOMAIN}',
+            'value' => '',
+            'datasource' => array(
+                'type' => 'SQL',
+                'querystring' => 'SELECT `email` FROM `mail_user` WHERE `email` LIKE \'%@{DOMAINNAME}\' AND {AUTHSQL} ORDER BY email',
+                'keyfield' => 'email',
+                'valuefield' => 'email'
             ),
             'maxlength' => '',
+            'separator' => ',',
             'required' => 0,
             'width' => 100,
         ),
         'SOGoIMAPAclConformsToIMAPExt' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
-            'default' => 'NO',
+            'default' => 'YES',
             'value' => array(
                 'NO' => $app->lng('No'),
                 'YES' => $app->lng('Yes'),
@@ -674,10 +433,28 @@ $form["tabs"]['domain'] = array(
 $form["tabs"]['user'] = array(
     'title' => "SOGo User Defaults",
     'width' => 70,
-    'template' => "templates/sogo_config_user_edit.htm",
+    'template' => "templates/sogo_domains_user_edit.htm",
     'fields' => array(
-        'server_id' => array(
+        'domain_id' => array(
+            'datatype' => 'INTEGER',
+            'formtype' => 'TEXT',
+            'default' => 0,
+            'value' => '',
+            'maxlength' => '',
+            'required' => 1,
+            'width' => 100,
+        ),
+        'domain_name' => array(
             'datatype' => 'VARCHAR',
+            'formtype' => 'TEXT',
+            'default' => '',
+            'value' => '',
+            'maxlength' => '',
+            'required' => 1,
+            'width' => 100,
+        ),
+        'server_id' => array(
+            'datatype' => 'INTEGER',
             'formtype' => 'TEXT',
             'default' => 0,
             'value' => '',
@@ -986,10 +763,28 @@ $form["tabs"]['user'] = array(
 $form["tabs"]['custom'] = array(
     'title' => "SOGo Custom",
     'width' => 70,
-    'template' => "templates/sogo_config_custom_edit.htm",
+    'template' => "templates/sogo_domains_custom_edit.htm",
     'fields' => array(
-        'server_id' => array(
+        'domain_id' => array(
+            'datatype' => 'INTEGER',
+            'formtype' => 'TEXT',
+            'default' => 0,
+            'value' => '',
+            'maxlength' => '',
+            'required' => 1,
+            'width' => 100,
+        ),
+        'domain_name' => array(
             'datatype' => 'VARCHAR',
+            'formtype' => 'TEXT',
+            'default' => '',
+            'value' => '',
+            'maxlength' => '',
+            'required' => 1,
+            'width' => 100,
+        ),
+        'server_id' => array(
+            'datatype' => 'INTEGER',
             'formtype' => 'TEXT',
             'default' => 0,
             'value' => '',

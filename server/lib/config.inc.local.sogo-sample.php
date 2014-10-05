@@ -1,0 +1,37 @@
+<?php
+
+//* SOGo sudo command to use when executing a SOGo binary
+$conf['sogo_su_command'] = 'sudo -u sogo';
+/*
+  //* full path to sogo binary
+  $conf['sogo_binary'] = '/usr/sbin/sogod';
+ */
+//* full path to sogo-tool binary 
+$conf['sogo_tool_binary'] = '/usr/sbin/sogo-tool';
+//* name of the database used for SOGo
+$conf['sogo_database_name'] = 'dbsogo';
+//* name of the database user used for SOGo db
+$conf['sogo_database_user'] = 'dbsogo';
+//* name of the database user password used for SOGo db
+$conf['sogo_database_passwd'] = 'dbsogo';
+//* database host where SOGo db is hosted
+$conf['sogo_database_host'] = '127.0.0.1';
+//* database port number
+$conf['sogo_database_port'] = '3306';
+//* vars added to the domain template
+$conf['sogo_domain_extra_vars'] = array(
+    //* password algorithm default is crypt
+    'userPasswordAlgorithm' => 'crypt',
+    /*
+      The default behaviour is to store newly set
+      passwords with out the scheme (default: NO). 
+      This can be overridden by setting to YES
+      and will result in passwords stored as {scheme}encryptedPass
+     */
+    'prependPasswordScheme' => 'NO',
+    //* human identification name of the address book
+    'displayName' => 'Users in {domain}',
+);
+//* sogo default configuration file(s)
+$conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
+$conf['sogo_gnu_step_defaults_sogod.plist'] = '/var/lib/sogo/GNUstep/Defaults/sogod.plist';

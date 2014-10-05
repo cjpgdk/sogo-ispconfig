@@ -1,0 +1,14 @@
+<?php
+$wb["list_head_txt"] = 'SOGo Domains';
+$wb["server_id_txt"] = 'Server';
+$wb["domain_txt"] = 'Domain';
+$wb["active_txt"] = 'Active';
+$wb["sys_groupid_txt"] = 'Client';
+$wb["list_desc_txt"] = 'All mail domains available in this system is listed here'
+        . '<br />only domains with SOGo configuration has delete icon'
+        . '<br />once you click on a domain if the configuration do not exists it will be created'
+        . '<br />by clicking on delete icon, you delete ONLY the SOGo configuration not the domain'
+        . '<br />'
+        . '<br />By default all domains is configured to be used with SOGo with settings based on the defaults set for that server, this behavior can be changed under settings in the left menu, '
+        . 'furthermore all mail domains can use the same SOGo instance this behavior can also be changed under settings in the left menu';
+

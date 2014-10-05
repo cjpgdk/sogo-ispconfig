@@ -1,0 +1,253 @@
+                <key>{tmpl_var name='domain'}</key>
+                <dict>
+{tmpl_if name="SOGoSieveScriptsEnabled"}
+                    <key>SOGoSieveScriptsEnabled</key>
+                    <string>{tmpl_var name='SOGoSieveScriptsEnabled'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoVacationEnabled"}
+                    <key>SOGoVacationEnabled</key>
+                    <string>{tmpl_var name='SOGoVacationEnabled'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoDraftsFolderName"}
+                    <key>SOGoDraftsFolderName</key>
+                    <string>{tmpl_var name='SOGoDraftsFolderName'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoSentFolderName"}
+                    <key>SOGoSentFolderName</key>
+                    <string>{tmpl_var name='SOGoSentFolderName'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoTrashFolderName"}
+                    <key>SOGoTrashFolderName</key>
+                    <string>{tmpl_var name='SOGoTrashFolderName'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoSMTPServer"}
+                    <key>SOGoSMTPServer</key>
+                    <string>{tmpl_var name='SOGoSMTPServer'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailingMechanism"}
+                    <key>SOGoMailingMechanism</key>
+                    <string>{tmpl_var name='SOGoMailingMechanism'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailSpoolPath"}
+                    <key>SOGoMailSpoolPath</key>
+                    <string>{tmpl_var name='SOGoMailSpoolPath'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoSearchMinimumWordLength"}
+                    <key>SOGoSearchMinimumWordLength</key>
+                    <string>{tmpl_var name='SOGoSearchMinimumWordLength'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoSieveFolderEncoding"}
+                    <key>SOGoSieveFolderEncoding</key>
+                    <string>{tmpl_var name='SOGoSieveFolderEncoding'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoSubscriptionFolderFormat"}
+                    <key>SOGoSubscriptionFolderFormat</key>
+                    <string>{tmpl_var name='SOGoSubscriptionFolderFormat'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoTimeZone"}
+                    <key>SOGoTimeZone</key>
+                    <string>{tmpl_var name='SOGoTimeZone'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoACLsSendEMailNotifications"}
+                    <key>SOGoACLsSendEMailNotifications</key>
+                    <string>{tmpl_var name='SOGoACLsSendEMailNotifications'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoAppointmentSendEMailNotifications"}
+                    <key>SOGoAppointmentSendEMailNotifications</key>
+                    <string>{tmpl_var name='SOGoAppointmentSendEMailNotifications'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoFoldersSendEMailNotifications"}
+                    <key>SOGoFoldersSendEMailNotifications</key>
+                    <string>{tmpl_var name='SOGoFoldersSendEMailNotifications'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoNotifyOnPersonalModifications"}
+                    <key>SOGoNotifyOnPersonalModifications</key>
+                    <string>{tmpl_var name='SOGoNotifyOnPersonalModifications'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoNotifyOnExternalModifications"}
+                    <key>SOGoNotifyOnExternalModifications</key>
+                    <string>{tmpl_var name='SOGoNotifyOnExternalModifications'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoForceExternalLoginWithEmail"}
+                    <key>SOGoForceExternalLoginWithEmail</key>
+                    <string>{tmpl_var name='SOGoForceExternalLoginWithEmail'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailAuxiliaryUserAccountsEnabled"}
+                    <key>SOGoMailAuxiliaryUserAccountsEnabled</key>
+                    <string>{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailCustomFromEnabled"}
+                    <key>SOGoMailCustomFromEnabled</key>
+                    <string>{tmpl_var name='SOGoMailCustomFromEnabled'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoContactsDefaultRoles"}
+                    <key>SOGoContactsDefaultRoles</key>
+                    <string>{tmpl_var name='SOGoContactsDefaultRoles'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoIMAPAclConformsToIMAPExt"}
+                    <key>SOGoIMAPAclConformsToIMAPExt</key>
+                    <string>{tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoCalendarDefaultReminder"}
+                    <key>SOGoCalendarDefaultReminder</key>
+                    <string>{tmpl_var name='SOGoCalendarDefaultReminder'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoCalendarEventsDefaultClassification"}
+                    <key>SOGoCalendarEventsDefaultClassification</key>
+                    <string>{tmpl_var name='SOGoCalendarEventsDefaultClassification'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoCalendarTasksDefaultClassification"}
+                    <key>SOGoCalendarTasksDefaultClassification</key>
+                    <string>{tmpl_var name='SOGoCalendarTasksDefaultClassification'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoCalendarShouldDisplayWeekend"}
+                    <key>SOGoCalendarShouldDisplayWeekend</key>
+                    <string>{tmpl_var name='SOGoCalendarShouldDisplayWeekend'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoDayStartTime"}
+                    <key>SOGoDayStartTime</key>
+                    <string>{tmpl_var name='SOGoDayStartTime'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoDayEndTime"}
+                    <key>SOGoDayEndTime</key>
+                    <string>{tmpl_var name='SOGoDayEndTime'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoFirstDayOfWeek"}
+                    <key>SOGoFirstDayOfWeek</key>
+                    <string>{tmpl_var name='SOGoFirstDayOfWeek'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoFirstWeekOfYear"}
+                    <key>SOGoFirstWeekOfYear</key>
+                    <string>{tmpl_var name='SOGoFirstWeekOfYear'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoLanguage"}
+                    <key>SOGoLanguage</key>
+                    <string>{tmpl_var name='SOGoLanguage'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoLoginModule"}
+                    <key>SOGoLoginModule</key>
+                    <string>{tmpl_var name='SOGoLoginModule'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailComposeMessageType"}
+                    <key>SOGoMailComposeMessageType</key>
+                    <string>{tmpl_var name='SOGoMailComposeMessageType'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailMessageCheck"}
+                    <key>SOGoMailMessageCheck</key>
+                    <string>{tmpl_var name='SOGoMailMessageCheck'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailMessageForwarding"}
+                    <key>SOGoMailMessageForwarding</key>
+                    <string>{tmpl_var name='SOGoMailMessageForwarding'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailReplyPlacement"}
+                    <key>SOGoMailReplyPlacement</key>
+                    <string>{tmpl_var name='SOGoMailReplyPlacement'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailSignaturePlacement"}
+                    <key>SOGoMailSignaturePlacement</key>
+                    <string>{tmpl_var name='SOGoMailSignaturePlacement'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoTimeFormat"}
+                    <key>SOGoTimeFormat</key>
+                    <string>{tmpl_var name='SOGoTimeFormat'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailUseOutlookStyleReplies"}
+                    <key>SOGoMailUseOutlookStyleReplies</key>
+                    <string>{tmpl_var name='SOGoMailUseOutlookStyleReplies'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoCalendarDefaultCategoryColor"}
+                    <key>SOGoCalendarDefaultCategoryColor</key>
+                    <string>{tmpl_var name='SOGoCalendarDefaultCategoryColor'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoDefaultCalendar"}
+                    <key>SOGoDefaultCalendar</key>
+                    <string>{tmpl_var name='SOGoDefaultCalendar'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoCustomXML"}
+{tmpl_var name='SOGoCustomXML'}
+{/tmpl_if}
+                    <key>SOGoMailDomain</key>
+                    <string>{tmpl_var name='domain'}</string>
+                    <key>SOGoSuperUsernames</key>
+                    <array>
+{tmpl_loop name="SOGoSuperUsernames"}
+                        <string>{tmpl_var name='SOGoSuperUsername'}</string>
+{/tmpl_loop}
+{tmpl_unless name="SOGoSuperUsernames"}
+                        <string>postmaster@{tmpl_var name='domain'}</string>
+{/tmpl_unless}
+                    </array>
+{tmpl_if name='SOGoCalendarDefaultRoles'}
+                    <key>SOGoCalendarDefaultRoles</key>
+                    <array>
+{tmpl_loop name="SOGoCalendarDefaultRoles"}
+                        <string>{tmpl_var name='SOGoCalendarDefaultRole'}</string>
+{/tmpl_loop}
+                    </array>
+{/tmpl_if}
+{tmpl_if name='SOGoMailListViewColumnsOrder'}
+                    <key>SOGoMailListViewColumnsOrder</key>
+                    <array>
+{tmpl_loop name="SOGoMailListViewColumnsOrder"}
+                        <string>{tmpl_var name='SOGoMailListViewColumn'}</string>
+{/tmpl_loop}
+                    </array>
+{/tmpl_if}
+                    <key>SOGoUserSources</key>
+                    <array>
+                        <dict>
+{tmpl_if name='userPasswordAlgorithm'}
+                            <key>userPasswordAlgorithm</key>
+                            <string>{tmpl_var name='userPasswordAlgorithm'}</string>
+{/tmpl_if}
+{tmpl_if name='prependPasswordScheme'}
+                            <key>prependPasswordScheme</key>
+                            <string>{tmpl_var name='prependPasswordScheme'}</string>
+{/tmpl_if}
+                            <key>LoginFieldNames</key>
+                            <array>
+                                <string>c_uid</string>
+                                <string>mail</string>
+                                <string>c_imaplogin</string>
+                            </array>
+                            <key>IMAPHostFieldName</key>
+                            <string>c_imaphostname</string>
+                            <key>SieveHostFieldName</key>
+                            <string>c_sievehostname</string>
+                            <key>IMAPLoginFieldName</key>
+                            <string>c_imaplogin</string>
+                            <key>DomainFieldName</key>
+                            <string>c_domain</string>
+                            <key>type</key>
+                            <string>sql</string>
+                            <key>isAddressBook</key>
+                            <string>NO</string>
+                            <key>canAuthenticate</key>
+                            <string>YES</string>
+{tmpl_if name='displayName'}
+                            <key>displayName</key>
+                            <string>{tmpl_var name='displayName'}</string>
+{tmpl_else}
+                            <key>displayName</key>
+                            <string>Users in {tmpl_var name='domain'}</string>
+{/tmpl_if}
+                            <key>hostname</key>
+                            <string>localhost</string>
+{tmpl_if name='MailFieldNames'}
+                            <key>MailFieldNames</key>
+                            <array>
+{tmpl_loop name="MailFieldNames">
+                                <string>{tmpl_var name='MailFieldName'}</string>
+{/tmpl_loop}
+                            </array>
+{/tmpl_if}
+                            <key>id</key>
+                            <string>{tmpl_var name='SOGOUNIQID'}</string>
+{tmpl_if name='CONNECTIONVIEWURL'}
+                            <key>viewURL</key>
+                            <string>{tmpl_var name='CONNECTIONVIEWURL'}</string>
+{/tmpl_if}
+                        </dict>
+                    </array>
+                </dict>

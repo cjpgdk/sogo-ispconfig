@@ -1,0 +1,11 @@
+<?php
+$wb["list_head_txt"] = 'SOGo Configuration';
+$wb["server_name_txt"] = 'Server Name';
+$wb["sogo_conifg"] = 'SOGo Configuration';
+$wb["rebuild_txt"] = 'Reconfigure/Rebuild SOGo Configuration';
+$wb["list_desc_txt"] = 'All servers available in this system is listed here'
+        . '<br />only servers with SOGo configuration has delete and rebuild icons'
+        . '<br />once you click on a server if the configuration do not exists it will be created'
+        . '<br />by clicking on delete icon, you delete ONLY the SOGo configuration not the server or SOGo installation'
+        . '<br />by clicking on rebuild icon, you trigger an event to rebuild the SOGo configuration and restart SOGo on the given server';
+

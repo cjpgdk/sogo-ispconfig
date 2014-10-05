@@ -1,0 +1,157 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_config">
+
+    <div class="pnl_formsarea">
+        <p>{tmpl_var name="list_desc_SOGo_Domain_Defaults_txt"}</p>
+        <fieldset class="inlineLabels"><legend>SOGo Domain Defaults</legend>
+            <div class="ctrlHolder">
+                <label for="SOGoDraftsFolderName">{tmpl_var name='SOGoDraftsFolderName_txt'} <div class="ttip" title="{tmpl_var name='SOGoDraftsFolderName_ttip_txt'}"></div></label>
+                <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSentFolderName">{tmpl_var name='SOGoSentFolderName_txt'} <div class="ttip" title="{tmpl_var name='SOGoSentFolderName_ttip_txt'}"></div></label>
+                <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoTrashFolderName">{tmpl_var name='SOGoTrashFolderName_txt'} <div class="ttip" title="{tmpl_var name='SOGoTrashFolderName_ttip_txt'}"></div></label>
+                <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSubscriptionFolderFormat">{tmpl_var name='SOGoSubscriptionFolderFormat_txt'} <div class="ttip" title="{tmpl_var name='SOGoSubscriptionFolderFormat_ttip_txt'}"></div></label>
+                <input name="SOGoSubscriptionFolderFormat" id="SOGoSubscriptionFolderFormat" value="{tmpl_var name='SOGoSubscriptionFolderFormat'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPServer">{tmpl_var name='SOGoIMAPServer_txt'} <div class="ttip" title="{tmpl_var name='SOGoIMAPServer_ttip_txt'}"></div></label>
+                <input name="SOGoIMAPServer" id="SOGoIMAPServer" value="{tmpl_var name='SOGoIMAPServer'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSMTPServer">{tmpl_var name='SOGoSMTPServer_txt'} <div class="ttip" title="{tmpl_var name='SOGoSMTPServer_ttip_txt'}"></div></label>
+                <input name="SOGoSMTPServer" id="SOGoSMTPServer" value="{tmpl_var name='SOGoSMTPServer'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveServer">{tmpl_var name='SOGoSieveServer_txt'} <div class="ttip" title="{tmpl_var name='SOGoSieveServer_ttip_txt'}"></div></label>
+                <input name="SOGoSieveServer" id="SOGoSieveServer" value="{tmpl_var name='SOGoSieveServer'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveScriptsEnabled">{tmpl_var name='SOGoSieveScriptsEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoSieveScriptsEnabled_ttip_txt'}"></div></label>
+                <select name="SOGoSieveScriptsEnabled" id="SOGoSieveScriptsEnabled" class="selectInput">
+                    {tmpl_var name='SOGoSieveScriptsEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoVacationEnabled">{tmpl_var name='SOGoVacationEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoVacationEnabled_ttip_txt'}"></div></label>
+                <select name="SOGoVacationEnabled" id="SOGoVacationEnabled" class="selectInput">
+                    {tmpl_var name='SOGoVacationEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveFolderEncoding">{tmpl_var name='SOGoSieveFolderEncoding_txt'} <div class="ttip" title="{tmpl_var name='SOGoSieveFolderEncoding_ttip_txt'}"></div></label>
+                <select name="SOGoSieveFolderEncoding" id="SOGoSieveFolderEncoding" class="selectInput">
+                    {tmpl_var name='SOGoSieveFolderEncoding'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoForwardEnabled">{tmpl_var name='SOGoForwardEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoForwardEnabled_ttip_txt'}"></div></label>
+                <select name="SOGoForwardEnabled" id="SOGoForwardEnabled" class="selectInput">
+                    {tmpl_var name='SOGoForwardEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailingMechanism">{tmpl_var name='SOGoMailingMechanism_txt'} <div class="ttip" title="{tmpl_var name='SOGoMailingMechanism_ttip_txt'}"></div></label>
+                <select name="SOGoMailingMechanism" id="SOGoMailingMechanism" class="selectInput">
+                    {tmpl_var name='SOGoMailingMechanism'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailSpoolPath">{tmpl_var name='SOGoMailSpoolPath_txt'} <div class="ttip" title="{tmpl_var name='SOGoMailSpoolPath_ttip_txt'}"></div></label>
+                <input name="SOGoMailSpoolPath" id="SOGoMailSpoolPath" value="{tmpl_var name='SOGoMailSpoolPath'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSearchMinimumWordLength">{tmpl_var name='SOGoSearchMinimumWordLength_txt'} <div class="ttip" title="{tmpl_var name='SOGoSearchMinimumWordLength_ttip_txt'}"></div></label>
+                <input name="SOGoSearchMinimumWordLength" id="SOGoSearchMinimumWordLength" value="{tmpl_var name='SOGoSearchMinimumWordLength'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoTimeZone">{tmpl_var name='SOGoTimeZone_txt'} <div class="ttip" title="{tmpl_var name='SOGoTimeZone_ttip_txt'}"></div></label>
+                <input name="SOGoTimeZone" id="SOGoTimeZone" value="{tmpl_var name='SOGoTimeZone'}" size="100" maxlength="" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoACLsSendEMailNotifications">{tmpl_var name='SOGoACLsSendEMailNotifications_txt'}<div class="ttip" title="{tmpl_var name='SOGoACLsSendEMailNotifications_ttip_txt'}"></div></label>
+                <select name="SOGoACLsSendEMailNotifications" id="SOGoACLsSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoACLsSendEMailNotifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoAppointmentSendEMailNotifications">{tmpl_var name='SOGoAppointmentSendEMailNotifications_txt'} <div class="ttip" title="{tmpl_var name='SOGoAppointmentSendEMailNotifications_ttip_txt'}"></div></label>
+                <select name="SOGoAppointmentSendEMailNotifications" id="SOGoAppointmentSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoAppointmentSendEMailNotifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoFoldersSendEMailNotifications">{tmpl_var name='SOGoFoldersSendEMailNotifications_txt'} <div class="ttip" title="{tmpl_var name='SOGoFoldersSendEMailNotifications_ttip_txt'}"></div></label>
+                <select name="SOGoFoldersSendEMailNotifications" id="SOGoFoldersSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoFoldersSendEMailNotifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoNotifyOnPersonalModifications">{tmpl_var name='SOGoNotifyOnPersonalModifications_txt'} <div class="ttip" title="{tmpl_var name='SOGoNotifyOnPersonalModifications_ttip_txt'}"></div></label>
+                <select name="SOGoNotifyOnPersonalModifications" id="SOGoNotifyOnPersonalModifications" class="selectInput">
+                    {tmpl_var name='SOGoNotifyOnPersonalModifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoNotifyOnExternalModifications">{tmpl_var name='SOGoNotifyOnExternalModifications_txt'} <div class="ttip" title="{tmpl_var name='SOGoNotifyOnExternalModifications_ttip_txt'}"></div></label>
+                <select name="SOGoNotifyOnExternalModifications" id="SOGoNotifyOnExternalModifications" class="selectInput">
+                    {tmpl_var name='SOGoNotifyOnExternalModifications'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoForceExternalLoginWithEmail">{tmpl_var name='SOGoForceExternalLoginWithEmail_txt'} <div class="ttip" title="{tmpl_var name='SOGoForceExternalLoginWithEmail_ttip_txt'}"></div></label>
+                <select name="SOGoForceExternalLoginWithEmail" id="SOGoForceExternalLoginWithEmail" class="selectInput">
+                    {tmpl_var name='SOGoForceExternalLoginWithEmail'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailAuxiliaryUserAccountsEnabled">{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_ttip_txt'}"></div></label>
+                <select name="SOGoMailAuxiliaryUserAccountsEnabled" id="SOGoMailAuxiliaryUserAccountsEnabled" class="selectInput">
+                    {tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailCustomFromEnabled">{tmpl_var name='SOGoMailCustomFromEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoMailCustomFromEnabled_ttip_txt'}"></div></label>
+                <select name="SOGoMailCustomFromEnabled" id="SOGoMailCustomFromEnabled" class="selectInput">
+                    {tmpl_var name='SOGoMailCustomFromEnabled'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoCalendarDefaultRoles_txt'} <div class="ttip" title="{tmpl_var name='SOGoCalendarDefaultRoles_ttip_txt'}"></div></p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoCalendarDefaultRoles'}
+                </div>
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoContactsDefaultRoles_txt'} <div class="ttip" title="{tmpl_var name='SOGoContactsDefaultRoles_ttip_txt'}"></div></p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoContactsDefaultRoles'}
+                </div>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPAclConformsToIMAPExt">{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_txt'} <div class="ttip" title="{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_ttip_txt'}"></div></label>
+                <select name="SOGoIMAPAclConformsToIMAPExt" id="SOGoIMAPAclConformsToIMAPExt" class="selectInput">
+                    {tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}
+                </select>
+            </div>
+        </fieldset>
+
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+        <input type="hidden" name="server_id" value="{tmpl_var name='server_id'}">
+        <input type="hidden" name="server_name" value="{tmpl_var name='server_name'}">
+
+        <div class="buttonHolder buttons">
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_conifg_edit.php?id=1&server_id=1');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_conifg_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+
+</div>
