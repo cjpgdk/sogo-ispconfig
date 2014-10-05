@@ -97,7 +97,7 @@ class sogo_module {
                 break;
             case 'sogo_domains':
                 if ($action == 'i')
-                    $app->plugins->raiseEvent('sogo_domains_update', $data);
+                    $app->plugins->raiseEvent('sogo_domains_insert', $data);
                 if ($action == 'u')
                     $app->plugins->raiseEvent('sogo_domains_update', $data);
                 if ($action == 'd')
