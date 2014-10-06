@@ -853,41 +853,43 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
                     $aliasSQL = "UPDATE `{$app->sogo_helper->get_valid_sogo_table_name($domain_name)}_users` SET ";
 
                     $dtacount = (int) $app->sogo_helper->get_sogo_table_alias_column_count($domain_name); //* get alias columns in table for domain
+                    //* only do alias update if a column exists for it
+                    if ($dtacount > 0) {
+                        $ac = 0;
+                        foreach ($mail_aliases as $key => $value) {
+                            $aliasSQL .= " `alias_{$ac}` = '{$app->db->quote($value['source'])}' ,";
+                            $ac++;
+                            //* must be a better way but, need some results here so break on max alias columns in tb
+                            if ($dtacount == $ac) break;
+                        }
+                        $acount_n = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'n'); //* none active
+                        $acount_y = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'y'); //* active
+                        $a_cnt = (int) ($acount_n + $acount_y);
 
-                    $ac = 0;
-                    foreach ($mail_aliases as $key => $value) {
-                        $aliasSQL .= " `alias_{$ac}` = '{$app->db->quote($value['source'])}' ,";
-                        $ac++;
-                        //* must be a better way but, need some results here so break on max alias columns in tb
-                        if ($dtacount == $ac) break;
+                        //* if mail_forward table holds more aliases than columns in sogo table limit to number in sogo table
+                        if ($a_cnt > $dtacount) {
+                            $a_cnt = $dtacount;
+                        } else {
+                            $a_cnt = ($a_cnt < $dtacount ? $dtacount : $a_cnt);
+                        }
+
+
+
+                        for ($ac; $ac < $a_cnt; $ac++) {
+                            $aliasSQL .= " `alias_{$ac}` = '' ,";
+                        }
+                        $_tmpSQL['alias'][] = trim($aliasSQL, ',')
+                                . " WHERE "
+                                . " `c_uid` = '{$app->db->quote($email['login'])}' AND"
+                                . " `c_cn` = '{$app->db->quote($email['name'])}' AND"
+                                . " `c_name` = '{$app->db->quote($email['login'])}' AND"
+                                . " `mail` = '{$app->db->quote($email['email'])}' AND"
+                                . " `c_imaplogin` = '{$app->db->quote($email['login'])}' AND"
+                                . " `c_sievehostname` = '{$app->db->quote($domain_config['SOGoSieveServer'])}' AND"
+                                . " `c_imaphostname` = '{$app->db->quote($domain_config['SOGoIMAPServer'])}' AND"
+                                . " `c_domain` = '{$app->db->quote($domain_name)}' AND"
+                                . " `c_password` = '{$app->db->quote($email['password'])}';";
                     }
-                    $acount_n = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'n'); //* none active
-                    $acount_y = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'y'); //* active
-                    $a_cnt = (int) ($acount_n + $acount_y);
-
-                    //* if mail_forward table holds more aliases than columns in sogo table limit to number in sogo table
-                    if ($a_cnt > $dtacount) {
-                        $a_cnt = $dtacount;
-                    } else {
-                        $a_cnt = ($a_cnt < $dtacount ? $dtacount : $a_cnt);
-                    }
-
-
-
-                    for ($ac; $ac < $a_cnt; $ac++) {
-                        $aliasSQL .= " `alias_{$ac}` = '' ,";
-                    }
-                    $_tmpSQL['alias'][] = trim($aliasSQL, ',')
-                            . " WHERE "
-                            . " `c_uid` = '{$app->db->quote($email['login'])}' AND"
-                            . " `c_cn` = '{$app->db->quote($email['name'])}' AND"
-                            . " `c_name` = '{$app->db->quote($email['login'])}' AND"
-                            . " `mail` = '{$app->db->quote($email['email'])}' AND"
-                            . " `c_imaplogin` = '{$app->db->quote($email['login'])}' AND"
-                            . " `c_sievehostname` = '{$app->db->quote($domain_config['SOGoSieveServer'])}' AND"
-                            . " `c_imaphostname` = '{$app->db->quote($domain_config['SOGoIMAPServer'])}' AND"
-                            . " `c_domain` = '{$app->db->quote($domain_name)}' AND"
-                            . " `c_password` = '{$app->db->quote($email['password'])}';";
                 }
                 /*
                  * server_id
