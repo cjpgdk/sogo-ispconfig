@@ -74,6 +74,7 @@ class sogo_plugin {
 
     private function __buildSOGoConfig($method) {
         global $app, $conf;
+        $app->sogo_helper->logDebug("buildSOGoConfig: called by [{$method}]");
         //* get server config (CURRENT RUNNING server config)
         if ($sconf = $this->__get_server_config()) {
             $sconf['SOGoMailListViewColumnsOrder'] = explode(',', $sconf['SOGoMailListViewColumnsOrder']);
@@ -240,6 +241,8 @@ class sogo_plugin {
                 //* only log FULL configuration in debug mode
                 $app->sogo_helper->logDebug("Failed SOGo XML Config:" . PHP_EOL . $app->sogo_config->sogod);
             }
+        } else {
+            $app->sogo_helper->logDebug("Server config not found");
         }
     }
 
@@ -953,7 +956,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
 
         $server_default = $app->db->queryOneRecord($sql);
         if (!$server_default) {
-            $app->sogo_helper->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config for server id {$server_id}" . PHP_EOL . "SQL: {$sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . __LINE__ - 2);
+            $app->sogo_helper->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config for server id {$server_id}" . PHP_EOL . "SQL: {$sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
             return false;
         }
         //* vaules we don't need in sogo config.
@@ -975,7 +978,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
         $server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
         $server_default = $app->db->queryOneRecord($server_default_sql);
         if (!$server_default) {
-            $app->sogo_helper->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config from domain {$domain_name}" . PHP_EOL . "SQL: {$server_default_sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . __LINE__ - 2);
+            $app->sogo_helper->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config from domain {$domain_name}" . PHP_EOL . "SQL: {$server_default_sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
             return false; //* if server default is not isset we must stop it from running to prevent SOGo or system failures
         }
         $server_default["SOGoSieveServer"] = parse_url($server_default["SOGoSieveServer"], PHP_URL_HOST);

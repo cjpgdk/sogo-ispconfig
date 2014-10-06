@@ -3,6 +3,7 @@
 /*
 cd /tmp
 wget http://git.cmjscripter.net:2443/ispconfig-modules-extensions/sogo-inferface/repository/archive.tar -O sogo-inferface.tar
+tar -xvf sogo-inferface.tar
 cd sogo-inferface.git
 php install.php
  */
