@@ -1,5 +1,12 @@
 <?php
 
+/*
+cd /tmp
+wget http://git.cmjscripter.net:2443/ispconfig-modules-extensions/sogo-inferface/repository/archive.tar -O sogo-inferface.tar
+cd sogo-inferface.git
+php install.php
+ */
+
 $files_copy = array(
     'interface' => array(
         'lib/classes/sogo_helper.inc.php',
@@ -24,15 +31,15 @@ $files_copy = array(
         'web/admin/list/sogo_domains.list.php',
         'web/admin/list/sogo_server.list.php',
         //* templates
-        'web/admin/templates/sogo_config_custom_edit.html',
-        'web/admin/templates/sogo_config_domain_edit.html',
-        'web/admin/templates/sogo_config_edit.html',
-        'web/admin/templates/sogo_config_user_edit.html',
-        'web/admin/templates/sogo_conifg_list.html',
-        'web/admin/templates/sogo_domains_custom_edit.html',
-        'web/admin/templates/sogo_domains_domain_edit.html',
-        'web/admin/templates/sogo_domains_list.html',
-        'web/admin/templates/sogo_domains_user_edit.html',
+        'web/admin/templates/sogo_config_custom_edit.htm',
+        'web/admin/templates/sogo_config_domain_edit.htm',
+        'web/admin/templates/sogo_config_edit.htm',
+        'web/admin/templates/sogo_config_user_edit.htm',
+        'web/admin/templates/sogo_conifg_list.htm',
+        'web/admin/templates/sogo_domains_custom_edit.htm',
+        'web/admin/templates/sogo_domains_domain_edit.htm',
+        'web/admin/templates/sogo_domains_list.htm',
+        'web/admin/templates/sogo_domains_user_edit.htm',
     //* /#ADMIN#
     //* #MAIL#
     //* currently empty
