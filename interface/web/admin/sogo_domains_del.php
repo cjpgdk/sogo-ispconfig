@@ -29,14 +29,17 @@ require_once '../../lib/app.inc.php';
 
 //* Check permissions for module
 $app->auth->check_module_permissions('admin');
-$app->auth->check_security_permissions('admin_allow_server_services');
+if (method_exists($app->auth, 'check_security_permissions')) {
+    //* for this version (Update 10) only we check if admin is allowed 
+    $app->auth->check_security_permissions('admin_allow_server_services');
+}
 if ($conf['demo_mode'] == true)
     $app->error('This function is disabled in demo mode.');
 
 $app->uses("tform_actions");
 $app->load("sogo_helper,functions");
 
-$dId = (int) (isset($_REQUEST["domain_id"]) ? $app->functions->intval($_REQUEST["domain_id"]) : 0);
+$dId = (int) (isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) : 0);
 $dConfId = (int) sogo_helper::get_domain_config_index($dId, $app);
 
 $_REQUEST['id'] = $dConfId;

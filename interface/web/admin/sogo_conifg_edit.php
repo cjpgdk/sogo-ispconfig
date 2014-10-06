@@ -54,40 +54,6 @@ class tform_action extends tform_actions {
                 $this->_server_name = $result['server_name'];
             }
         }
-//        $id = (
-//                isset($_REQUEST["server_id"]) ?
-//                        intval($_REQUEST["server_id"]) :
-//                        (
-//                        isset($_SESSION['s']['module']["sogo_conifg_server_id"]) ?
-//                                intval($_SESSION['s']['module']["sogo_conifg_server_id"]) : 0)
-//                );
-//        $sConfid = sogo_helper::get_config_index($id, $app);
-//
-//        //* if no config for server exists set id = 0 to create a new
-//        if ($id != 0 && !sogo_helper::config_exists($id, $app)) {
-//            $result = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . $id);
-//            if (!isset($result['server_name'])) {
-//                //* server do not exists.!
-//                echo "HEADER_REDIRECT:admin/sogo_conifg_list.php";
-//                exit;
-//            } else {
-//                //* server exists but no config exists yet
-//                $_REQUEST["id"] = 0;
-//                $app->tpl->setVar('server_id', $id);
-//                $app->tpl->setVar('server_name', $result['server_name']);
-//            }
-//        } else if ($id != 0 && $sConfid != 0 && sogo_helper::config_exists($id, $app)) {
-//            //* server config found, redirect to get correct vars page loaded
-//            if (!isset($_REQUEST["id"])) {
-//                echo "HEADER_REDIRECT:admin/sogo_conifg_edit.php?id=" . $sConfid . '&server_id=' . $id;
-//                exit;
-//            }
-//        } else {
-//            //* nothing is valid
-//            echo "HEADER_REDIRECT:admin/sogo_conifg_list.php";
-//            exit;
-//        }
-//        $_SESSION['s']['module']["sogo_conifg_server_id"] = $id;
         parent::onLoad();
     }
 

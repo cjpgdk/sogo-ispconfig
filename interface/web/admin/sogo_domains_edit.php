@@ -109,6 +109,25 @@ class tform_action extends tform_actions {
         parent::onShowEnd();
     }
 
+    /** @global app $app */
+    public function onShowNew() {
+        global $app;
+        if (sogo_helper::config_exists($this->__server_id, &$app)) {
+            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . sogo_helper::get_config_index($this->__server_id, &$app));
+            //* on new copy all default values from server config if exists
+            foreach ($app->tform->formDef["tabs"] as $key => & $value) {
+                foreach ($value['fields'] as $key => & $value) {
+                    if ($key == "sogo_id" || $key == "sys_userid" || $key == "sys_groupid" || $key == "sys_perm_user" || $key == "sys_perm_group" || $key == "sys_perm_other" || $key == "server_id" || $key == "server_name" || $key == "domain_id" || $key == "domain_name" || $key == "SOGoCustomXML") {
+                        continue;
+                    } else {
+                        $value['default'] = (isset($sConf[$key]) ? $sConf[$key] : $value['default']);
+                    }
+                }
+            }
+        }
+        parent::onShowNew();
+    }
+
     public function onAfterInsert() {
         $this->__fixDomainOwner();
         parent::onAfterInsert();
@@ -118,7 +137,7 @@ class tform_action extends tform_actions {
         $this->__fixDomainOwner();
         parent::onAfterUpdate();
     }
-    
+
     /** @global app $app */
     private function __fixDomainOwner() {
         global $app;
@@ -137,8 +156,8 @@ class tform_action extends tform_actions {
                 isset($result['sys_perm_other'])) {
             $dConfId = (int) sogo_helper::get_domain_config_index($dId, $app);
             $app->db->query("UPDATE `sogo_domains` SET "
-                    . "`sys_userid` = '".intval($result['sys_userid'])."', "
-                    . "`sys_groupid` = '".intval($result['sys_groupid'])."', "
+                    . "`sys_userid` = '" . intval($result['sys_userid']) . "', "
+                    . "`sys_groupid` = '" . intval($result['sys_groupid']) . "', "
                     . "`sys_perm_user` = '{$result['sys_perm_user']}', "
                     . "`sys_perm_group` = '{$result['sys_perm_group']}', "
                     . "`sys_perm_other` = '{$result['sys_perm_other']}' "
