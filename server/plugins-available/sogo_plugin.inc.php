@@ -208,7 +208,7 @@ class sogo_plugin {
             //* load it as DOMDocument Object (this validates the XML)
             if ($app->sogo_config->loadSOGoConfigString($app->sogo_config->sogod) !== FALSE) {
                 $result = TRUE;
-                file_exists($conf['sogo_gnu_step_defaults'])
+                if(file_exists($conf['sogo_gnu_step_defaults']))
                     copy($conf['sogo_gnu_step_defaults'], $conf['sogo_gnu_step_defaults'] . ".".time()); //* create backup
                 $result = file_put_contents($conf['sogo_gnu_step_defaults'], $app->sogo_config->sogod);//* try writing to the file
     
