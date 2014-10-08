@@ -208,23 +208,18 @@ class sogo_plugin {
             //* load it as DOMDocument Object (this validates the XML)
             if ($app->sogo_config->loadSOGoConfigString($app->sogo_config->sogod) !== FALSE) {
                 $result = TRUE;
-                //* check if file exists (default config file)
-                if (file_exists($conf['sogo_gnu_step_defaults'])) {
-                    //* create backup
-                    copy($conf['sogo_gnu_step_defaults'], $conf['sogo_gnu_step_defaults'] . ".last");
-                    //* try writing to the file
-                    $result = file_put_contents($conf['sogo_gnu_step_defaults'], $app->sogo_config->sogod);
-                } else {
-                    //* if do not exsists sogo or config setting sogo_gnu_step_defaults is not setup yet
-                    $result = FALSE;
-                }
+                file_exists($conf['sogo_gnu_step_defaults'])
+                    copy($conf['sogo_gnu_step_defaults'], $conf['sogo_gnu_step_defaults'] . ".".time()); //* create backup
+                $result = file_put_contents($conf['sogo_gnu_step_defaults'], $app->sogo_config->sogod);//* try writing to the file
+    
                 //* debug the result
                 $app->sogo_helper->logDebug("{$method} Write file [{$conf['sogo_gnu_step_defaults']}] " . ($result ? "Succeeded" : "Failed") . " (CONFIG var: sogo_gnu_step_defaults)");
                 //* check if file exists (sogod.plist)
                 if (file_exists($conf['sogo_gnu_step_defaults_sogod.plist'])) {
                     copy($conf['sogo_gnu_step_defaults_sogod.plist'], $conf['sogo_gnu_step_defaults_sogod.plist'] . ".last");
                     $result = file_put_contents($conf['sogo_gnu_step_defaults_sogod.plist'], $app->sogo_config->sogodplist);
-                    //* if the file doesn't exists it's not needed or SOGo has not yet been started with a usable configuration!
+                    //* debug the result
+                    $app->sogo_helper->logDebug("{$method} Write file [{$conf['sogo_gnu_step_defaults_sogod.plist']}] " . ($result ? "Succeeded" : "Failed") . " (CONFIG var: sogo_gnu_step_defaults_sogod.plist)");
                 }
                 //* test the result
                 if ($result) {

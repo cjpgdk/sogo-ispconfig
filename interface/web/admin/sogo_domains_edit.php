@@ -112,8 +112,8 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShowNew() {
         global $app;
-        if (sogo_helper::config_exists($this->__server_id, &$app)) {
-            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . sogo_helper::get_config_index($this->__server_id, &$app));
+        if (sogo_helper::config_exists($this->__server_id, $app)) {
+            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . sogo_helper::get_config_index($this->__server_id, $app));
             //* on new copy all default values from server config if exists
             foreach ($app->tform->formDef["tabs"] as $key => & $value) {
                 foreach ($value['fields'] as $key => & $value) {
