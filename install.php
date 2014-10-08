@@ -2,9 +2,9 @@
 
 /*
 cd /tmp
-wget http://git.cmjscripter.net:2443/ispconfig-modules-extensions/sogo-inferface/repository/archive.tar -O sogo-inferface.tar
-tar -xvf sogo-inferface.tar
-cd sogo-inferface.git
+wget https://github.com/cmjnisse/sogo-ispconfig/archive/master.tar.gz -O sogo-ispconfig.tar.gz
+tar -xvf sogo-ispconfig.tar.gz
+cd sogo-ispconfig-master
 php install.php
  */
 
