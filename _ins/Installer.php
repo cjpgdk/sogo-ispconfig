@@ -110,8 +110,15 @@ class Installer {
 
     /** @var boolean a var used to detirming if server module and plugin shall be enabled */
     static public $config_server = FALSE;
+    static public $type = "all";
 
-    public function __construct() {
+    public function __construct($type = "all") {
+        self::$type = strtolower($type); //* no significant use at this point but must be (slave|all|mysqltables)
+        //* if sql tables only no need for the rest
+        if (self::$type == 'mysqltables') {
+            self::$isError = FALSE;
+            return TRUE;
+        }
         //* get sogo home dir
         self::$ispc_home_dir = Installer::getISPConfigHomeDir();
         if (!empty(self::$ispc_home_dir) && is_dir(self::$ispc_home_dir)) {
@@ -194,8 +201,12 @@ class Installer {
             echo PHP_EOL;
             self::$isError = FALSE; //* reset
         }
-        $this->installInterface();
-        $this->installServer();
+        if (self::$type == "all" || self::$type == "slave") {
+            $this->installInterface();
+            $this->installServer();
+        } elseif (self::$type == 'mysqltables') {
+            $this->installTablesMySQL();
+        }
     }
 
     /**
@@ -284,7 +295,10 @@ class Installer {
         } else {
             echo "Not installing interface files, interface folder not found" . PHP_EOL;
         }
+        $this->installTablesMySQL();
+    }
 
+    public function installTablesMySQL() {
         if (file_exists(self::$mysql_tables_ispc)) {
             //* add mysql tables
             echo "MySQL Host? [127.0.0.1]: ";
@@ -299,7 +313,7 @@ class Installer {
             echo "ISPConfig database? [dbispconfig]: ";
             $mysql_database = self::readInput("dbispconfig");
             echo PHP_EOL;
-            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password} {$mysql_database} < ".self::$mysql_tables_ispc;
+            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password} {$mysql_database} < " . self::$mysql_tables_ispc;
             echo exec($command) . PHP_EOL;
         } else {
             self::$error = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" . PHP_EOL . "Redownload the tables and import them manualy before using";
@@ -334,7 +348,7 @@ class Installer {
      */
     public static function getSOGoHomeDir() {
         $sogo_home_dir = exec("getent passwd sogo | cut -d: -f6");
-        echo "location home dir [{$sogo_home_dir}]: ";
+        echo "location of SOGo home dir [{$sogo_home_dir}]: ";
         $sogo_home_dir = self::readInput($sogo_home_dir);
         return $sogo_home_dir;
     }
