@@ -19,7 +19,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Struktur-dump for tabellen `sogo_config`
 --
 
-DROP TABLE IF EXISTS `sogo_config`;
 CREATE TABLE IF NOT EXISTS `sogo_config` (
   `sogo_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `sys_userid` int(11) NOT NULL DEFAULT '0',
@@ -110,7 +109,6 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
 -- Struktur-dump for tabellen `sogo_domains`
 --
 
-DROP TABLE IF EXISTS `sogo_domains`;
 CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `sogo_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `sys_userid` int(11) NOT NULL DEFAULT '0',
@@ -173,5 +171,4 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
-SELECT @configid := count(*) FROM `sys_config`;
-INSERT INTO `sys_config` (`config_id`, `group`, `name`, `value`) VALUES (@configid+1, 'addons', 'sogo', '0.1');
+INSERT INTO `sys_config` (`group`, `name`, `value`) VALUES ('interface', 'sogo_interface', '0.2');
