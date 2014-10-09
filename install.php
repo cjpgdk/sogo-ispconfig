@@ -8,13 +8,14 @@
   php install.php
  */
 
+require '_ins/copy_files.php';
 require '_ins/Installer.php';
+Installer::$files_copy = $files_copy;
 
 $failed = FALSE;
 $srv_enable = TRUE;
 
 $Installer = new Installer();
-
 $Installer->run();
 
 if (count(Installer::$errors) > 0) {
