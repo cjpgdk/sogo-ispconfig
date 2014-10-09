@@ -168,7 +168,7 @@ class Installer {
     public function installServer() {
         if (self::$has_ispconfig_server_folder) {
             echo "Installing server files" . PHP_EOL;
-            $this->_copyFiles('server');
+            self::copyFiles('server');
 
             echo "Enable SOGo Module and Plugin?" . PHP_EOL;
             echo "\t - Only do this if SOGo is install on this server" . PHP_EOL;
@@ -201,10 +201,6 @@ class Installer {
     
     //* quick lazy alias
     public static function copyFiles($index) {
-        $this->_copyFiles($index);
-    }
-
-    private function _copyFiles($index) {
         if (isset(self::$files_copy[$index])) {
             foreach (self::$files_copy[$index] as $file) {
                 if (file_exists($index . '/' . $file)) {
@@ -249,7 +245,7 @@ class Installer {
     public function installInterface() {
         if (self::$has_ispconfig_interface_folder) {
             echo "Installing interface files" . PHP_EOL;
-            $this->_copyFiles('interface');
+            self::copyFiles('interface');
         } else {
             echo "Not installing interface files, interface folder not found" . PHP_EOL;
         }

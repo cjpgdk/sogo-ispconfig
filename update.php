@@ -1,28 +1,32 @@
 <?php
+require '_ins/Installer.php';
+$ispchome = Installer::getISPConfigHomeDir();
+Installer::$ispc_home_dir = $ispchome;
+$db = NULL;
+if (file_exists($ispchome . '/interface/lib/config.inc.php') && file_exists($ispchome . '/interface/lib/classes/db_mysql.inc.php') && file_exists($ispchome . '/server/lib/mysql_clientdb.conf')) {
+    require_once $ispchome . '/interface/lib/config.inc.php';
+    require_once $ispchome . '/interface/lib/classes/db_mysql.inc.php';
+    $db = new db();
+    require_once $ispchome . '/server/lib/mysql_clientdb.conf';
+} else {
+    die("i can't include the following to files that is needed for updating.!" . PHP_EOL . $ispchome . '/server/lib/mysql_clientdb.conf' . PHP_EOL . $ispchome . '/interface/lib/config.inc.php' . PHP_EOL . $ispchome . '/interface/lib/classes/db_mysql.inc.php');
+}
 
 $sogo_interface_version_latest = "2";
 
 require '_ins/copy_files.php';
-require '_ins/Installer.php';
 Installer::$files_copy = $files_copy;
-$ispchome = Installer::getISPConfigHomeDir();
-if (file_exists($ispchome . '/interface/lib/config.inc.php') && file_exists($ispchome . '/interface/lib/app.inc.php') && file_exists($ispchome . '/server/lib/mysql_clientdb.conf')) {
-    require_once $ispchome . '/interface/lib/config.inc.php';
-    require_once $ispchome . '/interface/lib/app.inc.php';
-    require_once $ispchome . '/server/lib/mysql_clientdb.conf';
-} else {
-    die("i can't include the following to files that is needed for updating.!" . PHP_EOL . $ispchome . '/server/lib/mysql_clientdb.conf' . PHP_EOL . $ispchome . '/interface/lib/config.inc.php' . PHP_EOL . $ispchome . '/interface/lib/app.inc.php');
-}
-$sogo_interface_version = $app->db->queryOneRecord("SELECT `value` FROM sys_config WHERE `name`='sogo_interface' AND `group`='interface'");
+
+$sogo_interface_version = $db->queryOneRecord("SELECT `value` FROM sys_config WHERE `name`='sogo_interface' AND `group`='interface'");
 if ($sogo_interface_version === FALSE || !isset($sogo_interface_version['value'])) {
     //* first used only once
-    $sogo_interface_version = $app->db->queryOneRecord("SELECT `value` FROM sys_config WHERE `name`='sogo' AND `group`='addons'");
+    $sogo_interface_version = $db->queryOneRecord("SELECT `value` FROM sys_config WHERE `name`='sogo' AND `group`='addons'");
 }
 if ($sogo_interface_version === FALSE || !isset($sogo_interface_version['value']))
     $sogo_interface_version = '0'; //* no db version
-if ($sogo_interface_version == "0.0")
+if ($sogo_interface_version['value'] == "0.0")
     $sogo_interface_version = '0';
-if ($sogo_interface_version == "0.1")
+if ($sogo_interface_version['value'] == "0.1")
     $sogo_interface_version = '1';
 
 echo PHP_EOL . PHP_EOL; //* give some space thanks
@@ -43,7 +47,7 @@ echo PHP_EOL;
 echo "Starting database update" . PHP_EOL;
 echo "Current version: {$sogo_interface_version}" . PHP_EOL;
 echo "Latest version: {$sogo_interface_version_latest}" . PHP_EOL;
-if ($sogo_interface_version_latest < $sogo_interface_version) {
+if ($sogo_interface_version < $sogo_interface_version_latest) {
     $dbupd_run = true;
     while ($dbupd_run == true) {
         $next_db_version = intval($sogo_interface_version + 1);
