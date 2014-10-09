@@ -4,9 +4,7 @@ $sogo_interface_version_latest = "2";
 
 require '_ins/copy_files.php';
 require '_ins/Installer.php';
-
-
-$app = new app();
+Installer::$files_copy = $files_copy;
 $ispchome = Installer::getISPConfigHomeDir();
 if (file_exists($ispchome . '/interface/lib/config.inc.php') && file_exists($ispchome . '/interface/lib/app.inc.php') && file_exists($ispchome . '/server/lib/mysql_clientdb.conf')) {
     require_once $ispchome . '/interface/lib/config.inc.php';
