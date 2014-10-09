@@ -34,8 +34,8 @@ echo PHP_EOL;
 
 echo "All done assuming no errors and all went well" . PHP_EOL;
 echo "you will need to add SOGo config values to server config file:" . PHP_EOL;
-echo "{$ispcdir}/server/lib/config.inc.local.php" . PHP_EOL;
+echo Installer::$ispc_home_dir."/server/lib/config.inc.local.php" . PHP_EOL;
 echo "A sample file can be found here.!" . PHP_EOL;
-echo "{$ispcdir}/server/lib/config.inc.local.sogo-sample.php" . PHP_EOL . PHP_EOL;
+echo Installer::$ispc_home_dir."/server/lib/config.inc.local.sogo-sample.php" . PHP_EOL . PHP_EOL;
 
 echo "AND DON'T forget to create a database SOGo can use for storage" . PHP_EOL;

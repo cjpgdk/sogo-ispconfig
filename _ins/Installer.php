@@ -79,7 +79,7 @@ class Installer {
     static private $mysql_tables_ispc = "_ins/tables.sql";
 
     /** @var string location of ISPConfig home dir */
-    static private $ispc_home_dir = "";
+    static public $ispc_home_dir = "";
 
     /** @var boolean have ISPConfig interface folder */
     static private $has_ispconfig_interface_folder = FALSE;
@@ -140,7 +140,7 @@ class Installer {
                 }
             }
         } else {
-            die("Folder [" . self::$ispc_home_dir . "] is not valid ISPConfig installation.");
+            die("Folder [" . self::$ispc_home_dir . "] is not valid ISPConfig installation." . PHP_EOL);
         }
 
 
@@ -174,7 +174,7 @@ class Installer {
             self::$errors['step1'][] = self::$error;
             self::$isError = TRUE;
             self::$have_sins_of_sogo &= FALSE;
-        } else if (file_exists(self::$sogo_home_dir) || is_dir(self::$sogo_home_dir)) {
+        } else if (file_exists(self::$sogo_home_dir) && is_dir(self::$sogo_home_dir)) {
             self::$have_sins_of_sogo &= TRUE;
         }
     }
@@ -209,7 +209,7 @@ class Installer {
             echo "Enable SOGo Module and Plugin?" . PHP_EOL;
             echo "\t - Only do this if SOGo is install on this server" . PHP_EOL;
             echo "? (Y/N) [Y]: ";
-            self::$config_server = (strtolower(self::readInput("n")) == 'y' ? TRUE : FALSE);
+            self::$config_server = (strtolower(self::readInput("y")) == 'y' ? TRUE : FALSE);
             if (self::$config_server) {
                 if (!is_link(self::$ispc_home_dir . '/server/plugins-enabled/sogo_plugin.inc.php')) {
                     if (!symlink(self::$ispc_home_dir . '/server/plugins-available/sogo_plugin.inc.php', self::$ispc_home_dir . '/server/plugins-enabled/sogo_plugin.inc.php')) {
@@ -299,7 +299,7 @@ class Installer {
             echo "ISPConfig database? [dbispconfig]: ";
             $mysql_database = self::readInput("dbispconfig");
             echo PHP_EOL;
-            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password} {$mysql_database} < {self::$mysql_tables_ispc}";
+            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password} {$mysql_database} < ".self::$mysql_tables_ispc;
             echo exec($command) . PHP_EOL;
         } else {
             self::$error = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" . PHP_EOL . "Redownload the tables and import them manualy before using";

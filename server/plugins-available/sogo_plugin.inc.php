@@ -422,7 +422,7 @@ class sogo_plugin {
          */
         //* type changed
         if (!$app->sogo_helper->isEqual($data['old']['type'], $data['new']['type'])) {
-            
+
             if (!$is_synced)
                 $this->__sync_mail_users($new_destination_domain);
             $is_synced = TRUE;
@@ -752,6 +752,10 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
     private function __sync_mail_users($domain_name, $imap_enabled = true) {
         global $app;
         $app->sogo_helper->logDebug("sogo_plugin::__sync_mail_users(): [{$domain_name}]");
+        //* create domain table id it do not exists
+        if (!$app->sogo_helper->sogo_table_exists($domain_name)) {
+            $this->__create_sogo_table($domain_name);
+        }
         $emails = $app->db->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
         $sogo_user_sql = "";
         if (!empty($emails)) {

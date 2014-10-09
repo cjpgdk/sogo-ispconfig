@@ -171,3 +171,7 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `SOGoCustomXML` text,
   PRIMARY KEY (`sogo_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+SELECT @configid := count(*) FROM `sys_config`;
+INSERT INTO `sys_config` (`config_id`, `group`, `name`, `value`) VALUES (@configid+1, 'addons', 'sogo', '0.1');
