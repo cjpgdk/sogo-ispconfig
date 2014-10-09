@@ -32,7 +32,6 @@ if (method_exists($app->auth, 'check_security_permissions')) {
 if ($conf['demo_mode'] == true)
     $app->error('This function is disabled in demo mode.');
 
-$app = new app();
 //* no harm in doing an update, plugin always does a direct sql select
 $rec = $app->db->queryOneRecord("SELECT * FROM sogo_config WHERE sogo_id=".intval($_REQUEST['id']));
 
