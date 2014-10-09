@@ -32,13 +32,14 @@ if (method_exists($app->auth, 'check_security_permissions')) {
 if ($conf['demo_mode'] == true)
     $app->error('This function is disabled in demo mode.');
 
+$app = new app();
 //* no harm in doing an update, plugin always does a direct sql select
-$app->db->datalogSave('sogo_config', 'UPDATE', 'sogo_id', $_REQUEST['id'], array(
-    'sogo_id' => $_REQUEST['id'],
-    'old' => 'TRUE',
-    'new' => 'FALSE'), array(
-    'sogo_id' => $_REQUEST['id'],
-    'old' => 'FALSE',
-    'new' => 'TRUE'), TRUE);
+$rec = $app->db->queryOneRecord("SELECT * FROM sogo_config WHERE sogo_id=".intval($_REQUEST['id']));
+
+$drec = $app->db->quote(serialize(array('old' => $rec, 'new' => $rec)));
+$app->db->query("INSERT INTO sys_datalog (dbtable,dbidx,server_id,action,tstamp,user,data) "
+        . "VALUES "
+        . "('sogo_config','sogo_id:{$_REQUEST['id']}','{$rec['server_id']}','u','" . time() . "','{$app->db->quote($_SESSION['s']['user']['username'])}','{$drec}')");
+
 require_once 'list/sogo_server.list.php';
 header("Location: " . $liste["file"]);
