@@ -21,6 +21,7 @@ $conf['sogo_database_port'] = '3306';
 //* vars added to the domain template
 $conf['sogo_domain_extra_vars'] = array(
     //* password algorithm default is crypt
+    //* Possible algorithms are: plain, md5, crypt-md5, sha, ssha (including 256/512 variants),
     'userPasswordAlgorithm' => 'crypt',
     /*
       The default behaviour is to store newly set
