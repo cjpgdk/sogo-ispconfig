@@ -36,6 +36,23 @@ class sogo_helper {
     static private $sCache = array();
 
     /**
+     * check if a domain has any email addresses
+     * @global app $app
+     * @global array $conf
+     * @param string $domain_name
+     * @param boolean $imap_enabled if set to false will count all email addresses, is set to true will only count email addresses with imap enabled
+     * @return boolean
+     */
+    public function has_mail_users($domain_name, $imap_enabled = true) {
+        global $app;
+        $emails = $app->db->queryOneRecord("SELECT count(*) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        if ($emails !== FALSE && ((int) $emails['cnt'] > 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * get config by server id
      * @global app $app
      * @global array $conf

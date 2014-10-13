@@ -559,10 +559,11 @@ class sogo_plugin {
         //* check event
         if (!$app->sogo_helper->isEqual($event_name, 'mail_domain_insert'))
             return;
-
-        $this->__create_sogo_table($data['new']['domain']);
-        $method = "sogo_plugin::insert_sogo_mail_domain():";
-        $this->__buildSOGoConfig($method);
+        if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
+            $this->__create_sogo_table($data['new']['domain']);
+            $method = "sogo_plugin::insert_sogo_mail_domain():";
+            $this->__buildSOGoConfig($method);
+        }
     }
 
     /**
