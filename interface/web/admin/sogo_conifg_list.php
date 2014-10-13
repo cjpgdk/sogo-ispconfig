@@ -51,6 +51,15 @@ class listform_action extends listform_actions {
         parent::onLoad();
     }
 
+    /** @global app $app */
+    public function onShow() {
+        global $app;
+        if (isset($_GET['msg'])) {
+            $app->tpl->setVar('msg', sprintf($app->listform->wordbook['REBUILD_TRIGGERED'], $_GET['server_n']));
+        }
+        parent::onShow();
+    }
+
 }
 
 $app->listform_action = new listform_action();

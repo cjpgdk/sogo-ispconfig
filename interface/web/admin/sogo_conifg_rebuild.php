@@ -41,4 +41,4 @@ $app->db->query("INSERT INTO sys_datalog (dbtable,dbidx,server_id,action,tstamp,
         . "('sogo_config','sogo_id:{$_REQUEST['id']}','{$rec['server_id']}','u','" . time() . "','{$app->db->quote($_SESSION['s']['user']['username'])}','{$drec}')");
 
 require_once 'list/sogo_server.list.php';
-header("Location: " . $liste["file"]);
+header("Location: {$liste["file"]}?msg=REBUILD_TRIGGERED&server_n={$rec['server_name']}");
