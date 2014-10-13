@@ -30,12 +30,10 @@ if ($sogo_interface_version === FALSE || !isset($sogo_interface_version['value']
     $sogo_interface_version = $db->queryOneRecord("SELECT `value` FROM sys_config WHERE `name`='sogo' AND `group`='addons'");
 if ($sogo_interface_version === FALSE || !isset($sogo_interface_version['value']))
     $sogo_interface_version = '0'; //* no db version
-if ($sogo_interface_version['value'] == "0.0")
-    $sogo_interface_version = '0';
-if ($sogo_interface_version['value'] == "0.1")
-    $sogo_interface_version = '1';
-if ($sogo_interface_version['value'] == "0.2")
-    $sogo_interface_version = '2';
+if (preg_match("/[0-9]\.([0-9])/i", $sogo_interface_version['value'], $matches))
+    $sogo_interface_version = $matches[1];
+else
+    $sogo_interface_version = $sogo_interface_version['value'];
 
 echo PHP_EOL . PHP_EOL; //* give some space thanks
 //* start copy files
