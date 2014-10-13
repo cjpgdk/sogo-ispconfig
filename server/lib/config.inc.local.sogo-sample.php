@@ -36,3 +36,7 @@ $conf['sogo_domain_extra_vars'] = array(
 //* sogo default configuration file(s)
 $conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
 $conf['sogo_gnu_step_defaults_sogod.plist'] = '/var/lib/sogo/GNUstep/Defaults/sogod.plist';
+
+/*
+SOGoEncryptionKey ?? if password change shall be enabled.!
+*/
