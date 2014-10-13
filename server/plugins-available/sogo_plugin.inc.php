@@ -296,8 +296,15 @@ class sogo_plugin {
         }
         if ($app->sogo_helper->isEqual($event_name, 'sogo_domains_delete')) {
             if ($app->sogo_helper->sogo_table_exists($domain_name)) {
-                $this->__sync_mail_users($domain_name);
-            } else {
+                if ($app->sogo_helper->has_mail_users($domain_name, true)) {
+                    //* if users still exists for domain this is only a sogo domain config removal/reset
+                    $this->__sync_mail_users($domain_name);
+                } else {
+                    //* no users left in db remove sogo tables
+                    $app->sogo_helper->drop_sogo_users_table($domain_name, $data['old']['domain_id']);
+                }
+            } else if ($app->sogo_helper->has_mail_users($domain_name, true)) {
+                //* if users still exists for domain this is only a sogo domain config removal/reset
                 $this->__create_sogo_table($domain_name);
             }
             $method = "sogo_plugin::remove_sogo_domain():";

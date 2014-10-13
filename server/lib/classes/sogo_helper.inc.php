@@ -176,6 +176,7 @@ class sogo_helper {
      */
     public function drop_sogo_users_table($domain_name, $domain_id) {
         global $app;
+        $app->sogo_helper->logDebug("sogo_helper::drop_sogo_users_table(): {$domain_id}#{$domain_name}");
         $sogo_db = & $app->sogo_helper->sqlConnect();
         $sogo_db->query("DROP TABLE {$app->sogo_helper->get_valid_sogo_table_name($domain_name)}_users");
         if ($sogo_db->error) {
