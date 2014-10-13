@@ -34,6 +34,34 @@ class sogo_helper {
 
     /** @var array */
     static private $sCache = array();
+    
+    
+    public function check_alias_columns($domain) {
+        
+        //* get total alias count for domain
+        $acount_n = (int) $this->get_max_alias_count($domain, 'n'); //* none active
+        $acount_y = (int) $this->get_max_alias_count($domain, 'y'); //* active
+        $acount = (int) ($acount_n + $acount_y);
+
+        $dtacount = (int) $this->get_sogo_table_alias_column_count($domain); //* get alias columns in table for domain
+        $has_error = FALSE;
+        if ($dtacount < $acount) {
+            //* update domain table
+            $sql = array();
+            for ($index = 0; $index < intval(($acount - $dtacount)); $index++) {
+                $_i = (int) ($dtacount + $index);
+                $sql[] = "ALTER TABLE `{$this->get_valid_sogo_table_name($domain)}_users` ADD `alias_{$_i}` VARCHAR( 500 ) NOT NULL ";
+            }
+            $sqlres = & $this->sqlConnect();
+            foreach ($sql as $value) {
+                if (!$sqlres->query($value)) {
+                    $this->logError("sogo_helper::check_alias_columns(): update domain table for [{$domain}], FAILD" . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1));
+                    $has_error = TRUE;
+                }
+            }
+        }
+        return ($has_error === FALSE);
+    }
 
     /**
      * check if a domain has any email addresses
@@ -69,7 +97,7 @@ class sogo_helper {
 
             $server_default = $app->db->queryOneRecord($sql);
             if (!$server_default) {
-                $app->sogo_helper->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config for server id {$server_id}" . PHP_EOL . "SQL: {$sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
+                $this->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config for server id {$server_id}" . PHP_EOL . "SQL: {$sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
                 self::$sCache[$server_id] = false;
                 return self::$sCache[$server_id];
             }
@@ -176,11 +204,11 @@ class sogo_helper {
      */
     public function drop_sogo_users_table($domain_name, $domain_id) {
         global $app;
-        $app->sogo_helper->logDebug("sogo_helper::drop_sogo_users_table(): {$domain_id}#{$domain_name}");
-        $sogo_db = & $app->sogo_helper->sqlConnect();
-        $sogo_db->query("DROP TABLE {$app->sogo_helper->get_valid_sogo_table_name($domain_name)}_users");
+        $this->logDebug("sogo_helper::drop_sogo_users_table(): {$domain_id}#{$domain_name}");
+        $sogo_db = & $this->sqlConnect();
+        $sogo_db->query("DROP TABLE {$this->get_valid_sogo_table_name($domain_name)}_users");
         if ($sogo_db->error) {
-            $app->sogo_helper->logWarn("sogo_plugin::sogo_domain_delete(): SQL ERROR:\n{$sogo_db->error}\n{$domain_id}#{$domain_name}");
+            $this->logWarn("sogo_plugin::sogo_domain_delete(): SQL ERROR:\n{$sogo_db->error}\n{$domain_id}#{$domain_name}");
         }
         unset(self::$sutCache[$domain_name]);
     }

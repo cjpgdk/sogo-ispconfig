@@ -363,30 +363,8 @@ class sogo_plugin {
 
         $app->sogo_helper->logDebug("sogo_plugin::insert_sogo_mail_user_alias(): {$data['new']['source']} => {$data['new']['destination']}");
 
-        //* get total alias count for domain
-        $acount_n = (int) $app->sogo_helper->get_max_alias_count($destination_domain, 'n'); //* none active
-        $acount_y = (int) $app->sogo_helper->get_max_alias_count($destination_domain, 'y'); //* active
-        $acount = (int) ($acount_n + $acount_y);
-
-        $dtacount = (int) $app->sogo_helper->get_sogo_table_alias_column_count($destination_domain); //* get alias columns in table for domain
-        $has_error = FALSE;
-        if ($dtacount < $acount) {
-            //* update domain table
-            $sql = array();
-            for ($index = 0; $index < intval(($acount - $dtacount)); $index++) {
-                $_i = (int) ($dtacount + $index);
-                $sql[] = "ALTER TABLE `{$app->sogo_helper->get_valid_sogo_table_name($destination_domain)}_users` ADD `alias_{$_i}` VARCHAR( 500 ) NOT NULL ";
-            }
-            $sqlres = & $app->sogo_helper->sqlConnect();
-            foreach ($sql as $value) {
-                if (!$sqlres->query($value)) {
-                    $app->sogo_helper->logError("sogo_plugin::insert_sogo_mail_user_alias(): update domain table for [{$destination_domain}], FAILD" . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1));
-                    $has_error = TRUE;
-                }
-            }
-        }
         //* don't sync on error
-        if (!$has_error) {
+        if ($app->sogo_helper->check_alias_columns($destination_domain)) {
             $this->__sync_mail_users($destination_domain);
             $method = "sogo_plugin::insert_sogo_mail_user_alias():";
             $this->__buildSOGoConfig($method);
@@ -421,7 +399,7 @@ class sogo_plugin {
         list($new_source_user, $new_source_domain) = explode('@', $data['new']['source']);
         list($old_destination_user, $old_destination_domain) = explode('@', $data['old']['destination']);
         list($new_destination_user, $new_destination_domain) = explode('@', $data['new']['destination']);
-
+        $app->sogo_helper->check_alias_columns($new_destination_domain);
         $is_synced = FALSE;
         /*
          * all using __sync_mail_users
@@ -456,6 +434,7 @@ class sogo_plugin {
                 //* domain changed
                 $this->__sync_mail_users($old_destination_domain);
             }
+
             if (!$is_synced)
                 $this->__sync_mail_users($new_destination_domain);
             $is_synced = TRUE;
