@@ -31,6 +31,10 @@ class sogo_module {
         'sogo_domains_update',
         'sogo_domains_delete',
         'sogo_domains_insert',
+        //* TB: sogo_module
+        'sogo_module_update',
+        'sogo_module_delete',
+        'sogo_module_insert',
     );
 
     function onInstall() {
@@ -46,6 +50,8 @@ class sogo_module {
         $app->modules->registerTableHook('sogo_config', $this->module_name, 'process');
         
         $app->modules->registerTableHook('sogo_domains', $this->module_name, 'process');
+        
+        $app->modules->registerTableHook('sogo_module', $this->module_name, 'process');
 
         $app->services->registerService('sogo', $this->module_name, 'restartSOGo');
 
@@ -102,6 +108,14 @@ class sogo_module {
                     $app->plugins->raiseEvent('sogo_domains_update', $data);
                 if ($action == 'd')
                     $app->plugins->raiseEvent('sogo_domains_delete', $data);
+                break;
+            case 'sogo_module':
+                if ($action == 'i')
+                    $app->plugins->raiseEvent('sogo_module_insert', $data);
+                if ($action == 'u')
+                    $app->plugins->raiseEvent('sogo_module_update', $data);
+                if ($action == 'd')
+                    $app->plugins->raiseEvent('sogo_module_delete', $data);
                 break;
         }
     }
