@@ -1,0 +1,39 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_module">
+
+    <div class="pnl_formsarea">
+        <fieldset class="inlineLabels"><legend>SOGo Module Settings</legend>
+            <div class="ctrlHolder">
+                <label for="all_domains">{tmpl_var name='all_domains_txt'} <div class="ttip" title="{tmpl_var name='all_domains_ttip_txt'}"></div></label>
+                <select name="all_domains" id="all_domains" class="selectInput">
+                    {tmpl_var name='all_domains'}
+                </select>
+                <p style="clear: both;">{tmpl_var name='all_domains_ex_txt'}</p>
+            </div>
+            <div class="ctrlHolder">
+                <label for="allow_same_instance">{tmpl_var name='allow_same_instance_txt'} <div class="ttip" title="{tmpl_var name='allow_same_instance_ttip_txt'}"></div></label>
+                <select name="allow_same_instance" id="allow_same_instance" class="selectInput">
+                    {tmpl_var name='allow_same_instance'}
+                </select>
+                <p style="clear: both;">{tmpl_var name='allow_same_instance_ex_txt'}</p>
+            </div>
+            <div class="ctrlHolder">
+                <label for="sql_of_mail_server">{tmpl_var name='sql_of_mail_server_txt'} <div class="ttip" title="{tmpl_var name='sql_of_mail_server_ttip_txt'}"></div></label>
+                <select name="sql_of_mail_server" id="sql_of_mail_server" class="selectInput">
+                    {tmpl_var name='sql_of_mail_server'}
+                </select>
+                <p style="clear: both;">{tmpl_var name='sql_of_mail_server_ex_txt'}</p>
+            </div>
+        </fieldset>
+
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+
+        <div class="buttonHolder buttons">
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onClick="submitForm('pageForm', 'admin/sogo_module_settings.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onClick="loadContent('admin/sogo_module_settings.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+
+</div>

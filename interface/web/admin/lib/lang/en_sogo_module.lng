@@ -1,0 +1,10 @@
+<?php
+$wb["all_domains_txt"] = 'All Domains';
+$wb["all_domains_ttip_txt"] = 'Configure all domain for use with SOGo by default';
+$wb["all_domains_ex_txt"] = 'if set to yes this will allow all mail domains with or without configuration in "SOGo => Domains" to be configured for use with SOGo';
+$wb["allow_same_instance_txt"] = 'Allow Same Instance';
+$wb["allow_same_instance_ttip_txt"] = 'Allow all mail domains to use the same  SOGo instance';
+$wb["allow_same_instance_ex_txt"] = 'if set to yes this allow all mail domains with access to SOGo to use the same instance of SOGo, if you are planning on using multiple SOGo servers i recommend setting this to NO';
+$wb["sql_of_mail_server_txt"] = 'Use SQL of mail server';
+$wb["sql_of_mail_server_ttip_txt"] = 'Tell SOGo to use the domain table configurated on the mail server';
+$wb["sql_of_mail_server_ex_txt"] = "Recommended settings is NO (its best to keep SQL connections local), if set to YES the SOGo server will need to contact the SQL server located on the mail server of the domain, causing connection delays and possibly a lot of failed login tries";
