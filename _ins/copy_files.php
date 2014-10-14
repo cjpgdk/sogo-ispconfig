@@ -12,14 +12,17 @@ $files_copy = array(
         'web/admin/sogo_domains_del.php',
         'web/admin/sogo_domains_edit.php',
         'web/admin/sogo_domains_list.php',
+        'web/admin/sogo_module_settings.php',
         //* form
         'web/admin/form/sogo_config.tform.php',
         'web/admin/form/sogo_domains.tform.php',
+        'web/admin/form/sogo_module.tform.php',
         //* lng
         'web/admin/lib/lang/en_sogo_config.lng',
         'web/admin/lib/lang/en_sogo_conifg_list.lng',
         'web/admin/lib/lang/en_sogo_domains.lng',
         'web/admin/lib/lang/en_sogo_domains_list.lng',
+        'web/admin/lib/lang/en_sogo_module.lng',
         //* menu
         'web/admin/lib/menu.d/sogo.menu.php',
         //* list
@@ -35,6 +38,7 @@ $files_copy = array(
         'web/admin/templates/sogo_domains_domain_edit.htm',
         'web/admin/templates/sogo_domains_list.htm',
         'web/admin/templates/sogo_domains_user_edit.htm',
+        'web/admin/templates/sogo_module_edit.htm',
     //* /#ADMIN#
     //* #MAIL#
     //* currently empty
