@@ -172,6 +172,18 @@ class sogo_helper {
         return self::$sCache[$server_id];
     }
 
+    public function is_domain_active($domain_name) {
+        global $app;
+        if (!isset(self::$dnCache['active' . $domain_name])) {
+            $res = $app->db->queryOneRecord("SELECT `active` FROM `mail_domain` WHERE `domain`='{$app->db->quote($domain_name)}'");
+            if ($res !== FALSE && isset($res['active']))
+                self::$dnCache['active' . $domain_name] = (strtolower($res['active']) == 'y' ? TRUE : FALSE);
+            else
+                self::$dnCache['active' . $domain_name] = FALSE;
+        }
+        return (bool) self::$dnCache['active' . $domain_name];
+    }
+
     /**
      * get domain config
      * @global app $app
@@ -180,13 +192,13 @@ class sogo_helper {
      * @return array|boolean boolean false on error
      */
     public function get_domain_config($domain_name, $full_server_conf = false) {
-        if (!isset(self::$dnCache[$domain_name])) {
+        if (!isset(self::$dnCache[$domain_name]) && $this->is_domain_active($domain_name)) {
             global $app;
             //* get server default config (BASED on domain name)
             $server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
             $server_default = $app->db->queryOneRecord($server_default_sql);
             if (!$server_default) {
-                $this->logError("sogo_helper::get_domain_config(): failed." . PHP_EOL . "Unable to get server config from domain {$domain_name}" . PHP_EOL . "SQL: {$server_default_sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
+                $this->logWarn("sogo_helper::get_domain_config(): failed." . PHP_EOL . "Unable to get server config from domain {$domain_name}" . PHP_EOL . "SQL: {$server_default_sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
                 self::$dnCache[$domain_name] = false; //* if server default is not isset we must stop it from running to prevent SOGo or system failures
                 return self::$dnCache[$domain_name];
             }
@@ -234,6 +246,8 @@ class sogo_helper {
             unset($domain_default['sogo_id'], $domain_default['sys_groupid'], $domain_default['sys_perm_group'], $domain_default['domain_id'], $domain_default['sys_userid'], $domain_default['sys_perm_user'], $domain_default['sys_perm_other']);
             self::$dnCache[$domain_name] = $domain_default;
             return self::$dnCache[$domain_name];
+        }  else {
+            self::$dnCache[$domain_name] = $this->is_domain_active($domain_name);
         }
         return self::$dnCache[$domain_name];
     }

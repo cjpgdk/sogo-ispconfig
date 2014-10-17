@@ -1,5 +1,5 @@
 <?php
-
+echo "No settings to alter yet!";
 /*
   `smid` int(2) NOT NULL AUTO_INCREMENT,
   `sys_userid` int(11) unsigned NOT NULL,
@@ -10,7 +10,6 @@
   `all_domains` enum('y','n') NOT NULL DEFAULT 'y',
   `allow_same_instance` enum('y','n') NOT NULL DEFAULT 'y',
   `sql_of_mail_server` enum('y','n') NOT NULL DEFAULT 'n',
- */
 
 $tform_def_file = "form/sogo_module.tform.php";
 
@@ -34,3 +33,4 @@ class tform_action extends tform_actions {
 
 $page = new tform_action();
 $page->onLoad();
+ */
