@@ -34,17 +34,80 @@ class sogo_helper {
 
     /** @var array */
     static private $sCache = array();
-    
-    
+
+    /** @var sogo_module_settings */
+    public $module_settings;
+
+    /**
+     * query all mail domains, based on module settings
+     * @global app $app
+     * @global array $conf
+     * @param string $active
+     * @return boolean|array boolean false on failure or empty query
+     */
+    public function get_mail_domain_names($active = 'y') {
+        global $app, $conf;
+        if (!in_array($active, array('n', 'y')))
+            $active = 'y';
+        $mail_domains_sql = FALSE;
+        if ($this->module_settings->all_domains && $this->module_settings->allow_same_instance) {
+            //* allow all domains + same instance
+            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='y'";
+        } else if (!$this->module_settings->all_domains && $this->module_settings->allow_same_instance) {
+            //* allow only domains with sogo domain config + same instance
+            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='y' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=sd.`server_id`";
+        } else if ($this->module_settings->all_domains && !$this->module_settings->allow_same_instance) {
+            //* allow all domains but only for this server
+            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='y' AND `server_id`=" . intval($conf['server_id']);
+        } else if (!$this->module_settings->all_domains && !$this->module_settings->allow_same_instance) {
+            //* allow only domains with sogo domain config and located on this server
+            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='y' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=" . intval($conf['server_id']);
+        }
+        if ($mail_domains_sql !== FALSE) {
+            if ($conf['dbmaster_host'] != '' && $conf['dbmaster_host'] != $conf['db_host']) {
+                return $app->dbmaster->queryAllRecords($mail_domains_sql);
+            } else {
+                return $app->db->queryAllRecords($mail_domains_sql);
+            }
+        } else
+            return FALSE;
+    }
+
+    public function load_module_settings($server_id = 0) {
+        global $app;
+        //* $server_id are for the future
+        $query = "SELECT * FROM `sogo_module` WHERE smid=1;";
+        $settings = $app->db->queryOneRecord($query);
+        if (!$settings && is_object($this->dbmaster)) {
+            //* if local db fails to sync or table sogo_module not created try master db
+            $settings = $app->dbmaster->queryOneRecord($query);
+        }
+        $this->module_settings = new sogo_module_settings();
+        if ($settings !== FALSE) {
+            foreach ($settings as $key => $value) {
+                if (in_array($key, array('smid', 'sys_userid', 'sys_groupid', 'sys_perm_user', 'sys_perm_group', 'sys_perm_other')))
+                    continue;
+                $this->module_settings->{$key} = ($value == 'y' ? TRUE : FALSE);
+            }
+        } else {
+            $this->logWarn("Unable to fetch SOGo module settings using default");
+        }
+    }
+
+    /**
+     * check the number of alias columns for a domain name, and create more if to low
+     * @param string $domain
+     * @return boolean
+     */
     public function check_alias_columns($domain) {
-        
         //* get total alias count for domain
         $acount_n = (int) $this->get_max_alias_count($domain, 'n'); //* none active
         $acount_y = (int) $this->get_max_alias_count($domain, 'y'); //* active
         $acount = (int) ($acount_n + $acount_y);
-
-        $dtacount = (int) $this->get_sogo_table_alias_column_count($domain); //* get alias columns in table for domain
+        //* get alias columns in table for domain
+        $dtacount = (int) $this->get_sogo_table_alias_column_count($domain);
         $has_error = FALSE;
+        //* if alias columns count in table for domain are to low
         if ($dtacount < $acount) {
             //* update domain table
             $sql = array();
@@ -378,5 +441,27 @@ class sogo_helper {
         }
         return FALSE;
     }
+
+}
+
+class sogo_module_settings {
+
+    /**
+     * configure domains with and without config
+     * @var boolean
+     */
+    public $all_domains = TRUE;
+
+    /**
+     * configure all domains for use same place
+     * @var boolean
+     */
+    public $allow_same_instance = TRUE;
+
+    /**
+     * use mail server database in SQL view
+     * @var boolean
+     */
+    public $sql_of_mail_server = FALSE;
 
 }

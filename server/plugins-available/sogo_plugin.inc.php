@@ -36,6 +36,7 @@ class sogo_plugin {
     function onLoad() {
         global $app, $conf;
         $app->uses('sogo_helper,sogo_config');
+        $app->sogo_helper->load_module_settings($conf['server_id']);
 
         //* check sogo config before we register events
         if (
@@ -69,6 +70,11 @@ class sogo_plugin {
             $app->plugins->registerEvent('mail_forwarding_delete', $this->plugin_name, 'remove_sogo_mail_user_alias');
             $app->plugins->registerEvent('mail_forwarding_insert', $this->plugin_name, 'insert_sogo_mail_user_alias');
             $app->plugins->registerEvent('mail_forwarding_update', $this->plugin_name, 'update_sogo_mail_user_alias');
+
+            //* TB: sogo_module
+            $app->plugins->registerEvent('sogo_module_insert', $this->plugin_name, 'remove_sogo_module_settings');
+            $app->plugins->registerEvent('sogo_module_update', $this->plugin_name, 'insert_sogo_module_settings');
+            $app->plugins->registerEvent('sogo_module_delete', $this->plugin_name, 'update_sogo_module_settings');
         }
     }
 
@@ -84,12 +90,10 @@ class sogo_plugin {
             $app->sogo_config->createConfig(array('sogod' => $sconf));
             //* holder for builded domain xml config
             $sogodomsconf = "";
-            //* SQL to select the mail domains
-            $mail_domains_sql = "SELECT `domain` FROM `mail_domain`";
             //* we use tpl class to build the domain config xml 
             $app->uses('tpl');
-            //* query mail domains
-            if ($mail_domains = $app->db->queryAllRecords($mail_domains_sql)) {
+            //* query mail domains active and based on module settings
+            if ($mail_domains = $app->sogo_helper->get_mail_domain_names('y')) {
                 //* on success loop mail domains, prepare config
                 foreach ($mail_domains as $value) {
                     //* get full config for this domain.!
@@ -245,6 +249,31 @@ class sogo_plugin {
         }
     }
 
+    //* #START# SOGO MODULE SETTINGS (TB: sogo_module)
+
+    public function update_sogo_module_settings($event_name, $data) {
+        global $app, $conf;
+        $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
+    }
+
+    public function insert_sogo_module_settings($event_name, $data) {
+        //* should NEVER be called!
+        /*
+          global $app, $conf;
+          $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
+         */
+    }
+
+    public function remove_sogo_module_settings($event_name, $data) {
+        //* should NEVER be called!
+        /*
+          global $app, $conf;
+          $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
+         */
+    }
+
+    //* #END# SOGO MODULE SETTINGS (TB: sogo_config)
+    //* ##
     //* #START# SOGO CONFIG (TB: sogo_config)
 
     public function update_sogo_config($event_name, $data) {
