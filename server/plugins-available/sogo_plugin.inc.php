@@ -494,8 +494,11 @@ class sogo_plugin {
 
         list($user, $domain) = explode('@', $data['new']['email']);
 
-        //* a simple sync should be ok 
-        $this->__sync_mail_users($domain);
+        //* only sync active domains, if not active make sure all data in sogo is gone!
+        if ($this->__check_domain_state($domain)) {
+            //* a simple sync should be ok 
+            $this->__sync_mail_users($domain);
+        }
         return TRUE;
     }
 
@@ -767,13 +770,15 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
      */
     private function __sync_mail_users($domain_name, $imap_enabled = true) {
         global $app;
+        if (!$this->__check_domain_state($domain_name))
+            return false; //* do nothing
+        
         $app->sogo_helper->logDebug("sogo_plugin::__sync_mail_users(): [{$domain_name}]");
         //* create domain table id it do not exists
         if (!$app->sogo_helper->sogo_table_exists($domain_name)) {
             $this->__create_sogo_table($domain_name);
         }
         $emails = $app->db->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
-        $sogo_user_sql = "";
         if (!empty($emails)) {
             $domain_config = $app->sogo_helper->get_domain_config($domain_name, true);
             if (!$domain_config || !is_array($domain_config)) {
@@ -913,7 +918,8 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
     private function __delete_mail_user($email) {
         global $app, $conf;
         if (!empty($email) && (strpos($email, '@') !== FALSE)) {
-            $cmd = "{$conf['sogo_su_command']} {$conf['sogo_tool_binary']} remove " . escapeshellarg($email);
+            $cmd_arg = escapeshellarg("{$conf['sogo_tool_binary']}") . " remove " . escapeshellarg("{$email}");
+            $cmd = str_replace('{command}', $cmd_arg, $conf['sogo_su_command']);
             $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_user() \n\t - CALL:{$cmd}");
             exec($cmd);
             $usrDom = explode('@', $email);
@@ -922,6 +928,29 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
             if ($sqlres->error)
                 $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_user() \n\t - SQL Error: {$sqlres->error}");
         }
+    }
+
+    private function __check_domain_state($domain, $domain_id = -1) {
+        global $app;
+        if (!$app->sogo_helper->is_domain_active($domain)) {
+            //* not active
+            if ($app->sogo_helper->sogo_table_exists($domain)) {
+                //* check if users exists in table, delete them with SOGo if they do
+                $domain_table = $app->sogo_helper->get_valid_sogo_table_name($domain) . '_users';
+                $sqlres = & $app->sogo_helper->sqlConnect();
+                if ($tmp = $sqlres->query("SELECT `c_imaplogin` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                    while ($obj = $tmp->fetch_object()) {
+                        if (isset($obj->c_imaplogin)) {
+                            //* only deletes from SOGo db
+                            $this->__delete_mail_user($obj->c_imaplogin);
+                        }
+                    }
+                }
+                $app->sogo_helper->drop_sogo_users_table($domain, $domain_id);
+            }
+            return false;
+        }
+        return true;
     }
 
 }

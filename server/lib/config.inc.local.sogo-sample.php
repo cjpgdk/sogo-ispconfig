@@ -1,7 +1,12 @@
 <?php
 
-//* SOGo sudo command to use when executing a SOGo binary
-$conf['sogo_su_command'] = 'sudo -u sogo';
+/*
+ SOGo sudo command to use when executing a SOGo binary
+ eg.
+ su -p -c '{command}' sogo
+ sudo -u sogo {command}
+*/
+$conf['sogo_su_command'] = 'sudo -u sogo {command}';
 /*
   //* full path to sogo binary
   $conf['sogo_binary'] = '/usr/sbin/sogod';
@@ -37,6 +42,11 @@ $conf['sogo_domain_extra_vars'] = array(
 $conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
 $conf['sogo_gnu_step_defaults_sogod.plist'] = '/var/lib/sogo/GNUstep/Defaults/sogod.plist';
 
+/* 
+ not integraded but will be 
+ template to use for table names in sogo db
+*/
+$conf['sogo_domain_table_tpl'] = "{domain}_users";
 /*
 SOGoEncryptionKey ?? if password change shall be enabled.!
 */

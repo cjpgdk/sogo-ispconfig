@@ -246,7 +246,7 @@ class sogo_helper {
             unset($domain_default['sogo_id'], $domain_default['sys_groupid'], $domain_default['sys_perm_group'], $domain_default['domain_id'], $domain_default['sys_userid'], $domain_default['sys_perm_user'], $domain_default['sys_perm_other']);
             self::$dnCache[$domain_name] = $domain_default;
             return self::$dnCache[$domain_name];
-        }  else {
+        } else {
             self::$dnCache[$domain_name] = $this->is_domain_active($domain_name);
         }
         return self::$dnCache[$domain_name];
@@ -322,6 +322,10 @@ class sogo_helper {
      * @return string 
      */
     public function get_valid_sogo_table_name($domain_name) {
+        /*
+          global $conf;
+          $conf['sogo_domain_table_tpl']
+         */
         return str_replace(array('-', '.'), '_', $domain_name);
     }
 
