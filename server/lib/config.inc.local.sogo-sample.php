@@ -2,9 +2,10 @@
 
 /*
  SOGo sudo command to use when executing a SOGo binary
- eg.
+ eg. 
  su -p -c '{command}' sogo
  sudo -u sogo {command}
+ **** if you must quote the command ONLY USE ' (Single quote) NOT "(Double quote)
 */
 $conf['sogo_su_command'] = 'sudo -u sogo {command}';
 /*

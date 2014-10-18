@@ -32,4 +32,14 @@ sogo_helper::get_domain_config(): failed. Unable to get server config from domai
 SOGo get server config failed
 	* when this error is raised and logged, it simply means that there is NO server configuration that can be used
 	* and it is called from multiple different methods so no "Class-Name::Method-Name():" 
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Why do i see these errors in ispconfig/cron.log
+
+2014-10-18 15:21:03.014 sogo-tool[7517] No folder returned for user 'admin@example.dk'
+	*simply output from calling "sogo-tool" when deleting a mail user, it's not an error 
 	
+2014-10-18 15:21:02.847 sogo-tool[7517] ERROR(+[GCSFolderManager defaultFolderManager]): default 'OCSFolderInfoURL' is not configured.
+	* this one is only logged the second the plugin tries to operate anything with SOGo, it means (simply) that you are missing the OCSFolderInfoURL (SQL connection)
+	* eg. deleting a mail user, rebuilding the configuration, restarting SOGo etc..
