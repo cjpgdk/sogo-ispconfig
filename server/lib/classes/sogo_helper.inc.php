@@ -160,7 +160,7 @@ class sogo_helper {
 
             $server_default = $app->db->queryOneRecord($sql);
             if (!$server_default) {
-                $this->logError("SOGo get server config failed." . PHP_EOL . "Unable to get server config for server id {$server_id}" . PHP_EOL . "SQL: {$sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
+                $this->logError("SOGo get server config failed.");
                 self::$sCache[$server_id] = false;
                 return self::$sCache[$server_id];
             }
@@ -198,7 +198,7 @@ class sogo_helper {
             $server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
             $server_default = $app->db->queryOneRecord($server_default_sql);
             if (!$server_default) {
-                $this->logWarn("sogo_helper::get_domain_config(): failed." . PHP_EOL . "Unable to get server config from domain {$domain_name}" . PHP_EOL . "SQL: {$server_default_sql}" . PHP_EOL . "SQL Error: {$app->db->error}" . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 2));
+                $this->logWarn("sogo_helper::get_domain_config(): failed. Unable to get server config from domain {$domain_name}");
                 self::$dnCache[$domain_name] = false; //* if server default is not isset we must stop it from running to prevent SOGo or system failures
                 return self::$dnCache[$domain_name];
             }
