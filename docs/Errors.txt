@@ -1,0 +1,35 @@
+In this file you can read a bit about the different errors
+
+let's see the errors/warnings are there to tell you that it is not running like it should
+many of the errors or warnings will usually start like this Class-Name::Method-Name(): 
+	- eg: error is raised "sogo_plugin::__sync_mail_users(): BLAH BLAH BLAH"
+	- 		as you can see the error is raised by Class: "sogo_plugin" in function "__sync_mail_users()"
+	-		followed by a small description of the error
+	
+in cases where the error is without "Class-Name::Method-Name():" 
+it simply means that it is a "global" error or warning the could 
+have bean set by any function/method this type of error/warning is 
+never alone but raised along with another error/warning
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+
+sogo_plugin::__sync_mail_users(): unable to fetch the domain config for domain [example.dk]
+	* when this error is raised and logged, it means the you DO NOT have configuration that can be used with this domain
+	* this is usually followed by a warning (NOT AN ERROR) from "sogo_helper::get_domain_config()"
+
+
+
+sogo_helper::get_domain_config(): failed. Unable to get server config from domain example.dk
+	* when this warning is raised and logged, it simply means that the server were SOGo is installed and the plugin is running
+	* do not have ANY configuration that can be used to set up the configuration(s)!
+	* one could say that it should not be raised but then don't install the plugin on that server!
+	
+
+
+SOGo get server config failed
+	* when this error is raised and logged, it simply means that there is NO server configuration that can be used
+	* and it is called from multiple different methods so no "Class-Name::Method-Name():" 
+	
