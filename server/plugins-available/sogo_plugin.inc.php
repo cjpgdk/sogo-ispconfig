@@ -577,6 +577,7 @@ class sogo_plugin {
         //* check event
         if (!$app->sogo_helper->isEqual($event_name, 'mail_domain_insert'))
             return;
+
         if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
             $this->__create_sogo_table($data['new']['domain']);
             $method = "sogo_plugin::insert_sogo_mail_domain():";
@@ -721,6 +722,12 @@ class sogo_plugin {
      */
     private function __create_sogo_table($domain_name) {
         global $app, $conf;
+
+        if (!$app->sogo_helper->has_mail_users($domain_name, true)) {
+            //* dont create no users
+            $app->sogo_helper->logDebug("sogo_plugin::__create_sogo_table(): Refusing to create table for domain: {$domain_name}, NO USERS");
+            return;
+        }
         if ($app->sogo_helper->sogo_table_exists($domain_name)) {
             $app->sogo_helper->logDebug("sogo_plugin::__create_sogo_table(): SOGo table exists for domain: {$domain_name}");
             return $this->__sync_mail_users($domain_name);
@@ -772,7 +779,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->get_valid_sogo_table_name($domai
         global $app;
         if (!$this->__check_domain_state($domain_name))
             return false; //* do nothing
-        
+
         $app->sogo_helper->logDebug("sogo_plugin::__sync_mail_users(): [{$domain_name}]");
         //* create domain table id it do not exists
         if (!$app->sogo_helper->sogo_table_exists($domain_name)) {
