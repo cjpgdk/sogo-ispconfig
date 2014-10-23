@@ -57,13 +57,16 @@ class tform_action extends tform_actions {
     }
 
     public function onAfterInsert() {
+        global $app;
         parent::onAfterInsert();
         if ($this->upload_ok) {
-            $_REQUEST["next_tab"] = ""; //* force redirect to list
+            $_REQUEST["next_tab"] = 'plugins';
+            $app->tpl->setVar('msg', str_replace(array('{LINK}', '{/LINK}'), array('<a href="#" onclick="loadContent(\'admin/sogo_plugins_list.php\');">', '</a>'), $app->tform->wordbook['all_good_return']));
         }
     }
 
     public function onBeforeUpdate() {
+        global $app, $conf;
         $this->upload_ok = $this->setFileName(true);
         
         if ($this->dataRecord['filetype'] == "download" && !file_exists("{$conf['sogo_plugins_upload_dir']}/{$this->dataRecord['file']}")) {
