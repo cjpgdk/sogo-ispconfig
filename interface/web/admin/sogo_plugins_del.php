@@ -45,15 +45,6 @@ $_SESSION["s"]["form"]["return_to"] = "";
 
 class tform_action extends tform_actions {
 
-    public function onAfterDelete() {
-        global $app;
-        //* i need to set it like this iget redirected to add new form after delete??
-        $app->plugin->raiseEvent($_SESSION['s']['module']['name'] . ':' . $app->tform->formDef['name'] . ':' . 'on_after_delete', $this);
-        include_once('list/sogo_plugins.list.php');
-        header("Location: " . $liste["file"]);
-        exit;
-    }
-
 }
 
 $app->tform_action = new tform_action();
