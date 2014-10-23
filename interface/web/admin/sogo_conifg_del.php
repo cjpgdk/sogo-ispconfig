@@ -29,8 +29,10 @@ require_once '../../lib/app.inc.php';
 
 $app->auth->check_module_permissions('admin');
 if (method_exists($app->auth, 'check_security_permissions')) {
-    //* for this version (Update 10) only we check if admin is allowed 
     $app->auth->check_security_permissions('admin_allow_server_services');
+} else {
+    if (!$app->auth->is_admin())
+        die('only allowed for administrators.');
 }
 
 if ($conf['demo_mode'] == true)

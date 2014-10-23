@@ -1,0 +1,77 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_plugins">
+
+    <div class="pnl_formsarea">
+        <fieldset class="inlineLabels"><legend>SOGo Module Settings</legend>
+            <div class="ctrlHolder">
+                <label for="active">{tmpl_var name='active_txt'}</label>
+                <select name="active" id="active" class="selectInput">
+                    {tmpl_var name='active'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="client_id">{tmpl_var name='client_id_txt'}</label>
+                <select name="client_id" id="client_id" class="selectInput">
+                    {tmpl_var name='client_id'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
+                <label for="name">{tmpl_var name='name_txt'}</label>
+                <input name="name" id="name" value="{tmpl_var name='name'}" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="description">{tmpl_var name='description_txt'}</label>
+                <textarea name="description" id="description">{tmpl_var name='description'}</textarea>
+            </div>
+            <div class="ctrlHolder">
+                <label for="filetype">{tmpl_var name='filetype_txt'}</label>
+                <select name="filetype" id="filetype" class="selectInput">
+                    {tmpl_var name='filetype'}
+                </select>
+            </div>
+            <div class="ctrlHolder" id="file_type_download">
+                <label for="file_download">{tmpl_var name='file_txt'}</label>
+                <input name="file_download" id="file_download" type="file" class="fileUpload" />
+            </div>
+            <div class="ctrlHolder" id="file_type_http" style="display: none;">
+                <label for="file_http">{tmpl_var name='file_txt'}</label>
+                <input name="file_http" id="file_http" value="{tmpl_var name='file'}" type="text" class="textInput" />
+            </div>
+        </fieldset>
+
+        
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+
+        <div class="buttonHolder buttons">
+            
+            <button class="positive iconstxt icoPositive" id="UploadFormsubmit" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitUploadForm('pageForm', 'admin/sogo_plugins_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="positive iconstxt icoPositive" id="FormSubmit" style="display: none;" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_plugins_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_plugins_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        filetypeoptionchange();
+        jQuery('#filetype').change(function () {
+            filetypeoptionchange();
+        });
+    });
+    function filetypeoptionchange() {
+        if ($("select#filetype option:selected").val() === "download") {
+            $('#file_type_download').show();
+            $('#UploadFormsubmit').show();
+            $('#file_type_http').hide();
+            $('#FormSubmit').hide();
+        } else {
+            $('#file_type_download').hide();
+            $('#UploadFormsubmit').hide();
+            $('#file_type_http').show();
+            $('#FormSubmit').show();
+        }
+    }
+</script>

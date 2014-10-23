@@ -1,0 +1,12 @@
+<?php
+$wb["active_txt"] = 'Active';
+$wb["client_id_txt"] = 'Client';
+$wb["name_txt"] = 'Name';
+$wb["description_txt"] = 'Description';
+$wb["filetype_txt"] = 'Tile Type';
+$wb["Client Plugins"] = 'Client Plugin';
+$wb["SOGo Plugins"] = 'SOGo Plugin'; //* tab name
+$wb["all_good_return"] = 'Plugin is now added to the list click here to return the list: {LINK}Back{/LINK}';
+$wb["download_file_missing"] = 'the file %s is not found on your server you may need to re-upload it?';
+$wb["Any type of plugins you have to use in order to integrate SOGo these will be listed under 'Email' for your clients"] = 'Any type of plugin you have to use in order to integrate SOGo these will be listed under \'Email\' for your clients';
+?>

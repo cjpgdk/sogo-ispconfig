@@ -21,10 +21,14 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$tform_def_file = "form/sogo_config.tform.php";
+$list_def_file = "list/sogo_plugins.list.php";
+$tform_def_file = "form/sogo_plugins.tform.php";
 
 require_once '../../lib/config.inc.php';
 require_once '../../lib/app.inc.php';
+
+if ($conf['demo_mode'] == true)
+    $app->error('This function is disabled in demo mode.');
 
 $app->auth->check_module_permissions('admin');
 if (method_exists($app->auth, 'check_security_permissions')) {
@@ -34,42 +38,24 @@ if (method_exists($app->auth, 'check_security_permissions')) {
         die('only allowed for administrators.');
 }
 
-$app->uses('tpl,tform,functions');
-$app->load('tform_actions,sogo_helper');
+$app->uses("tform_actions");
+
+//* for some reason i get redirected to add new form after delete so empty this session var
+$_SESSION["s"]["form"]["return_to"] = "";
 
 class tform_action extends tform_actions {
 
-    static private $_server_id = FALSE;
-    static private $_server_name = FALSE;
-
-    /** @global app $app */
-    public function onLoad() {
+    public function onAfterDelete() {
         global $app;
-        if (isset($_GET['sid'])) {
-            $result = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($_GET['sid']));
-            if (!isset($result['server_name'])) {
-                //* server do not exists.!
-                echo "HEADER_REDIRECT:admin/sogo_conifg_list.php";
-                exit;
-            } else {
-                $this->_server_id = intval($_GET['sid']);
-                $this->_server_name = $result['server_name'];
-            }
-        }
-        parent::onLoad();
-    }
-
-    /** @global app $app */
-    public function onShowEnd() {
-        global $app;
-        if (isset($_GET['sid']) && $this->_server_id !== FALSE && $this->_server_name !== FALSE) {
-            $app->tpl->setVar('server_id', $this->_server_id);
-            $app->tpl->setVar('server_name', $this->_server_name);
-        }
-        parent::onShowEnd();
+        //* i need to set it like this iget redirected to add new form after delete??
+        $app->plugin->raiseEvent($_SESSION['s']['module']['name'] . ':' . $app->tform->formDef['name'] . ':' . 'on_after_delete', $this);
+        include_once('list/sogo_plugins.list.php');
+        header("Location: " . $liste["file"]);
+        exit;
     }
 
 }
 
-$page = new tform_action();
-$page->onLoad();
+$app->tform_action = new tform_action();
+$app->tform_action->onDelete();
+?>

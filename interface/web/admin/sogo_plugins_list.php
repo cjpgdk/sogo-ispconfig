@@ -21,33 +21,17 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$module['nav'][] = array(
-    'title' => 'SOGo',
-    'open' => 1,
-    'items' => array(
-        array(
-            'title' => 'Configuration',
-            'target' => 'content',
-            'link' => 'admin/sogo_conifg_list.php',
-            'html_id' => 'sogo_conifg_list'
-        ),
-        array(
-            'title' => 'Domains',
-            'target' => 'content',
-            'link' => 'admin/sogo_domains_list.php',
-            'html_id' => 'sogo_domains_list'
-        ),
-        array(
-            'title' => 'Settings',
-            'target' => 'content',
-            'link' => 'admin/sogo_module_settings.php',
-            'html_id' => 'sogo_module_settings'
-        ),
-        array(
-            'title' => 'Plugins',
-            'target' => 'content',
-            'link' => 'admin/sogo_plugins_list.php',
-            'html_id' => 'sogo_plugins_list'
-        ),
-    )
-);
+
+
+require_once '../../lib/config.inc.php';
+require_once '../../lib/app.inc.php';
+
+$list_def_file = "list/sogo_plugins.list.php";
+
+$app->auth->check_module_permissions('admin');
+$app->uses('listform_actions');
+
+class listform_action extends listform_actions {}
+
+$app->listform_action = new listform_action();
+$app->listform_action->onLoad();
