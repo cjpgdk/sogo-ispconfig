@@ -41,7 +41,11 @@ if (count(Installer::$errors) > 0) {
 echo PHP_EOL;
 
 echo "All done assuming no errors and all went well" . PHP_EOL;
-echo "you will need to add SOGo config values to server config file:" . PHP_EOL;
+echo "you will need to add SOGo config values to interface config file:" . PHP_EOL;
+echo Installer::$ispc_home_dir."/interface/lib/config.inc.local.php" . PHP_EOL;
+echo "A sample file can be found here.!" . PHP_EOL;
+echo Installer::$ispc_home_dir."/interface/lib/config.inc.local.sogo-sample.php" . PHP_EOL . PHP_EOL;
+echo "and you also need to add SOGo config values to server config file:" . PHP_EOL;
 echo Installer::$ispc_home_dir."/server/lib/config.inc.local.php" . PHP_EOL;
 echo "A sample file can be found here.!" . PHP_EOL;
 echo Installer::$ispc_home_dir."/server/lib/config.inc.local.sogo-sample.php" . PHP_EOL . PHP_EOL;
