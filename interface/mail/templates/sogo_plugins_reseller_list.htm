@@ -1,0 +1,63 @@
+<h2>{tmpl_var name="list_head_txt"}</h2>
+
+<div class="panel panel_list_sogo_plugins_reseller">
+    <div class="pnl_listarea">
+        <fieldset><legend>{tmpl_var name="list_head_txt"}</legend>
+            <table class="list">
+                <thead>
+                    <tr>
+                        <th class="tbl_col_client_id" scope="col">{tmpl_var name="client_id_txt"}</th>
+                        <th class="tbl_col_name" scope="col">{tmpl_var name="name_txt"}</th>
+                        <th class="tbl_col_description" scope="col">{tmpl_var name="description_txt"}</th>
+                        <th class="tbl_col_buttons" scope="col">&nbsp;</th>
+                    </tr>
+                    <tr>
+                        <td class="tbl_col_client_id"><select name="search_client_id" onChange="submitForm('pageForm', 'mail/sogo_mail_plugins_list.php');">{tmpl_var name='search_client_id'}</select></td>
+                        <td class="tbl_col_name"><input type="text" name="search_name" value="{tmpl_var name='search_name'}" /></td>
+                        <td class="tbl_col_description"><input type="text" name="search_description" value="{tmpl_var name='search_description'}" /></td>
+                        <td class="tbl_col_buttons"><div class="buttons"><button type="button" class="icons16 icoFilter" name="Filter" id="Filter" value="{tmpl_var name="filter_txt"}" onclick="submitForm('pageForm','mail/sogo_mail_plugins_list.php');"><span>{tmpl_var name="filter_txt"}</span></button></div></td>
+                    </tr>
+                </thead>
+                <tbody>
+                <tmpl_loop name="records">
+                    <tr class="tbl_row_<tmpl_if name='__EVEN__'}even<tmpl_else>uneven</tmpl_if>">
+                        <td colspan="4">
+                            <table class="list">
+                                <thead></thead>
+                                <tfoot></tfoot>
+                                <tbody>
+                                    <tr>
+                                        <td style="vertical-align: top; min-width: 35px; max-width: 35px;">{tmpl_if name="client_id" op="==" value=""}
+{tmpl_var name="client_id_txt"}: ALL
+{tmpl_else}
+{tmpl_var name="client_id_txt"}: {tmpl_var name="client_id"}
+{/tmpl_if}<br>
+<a class="positive" href="mail/sogo_plugins_download.php?pid={tmpl_var name='id'}" target="_blank"><span>{tmpl_var name='download_record_txt'}</span></a>
+                                        </td>
+                                        <td style="vertical-align: top;"><h3>{tmpl_var name="name"}</h3>
+<p>
+{tmpl_var name="description"}
+</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tmpl_loop>
+                <tmpl_unless name="records">
+                    <tr class="tbl_row_noresults tbl_row_<tmpl_if name='__EVEN__'}even<tmpl_else>uneven</tmpl_if>">
+                        <td colspan="4">{tmpl_var name='globalsearch_noresults_text_txt'}</td>
+                    </tr>
+                </tmpl_unless>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="tbl_footer tbl_paging" colspan="4">{tmpl_var name="paging"}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </fieldset>
+    </div>
+
+</div>

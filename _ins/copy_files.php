@@ -51,7 +51,22 @@ $files_copy = array(
         'web/admin/templates/sogo_plugins_list.htm',
     //* /#ADMIN#
     //* #MAIL#
-    //* currently empty
+        //* mail
+        'web/mail/sogo_mail_plugins_list.php',
+        'web/mail/sogo_plugins_download.php',
+        //* form
+        //* lng
+        'web/mail/lib/lang/en_sogo_plugins_list.lng',
+        'web/mail/lib/lang/en_sogo_plugins_reseller_list.lng',
+        'web/mail/lib/lang/en_sogo_plugins_user_list.lng',
+        //* menu
+        'web/mail/lib/menu.d/sogo.menu.php',
+        //* list
+        'web/mail/list/sogo_plugins.list.php',
+        //* templates
+        'web/mail/templates/sogo_plugins_list.htm',
+        'web/mail/templates/sogo_plugins_reseller_list.htm',
+        'web/mail/templates/sogo_plugins_user_list.htm',
     //* /#MAIL#
     ),
     'server' => array(

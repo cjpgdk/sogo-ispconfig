@@ -1,0 +1,7 @@
+<?php
+$wb["list_head_txt"] = 'SOGo Mail Plugins';
+$wb["client_id_txt"] = 'Client';
+$wb["name_txt"] = 'Name';
+$wb["description_txt"] = 'Description';
+$wb["download_record_txt"] = 'Download';
+?>
