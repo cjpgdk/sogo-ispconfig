@@ -277,4 +277,6 @@ $wb["list_desc_SOGo_Defaults_txt"]='in this section you have configuration item 
 $wb["list_desc_SOGo_Domain_Defaults_txt"]='in this section you have configuration item that can only be set on a per server and domain level';
 $wb["list_desc_SOGo_User_Defaults_txt"]='in this section you have configuration item that can only be set on a per server, domain and user level';
 $wb["list_desc_SOGo_Custom_txt"]='All other configuration settings can be set here if needed this is will then be added to the main confiration';
+$wb["btn_cancel_txt"]='Cancel';
+$wb["btn_save_txt"]='Save';
 

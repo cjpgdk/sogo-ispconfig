@@ -7,7 +7,12 @@
         <p>{tmpl_var name="list_desc_SOGo_Custom_txt"}</p>
         <fieldset class="inlineLabels"><legend>SOGo Custom</legend>
             <div class="ctrlHolder">
-                <label for="SOGoCustomXML">{tmpl_var name='SOGoCustomXML_txt'} <div class="ttip" title="{tmpl_var name='SOGoCustomXML_ttip_txt'}"></div></label>
+                <label for="SOGoCustomXML">
+                    {tmpl_var name='SOGoCustomXML_txt'} 
+                    <span class="ttip" title="{tmpl_var name='SOGoCustomXML_ttip_txt'}"></span>
+                    <br><span style="white-space: pre-wrap; float: left; padding-top: 10px;">&lt;key>ValidKeyName&lt;/key>
+&lt;string>I am valid but i will never be used by SOGo&lt;/string></span>
+                </label>
                 <textarea name="SOGoCustomXML" id="SOGoCustomXML" rows='20' cols='30' style="width: 630px; height: 492px;">{tmpl_var name='SOGoCustomXML'}</textarea>
             </div>
         </fieldset>

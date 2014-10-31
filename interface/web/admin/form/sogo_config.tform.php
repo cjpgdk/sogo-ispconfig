@@ -364,7 +364,7 @@ $form["tabs"]['domain'] = array(
         'SOGoSieveServer' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
-            'default' => 'sieve://localhost:4190',
+            'default' => 'sieve://{SERVERNAME}:4190',
             'value' => '',
             'maxlength' => '',
             'required' => 0,
@@ -412,7 +412,7 @@ $form["tabs"]['domain'] = array(
         'SOGoIMAPServer' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
-            'default' => 'imaps://127.0.0.1:143/?tls=YES',
+            'default' => 'imaps://{SERVERNAME}:143/?tls=YES',
             'value' => '',
             'maxlength' => '',
             'required' => 0,
@@ -421,7 +421,7 @@ $form["tabs"]['domain'] = array(
         'SOGoSMTPServer' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
-            'default' => '127.0.0.1',
+            'default' => '{SERVERNAME}',
             'value' => '',
             'maxlength' => '',
             'required' => 0,

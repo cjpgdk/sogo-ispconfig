@@ -30,8 +30,7 @@ $list_def_file = "list/sogo_server.list.php";
 unset($_SESSION['s']['module']["sogo_conifg_server_id"]);
 
 $app->auth->check_module_permissions('admin');
-$app->uses('listform_actions');
-$app->load('sogo_helper');
+$app->uses('listform_actions,sogo_helper');
 
 class listform_action extends listform_actions {
 
@@ -40,7 +39,7 @@ class listform_action extends listform_actions {
         global $app;
         $app->uses('tpl,listform,tform');
 
-        $_system_servers = sogo_helper::list_system_servers($app, FALSE);
+        $_system_servers = $app->sogo_helper->listSystemServers(FALSE);
         $system_servers = array();
         foreach ($_system_servers as $value) {
             $system_servers[] = array('system_server_id' => $value->id, 'system_server_name' => $value->name);

@@ -40,11 +40,12 @@ if (method_exists($app->auth, 'check_security_permissions')) {
         die('only allowed for administrators.');
 }
 
-$app->uses("tform_actions");
-$app->load("sogo_helper,functions");
+$app->uses("tform_actions,sogo_helper");
+$app->load("functions");
 
+//* get domain config id from domain id
 $dId = (int) (isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) : 0);
-$dConfId = (int) sogo_helper::get_domain_config_index($dId, $app);
+$dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
 
 $_REQUEST['id'] = $dConfId;
 

@@ -7,58 +7,78 @@
         <p>{tmpl_var name="list_desc_SOGo_Defaults_txt"}</p>
         <fieldset class="inlineLabels"><legend>SOGo Defaults</legend>
             <div class="ctrlHolder">
-                <label for="SOGoPageTitle">{tmpl_var name='SOGoPageTitle_txt'} <div class="ttip" title="{tmpl_var name='SOGoPageTitle_ttip_txt'}"></div></label>
+                <label for="SOGoPageTitle">{tmpl_var name='SOGoPageTitle_txt'} <span class="ttip" title="{tmpl_var name='SOGoPageTitle_ttip_txt'}"></span></label>
                 <input name="SOGoPageTitle" id="SOGoPageTitle" value="{tmpl_var name='SOGoPageTitle'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoMemcachedHost">{tmpl_var name='SOGoMemcachedHost_txt'} <div class="ttip" title="{tmpl_var name='SOGoMemcachedHost_ttip_txt'}"></div></label>
+                <label for="SOGoMemcachedHost">{tmpl_var name='SOGoMemcachedHost_txt'} <span class="ttip" title="{tmpl_var name='SOGoMemcachedHost_ttip_txt'}"></span></label>
                 <input name="SOGoMemcachedHost" id="SOGoMemcachedHost" value="{tmpl_var name='SOGoMemcachedHost'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoZipPath">{tmpl_var name='SOGoZipPath_txt'} <div class="ttip" title="{tmpl_var name='SOGoZipPath_ttip_txt'}"></div></label>
+                <label for="SOGoZipPath">{tmpl_var name='SOGoZipPath_txt'} <span class="ttip" title="{tmpl_var name='SOGoZipPath_ttip_txt'}"></span></label>
                 <input name="SOGoZipPath" id="SOGoZipPath" value="{tmpl_var name='SOGoZipPath'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoSoftQuotaRatio">{tmpl_var name='SOGoSoftQuotaRatio_txt'} <div class="ttip" title="{tmpl_var name='SOGoSoftQuotaRatio_ttip_txt'}"></div></label>
+                <label for="SOGoSoftQuotaRatio">{tmpl_var name='SOGoSoftQuotaRatio_txt'} <span class="ttip" title="{tmpl_var name='SOGoSoftQuotaRatio_ttip_txt'}"></span></label>
                 <input name="SOGoSoftQuotaRatio" id="SOGoSoftQuotaRatio" value="{tmpl_var name='SOGoSoftQuotaRatio'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoAddressBookDAVAccessEnabled">{tmpl_var name='SOGoAddressBookDAVAccessEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoAddressBookDAVAccessEnabled_ttip_txt'}"></div></label>
+                <label for="SOGoAddressBookDAVAccessEnabled">{tmpl_var name='SOGoAddressBookDAVAccessEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoAddressBookDAVAccessEnabled_ttip_txt'}"></span></label>
                 <select name="SOGoAddressBookDAVAccessEnabled" id="SOGoAddressBookDAVAccessEnabled" class="selectInput">
                     {tmpl_var name='SOGoAddressBookDAVAccessEnabled'}
                 </select>
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoCalendarDAVAccessEnabled">{tmpl_var name='SOGoCalendarDAVAccessEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoAddressBookDAVAccessEnabled_ttip_txt'}"></div></label>
+                <label for="SOGoCalendarDAVAccessEnabled">{tmpl_var name='SOGoCalendarDAVAccessEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoAddressBookDAVAccessEnabled_ttip_txt'}"></span></label>
                 <select name="SOGoCalendarDAVAccessEnabled" id="SOGoCalendarDAVAccessEnabled" class="selectInput">
                     {tmpl_var name='SOGoCalendarDAVAccessEnabled'}
                 </select>
             </div>
             <div class="ctrlHolder">
-                <label for="NGImap4ConnectionStringSeparator">{tmpl_var name='NGImap4ConnectionStringSeparator_txt'} <div class="ttip" title="{tmpl_var name='NGImap4ConnectionStringSeparator_ttip_txt'}"></div></label>
+                <label for="NGImap4ConnectionStringSeparator">{tmpl_var name='NGImap4ConnectionStringSeparator_txt'} <span class="ttip" title="{tmpl_var name='NGImap4ConnectionStringSeparator_ttip_txt'}"></span></label>
                 <input name="NGImap4ConnectionStringSeparator" id="NGImap4ConnectionStringSeparator" value="{tmpl_var name='NGImap4ConnectionStringSeparator'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoEnableEMailAlarms">{tmpl_var name='SOGoEnableEMailAlarms_txt'} <div class="ttip" title="{tmpl_var name='SOGoEnableEMailAlarms_ttip_txt'}"></div></label>
+                <label for="SOGoEnableEMailAlarms">{tmpl_var name='SOGoEnableEMailAlarms_txt'} <span class="ttip" title="{tmpl_var name='SOGoEnableEMailAlarms_ttip_txt'}"></span></label>
                 <select name="SOGoEnableEMailAlarms" id="SOGoEnableEMailAlarms" class="selectInput">
                     {tmpl_var name='SOGoEnableEMailAlarms'}
                 </select>
             </div>
             <div class="ctrlHolder">
-                <label for="OCSEMailAlarmsFolderURL">{tmpl_var name='OCSEMailAlarmsFolderURL_txt'} <div class="ttip" title="{tmpl_var name='OCSEMailAlarmsFolderURL_ttip_txt'}"></div></label>
-                <input name="OCSEMailAlarmsFolderURL" id="OCSEMailAlarmsFolderURL" value="{tmpl_var name='OCSEMailAlarmsFolderURL'}" size="100" type="text" class="textInput" />
+                <label for="OCSEMailAlarmsFolderURL">{tmpl_var name='OCSEMailAlarmsFolderURL_txt'} <span class="ttip" title="{tmpl_var name='OCSEMailAlarmsFolderURL_ttip_txt'}"></span></label>
+                <input name="OCSEMailAlarmsFolderURL" id="OCSEMailAlarmsFolderURL" value="{tmpl_var name='OCSEMailAlarmsFolderURL'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Username">{SOGOUSERN}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Password">{SOGOUSERPW}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Host">{MYSQLHOST}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Port">{MYSQLPORT}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="OGo SQL Database name">{SOGODB}</a>
             </div>
             <div class="ctrlHolder">
-                <label for="OCSFolderInfoURL">{tmpl_var name='OCSFolderInfoURL_txt'} <div class="ttip" title="{tmpl_var name='OCSFolderInfoURL_ttip_txt'}"></div></label>
-                <input name="OCSFolderInfoURL" id="OCSFolderInfoURL" value="{tmpl_var name='OCSFolderInfoURL'}" size="100" type="text" class="textInput" />
+                <label for="OCSFolderInfoURL">{tmpl_var name='OCSFolderInfoURL_txt'} <span class="ttip" title="{tmpl_var name='OCSFolderInfoURL_ttip_txt'}"></span></label>
+                <input name="OCSFolderInfoURL" id="OCSFolderInfoURL" value="{tmpl_var name='OCSFolderInfoURL'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Username">{SOGOUSERN}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Password">{SOGOUSERPW}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Host">{MYSQLHOST}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Port">{MYSQLPORT}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="OGo SQL Database name">{SOGODB}</a>
             </div>
             <div class="ctrlHolder">
-                <label for="OCSSessionsFolderURL">{tmpl_var name='OCSSessionsFolderURL_txt'} <div class="ttip" title="{tmpl_var name='OCSSessionsFolderURL_ttip_txt'}"></div></label>
-                <input name="OCSSessionsFolderURL" id="OCSSessionsFolderURL" value="{tmpl_var name='OCSSessionsFolderURL'}" size="100" type="text" class="textInput" />
+                <label for="OCSSessionsFolderURL">{tmpl_var name='OCSSessionsFolderURL_txt'} <span class="ttip" title="{tmpl_var name='OCSSessionsFolderURL_ttip_txt'}"></span></label>
+                <input name="OCSSessionsFolderURL" id="OCSSessionsFolderURL" value="{tmpl_var name='OCSSessionsFolderURL'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Username">{SOGOUSERN}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Password">{SOGOUSERPW}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Host">{MYSQLHOST}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Port">{MYSQLPORT}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="OGo SQL Database name">{SOGODB}</a>
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoProfileURL">{tmpl_var name='SOGoProfileURL_txt'} <div class="ttip" title="{tmpl_var name='SOGoProfileURL_ttip_txt'}"></div></label>
-                <input name="SOGoProfileURL" id="SOGoProfileURL" value="{tmpl_var name='SOGoProfileURL'}" size="100" type="text" class="textInput" />
+                <label for="SOGoProfileURL">{tmpl_var name='SOGoProfileURL_txt'} <span class="ttip" title="{tmpl_var name='SOGoProfileURL_ttip_txt'}"></span></label>
+                <input name="SOGoProfileURL" id="SOGoProfileURL" value="{tmpl_var name='SOGoProfileURL'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Username">{SOGOUSERN}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="SOGo SQL Password">{SOGOUSERPW}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Host">{MYSQLHOST}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="MySQL Port">{MYSQLPORT}</a>&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="OGo SQL Database name">{SOGODB}</a>
             </div>
             <div class="ctrlHolder">
                 <label for="SOGoAppointmentSendEMailReceipts">{tmpl_var name='SOGoAppointmentSendEMailReceipts_txt'}</label>
@@ -73,25 +93,25 @@
                 </select>
             </div>
             <div class="ctrlHolder">
-                <label for="SOGoPasswordChangeEnabled">{tmpl_var name='SOGoPasswordChangeEnabled_txt'} <div class="ttip" title="{tmpl_var name='SOGoPasswordChangeEnabled_ttip_txt'}"></div></label>
+                <label for="SOGoPasswordChangeEnabled">{tmpl_var name='SOGoPasswordChangeEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoPasswordChangeEnabled_ttip_txt'}"></span></label>
                 <select name="SOGoPasswordChangeEnabled" id="SOGoPasswordChangeEnabled" class="selectInput">
                     {tmpl_var name='SOGoPasswordChangeEnabled'}
                 </select>
             </div>
             <div class="ctrlHolder">
-                <label for="SxVMemLimit">{tmpl_var name='SxVMemLimit_txt'} <div class="ttip" title="{tmpl_var name='SxVMemLimit_ttip_txt'}"></div></label>
+                <label for="SxVMemLimit">{tmpl_var name='SxVMemLimit_txt'} <span class="ttip" title="{tmpl_var name='SxVMemLimit_ttip_txt'}"></span></label>
                 <input name="SxVMemLimit" id="SxVMemLimit" value="{tmpl_var name='SxVMemLimit'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="WOWorkersCount">{tmpl_var name='WOWorkersCount_txt'} <div class="ttip" title="{tmpl_var name='WOWorkersCount_ttip_txt'}"></div></label>
+                <label for="WOWorkersCount">{tmpl_var name='WOWorkersCount_txt'} <span class="ttip" title="{tmpl_var name='WOWorkersCount_ttip_txt'}"></span></label>
                 <input name="WOWorkersCount" id="WOWorkersCount" value="{tmpl_var name='WOWorkersCount'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="WOListenQueueSize">{tmpl_var name='WOListenQueueSize_txt'} <div class="ttip" title="{tmpl_var name='WOListenQueueSize_ttip_txt'}"></div></label>
+                <label for="WOListenQueueSize">{tmpl_var name='WOListenQueueSize_txt'} <span class="ttip" title="{tmpl_var name='WOListenQueueSize_ttip_txt'}"></span></label>
                 <input name="WOListenQueueSize" id="WOListenQueueSize" value="{tmpl_var name='WOListenQueueSize'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="WOWatchDogRequestTimeout">{tmpl_var name='WOWatchDogRequestTimeout_txt'} <div class="ttip" title="{tmpl_var name='WOWatchDogRequestTimeout_ttip_txt'}"></div></label>
+                <label for="WOWatchDogRequestTimeout">{tmpl_var name='WOWatchDogRequestTimeout_txt'} <span class="ttip" title="{tmpl_var name='WOWatchDogRequestTimeout_ttip_txt'}"></span></label>
                 <input name="WOWatchDogRequestTimeout" id="WOWatchDogRequestTimeout" value="{tmpl_var name='WOWatchDogRequestTimeout'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
@@ -105,19 +125,19 @@
                 </select>
             </div>
             <div class="ctrlHolder">
-                <label for="WOLogFile">{tmpl_var name='WOLogFile_txt'} <div class="ttip" title="{tmpl_var name='WOLogFile_ttip_txt'}"></div></label>
+                <label for="WOLogFile">{tmpl_var name='WOLogFile_txt'} <span class="ttip" title="{tmpl_var name='WOLogFile_ttip_txt'}"></span></label>
                 <input name="WOLogFile" id="WOLogFile" value="{tmpl_var name='WOLogFile'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="WOPidFile">{tmpl_var name='WOPidFile_txt'} <div class="ttip" title="{tmpl_var name='WOLogFile_ttip_txt'}"></div></label>
+                <label for="WOPidFile">{tmpl_var name='WOPidFile_txt'} <span class="ttip" title="{tmpl_var name='WOLogFile_ttip_txt'}"></span></label>
                 <input name="WOPidFile" id="WOPidFile" value="{tmpl_var name='WOPidFile'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="WOPort">{tmpl_var name='WOPort_txt'} <div class="ttip" title="{tmpl_var name='WOPort_ttip_txt'}"></div></label>
+                <label for="WOPort">{tmpl_var name='WOPort_txt'} <span class="ttip" title="{tmpl_var name='WOPort_ttip_txt'}"></span></label>
                 <input name="WOPort" id="WOPort" value="{tmpl_var name='WOPort'}" size="100" type="text" class="textInput" />
             </div>
             <div class="ctrlHolder">
-                <label for="WOSendMail">{tmpl_var name='WOSendMail_txt'} <div class="ttip" title="{tmpl_var name='WOSendMail_ttip_txt'}"></div></label>
+                <label for="WOSendMail">{tmpl_var name='WOSendMail_txt'} <span class="ttip" title="{tmpl_var name='WOSendMail_ttip_txt'}"></span></label>
                 <input name="WOSendMail" id="WOSendMail" value="{tmpl_var name='WOSendMail'}" size="100" type="text" class="textInput" />
             </div>
         </fieldset>

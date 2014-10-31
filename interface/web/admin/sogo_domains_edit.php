@@ -34,8 +34,8 @@ if (method_exists($app->auth, 'check_security_permissions')) {
         die('only allowed for administrators.');
 }
 
-$app->uses('tpl,tform,functions');
-$app->load('tform_actions,sogo_helper');
+$app->uses('tpl,tform,functions,sogo_helper');
+$app->load('tform_actions');
 
 class tform_action extends tform_actions {
 
@@ -49,10 +49,10 @@ class tform_action extends tform_actions {
                         isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
                                 intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
                 );
-        $dConfId = (int) sogo_helper::get_domain_config_index($dId, $app);
+        $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
 
         //* if no config for domain exists set id = 0 to create a new
-        if ($dId != 0 && !sogo_helper::config_domain_exists($dId, $app)) {
+        if ($dId != 0 && !$app->sogo_helper->configDomainExists($dId)) {
             $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
             if (!isset($result['domain_id']) && !isset($result['server_id'])) {
                 //* domain do not exists.!
@@ -67,7 +67,7 @@ class tform_action extends tform_actions {
                 $this->__server_id = $result['server_id'];
                 $this->__server_name = $result2['server_name'];
             }
-        } else if ($dId != 0 && $dConfId != 0 && sogo_helper::config_domain_exists($dId, $app)) {
+        } else if ($dId != 0 && $dConfId != 0 && $app->sogo_helper->configDomainExists($dId)) {
             //* server config found, redirect to get correct vars page loaded
             if (!isset($_REQUEST["id"])) {
                 echo "HEADER_REDIRECT:admin/sogo_domains_edit.php?id=" . $dConfId . '&domain_id=' . $dId;
@@ -114,8 +114,9 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShowNew() {
         global $app;
-        if (sogo_helper::config_exists($this->__server_id, $app)) {
-            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . sogo_helper::get_config_index($this->__server_id, $app));
+        //* @todo change this to insert new row with server default then show edit..
+        if ($app->sogo_helper->configExists($this->__server_id)) {
+            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
             //* on new copy all default values from server config if exists
             foreach ($app->tform->formDef["tabs"] as $key => & $value) {
                 foreach ($value['fields'] as $key => & $value) {
@@ -156,7 +157,7 @@ class tform_action extends tform_actions {
                 isset($result['sys_perm_user']) &&
                 isset($result['sys_perm_group']) &&
                 isset($result['sys_perm_other'])) {
-            $dConfId = (int) sogo_helper::get_domain_config_index($dId, $app);
+            $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
             $app->db->query("UPDATE `sogo_domains` SET "
                     . "`sys_userid` = '" . intval($result['sys_userid']) . "', "
                     . "`sys_groupid` = '" . intval($result['sys_groupid']) . "', "

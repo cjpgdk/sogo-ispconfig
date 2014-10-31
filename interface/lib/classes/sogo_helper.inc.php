@@ -23,15 +23,22 @@
 
 class sogo_helper {
 
+    public function __construct() {
+        global $app;
+        if (!is_object($app->functions))
+            $app->uses('functions');
+    }
+
     /**
      * get a list of domains name,id and server of domains with sogo configurations
-     * @param app $app
      * @return sogo_domains_list[]
      */
-    public static function list_domains(&$app) {
+    public function listDomains() {
+        global $app;
         $list = array();
         $result = $app->db->queryAllRecords('SELECT `sogo_id`, `domain_id`, `server_id`,`domain_name` FROM `sogo_domains`');
-        if ($result === FALSE) return $list;
+        if ($result === FALSE)
+            return $list;
         foreach ($result as $value) {
             $list[] = new sogo_domains_list($value['sogo_id'], $value['domain_id'], $value['server_name'], $value['server_id']);
         }
@@ -41,11 +48,10 @@ class sogo_helper {
     /**
      * check if domain has a SOGo configuration
      * @param integer $domain_id
-     * @param app $app
      * @return boolean
      */
-    public static function config_domain_exists($domain_id, &$app) {
-        $app->uses('functions');
+    public function configDomainExists($domain_id) {
+        global $app;
         $result = $app->db->queryOneRecord('SELECT `domain_id` FROM `sogo_domains` WHERE `domain_id`=' . intval($domain_id));
         return (boolean) ($result['domain_id'] == $domain_id);
     }
@@ -53,42 +59,45 @@ class sogo_helper {
     /**
      * get domain SOGo configuration id
      * @param integer $server_id
-     * @param app $app
      * @return boolean
      */
-    public static function get_domain_config_index($domain_id, &$app) {
-        $app->uses('functions');
+    public function getDomainConfigIndex($domain_id) {
+        global $app;
         $result = $app->db->queryOneRecord('SELECT `sogo_id` FROM `sogo_domains` WHERE `domain_id`=' . intval($domain_id));
         return isset($result['sogo_id']) ? $result['sogo_id'] : 0;
     }
-
-    /**
-     * get a list of server name+id of server with sogo configurations
-     * @param app $app
-     * @return sogo_servers_list[]
-     */
-    public static function list_servers(&$app) {
-        $list = array();
-        $result = $app->db->queryAllRecords('SELECT `server_id`,`server_name` FROM `sogo_config`');
-        if ($result === FALSE) return $list;
-        foreach ($result as $value) {
-            $list[] = new sogo_servers_list($value['server_id'], $value['server_name']);
-        }
-        return $list;
-    }
+//    
+//    /**
+//     * get a list of server name+id of server with sogo configurations
+//     * @param app $app
+//     * @return sogo_servers_list[]
+//     */
+//    public static function list_servers(&$app) {
+//        $list = array();
+//        $result = $app->db->queryAllRecords('SELECT `server_id`,`server_name` FROM `sogo_config`');
+//        if ($result === FALSE)
+//            return $list;
+//        foreach ($result as $value) {
+//            $list[] = new sogo_servers_list($value['server_id'], $value['server_name']);
+//        }
+//        return $list;
+//    }
 
     /**
      * fetch all system servers with or without sogo config
-     * @param app $app
      * @param boolean $all set to true to fetch all servers in system
      * @return sogo_servers_list[]
      */
-    public function list_system_servers(&$app, $all = false) {
-        if (!$all) $result = $app->db->queryAllRecords('SELECT s.`server_id`, s.`server_name` FROM `server` s WHERE s.`server_id` NOT IN (SELECT `server_id` FROM `sogo_config`);');
-        else $result = $app->db->queryAllRecords('SELECT `server_id`,`server_name` FROM `sogo_config`');
-        
+    public function listSystemServers($all = false) {
+        global $app;
+        if (!$all)
+            $result = $app->db->queryAllRecords('SELECT s.`server_id`, s.`server_name` FROM `server` s WHERE s.`server_id` NOT IN (SELECT `server_id` FROM `sogo_config`);');
+        else
+            $result = $app->db->queryAllRecords('SELECT `server_id`,`server_name` FROM `sogo_config`');
+
         $list = array();
-        if ($result === FALSE) return $list;
+        if ($result === FALSE)
+            return $list;
         foreach ($result as $value) {
             $list[] = new sogo_servers_list($value['server_id'], $value['server_name']);
         }
@@ -98,11 +107,10 @@ class sogo_helper {
     /**
      * check if server has a SOGo configuration
      * @param integer $server_id
-     * @param app $app
      * @return boolean
      */
-    public static function config_exists($server_id, &$app) {
-        $app->uses('functions');
+    public function configExists($server_id) {
+        global $app;
         $result = $app->db->queryOneRecord('SELECT `server_id` FROM `sogo_config` WHERE `server_id`=' . intval($server_id));
         return (boolean) ($result['server_id'] == $server_id);
     }
@@ -110,11 +118,10 @@ class sogo_helper {
     /**
      * get servers SOGo configuration id
      * @param integer $server_id
-     * @param app $app
      * @return boolean
      */
-    public static function get_config_index($server_id, &$app) {
-        $app->uses('functions');
+    public function getConfigIndex($server_id) {
+        global $app;
         $result = $app->db->queryOneRecord('SELECT `sogo_id` FROM `sogo_config` WHERE `server_id`=' . intval($server_id));
         return isset($result['sogo_id']) ? $result['sogo_id'] : 0;
     }

@@ -4,7 +4,7 @@ $files_copy = array(
     'interface' => array(
         'lib/classes/sogo_helper.inc.php',
         'lib/config.inc.local.sogo-sample.php',
-        //* #ADMIN#
+    //* #ADMIN#
         //* admin
         'web/admin/sogo_conifg_del.php',
         'web/admin/sogo_conifg_edit.php',
@@ -50,6 +50,7 @@ $files_copy = array(
         'web/admin/templates/sogo_plugins_edit.htm',
         'web/admin/templates/sogo_plugins_list.htm',
     //* /#ADMIN#
+    
     //* #MAIL#
         //* mail
         'web/mail/sogo_mail_plugins_list.php',

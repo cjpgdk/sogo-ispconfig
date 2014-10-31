@@ -35,7 +35,7 @@ if (method_exists($app->auth, 'check_security_permissions')) {
 }
 
 $app->uses('tpl,tform,functions');
-$app->load('tform_actions,sogo_helper');
+$app->load('tform_actions');
 
 class tform_action extends tform_actions {
 
@@ -52,8 +52,8 @@ class tform_action extends tform_actions {
                 echo "HEADER_REDIRECT:admin/sogo_conifg_list.php";
                 exit;
             } else {
-                $this->_server_id = intval($_GET['sid']);
-                $this->_server_name = $result['server_name'];
+                self::$_server_id = intval($_GET['sid']);
+                self::$_server_name = $result['server_name'];
             }
         }
         parent::onLoad();
@@ -62,9 +62,9 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShowEnd() {
         global $app;
-        if (isset($_GET['sid']) && $this->_server_id !== FALSE && $this->_server_name !== FALSE) {
-            $app->tpl->setVar('server_id', $this->_server_id);
-            $app->tpl->setVar('server_name', $this->_server_name);
+        if (isset($_GET['sid']) && self::$_server_id !== FALSE && self::$_server_name !== FALSE) {
+            $app->tpl->setVar('server_id', self::$_server_id);
+            $app->tpl->setVar('server_name', self::$_server_name);
         }
         parent::onShowEnd();
     }

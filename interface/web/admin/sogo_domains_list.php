@@ -27,8 +27,9 @@ require_once '../../lib/app.inc.php';
 $list_def_file = "list/sogo_domains.list.php";
 
 $app->auth->check_module_permissions('admin');
-$app->uses('listform_actions');
-$app->load('sogo_helper');
+$app->uses('listform_actions, sogo_helper');
+
+//* remove old saved domain id
 unset($_SESSION['s']['module']["sogo_conifg_domain_id"]);
 
 class listform_action extends listform_actions {
@@ -38,7 +39,7 @@ class listform_action extends listform_actions {
         global $app;
         $app->uses('tpl,listform,tform');
 
-        $_sogo_domains = sogo_helper::list_domains($app);
+        $_sogo_domains = $app->sogo_helper->listDomains();
         $sogo_domains  = array();
         foreach ($_sogo_domains as $value) {
             $sogo_domains[] = array('sogo_domain_id' => $value->id, 'domain_id' => $value->domain_id, 'sogo_server_id' => $value->server_id);
