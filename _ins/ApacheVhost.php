@@ -56,9 +56,8 @@ class ApacheVhost {
         # Microsoft-Server-ActiveSync 
         echo PHP_EOL . "Enable Microsoft ActiveSync (Y/N) [N]: ";
         self::$EnableMSActiveSync = (strtolower(Installer::readInput('n')) == 'n' ? '#' : '');
-        self::SOGovHostConfig();
-        if (self::$novConf) {
-            die(PHP_EOL . "No vhost for SOGo is configured but i left the one that comes with SOGo you need to edit it, before you can access SOGo");
+        if (self::SOGovHostConfig()) {
+            die(PHP_EOL . PHP_EOL . "No vhost for SOGo is configured but i left the one that comes with SOGo you need to edit it, before you can access SOGo" . PHP_EOL . PHP_EOL);
         }
 
 
@@ -125,7 +124,9 @@ class ApacheVhost {
                     echo PHP_EOL . $value;
                 }
             }
-            
+            echo PHP_EOL . PHP_EOL;
+        } else {
+            echo PHP_EOL . PHP_EOL . str_repeat('=', 12) . PHP_EOL . PHP_EOL . self::printCronfig() . PHP_EOL . PHP_EOL . str_repeat('=', 12) . PHP_EOL . PHP_EOL;
         }
     }
 
@@ -166,14 +167,15 @@ class ApacheVhost {
         if ((strtolower(Installer::readInput('y')) == 'n')) {
             echo PHP_EOL . "Okay would you like try again (Y/N) [Y]: ";
             if ((strtolower(Installer::readInput('y')) == 'n'))
-                return;
+                return self::$novConf;
             else {
-                self::SOGovHostConfig();
-                return;
+                self::$novConf = self::SOGovHostConfig();
+                return self::$novConf;
             }
             self::$novConf = TRUE;
         }
         self::$novConf = FALSE;
+        return self::$novConf;
     }
 
     /**

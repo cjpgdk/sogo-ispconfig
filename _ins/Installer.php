@@ -169,6 +169,9 @@ class Installer {
         if (self::$type == "all" || self::$type == "slave") {
             $this->installInterface();
             $this->installServer();
+            echo PHP_EOL . "Setup basic Apache vhost (Y/N) [Y]: ";
+            if (strtolower(self::readInput("y")) == "y")
+                ApacheVhost::Run();
         } elseif (self::$type == 'mysqltables') {
             $this->installTablesMySQL();
         }

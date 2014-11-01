@@ -16,6 +16,8 @@ GRANT ALL PRIVILEGES ON `dbsogo` . * TO 'dbsogo'@'localhost';
 */
 
 require '_ins/copy_files.php';
+require '_ins/SOGo.php';
+require '_ins/ApacheVhost.php';
 require '_ins/Installer.php';
 Installer::$files_copy = $files_copy;
 
