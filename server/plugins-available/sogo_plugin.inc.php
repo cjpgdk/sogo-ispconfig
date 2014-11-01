@@ -875,7 +875,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
 
             //* load it as DOMDocument Object (this validates the XML)
             if ($app->sogo_config->loadSOGoConfigString($sogod) !== FALSE) {
-                //unset($app->sogo_config); //$app->sogo_config->clearAll(); //* unset everything (- ~5kB per. domain)
+                unset($app->sogo_config); //$app->sogo_config->clearAll(); //* unset everything (- ~5kB per. domain)
                 $result = TRUE;
                 if (file_exists($conf['sogo_gnu_step_defaults']))
                     copy($conf['sogo_gnu_step_defaults'], $conf['sogo_gnu_step_defaults'] . ".back");
