@@ -28,7 +28,6 @@ class Installer {
      * @var array 
      */
     static public $files_copy = array();
-    
     static private $mysql_tables_ispc = "_ins/tables.sql";
 
     /** @var string location of ISPConfig home dir */
@@ -102,7 +101,20 @@ class Installer {
         } else {
             die("Folder [" . self::$ispc_home_dir . "] is not valid ISPConfig installation." . PHP_EOL);
         }
-
+        $insSoGo = TRUE;
+        if (Installer::isSOGoOnServer()) {
+            echo PHP_EOL . "I Found SOGo on your server is this true? (Y/N) [Y]: ";
+            if (strtolower(self::readInput("y")) == "y")
+                $insSoGo = FALSE;
+        }
+        if ($insSoGo) {
+            echo PHP_EOL . "Do you whant me to install SOGo? (Y/N) [Y]: ";
+            if (strtolower(self::readInput("y")) == "y") {
+                $SOGo = new SOGo();
+                $SOGo->run();
+            }
+        }
+        unset($insSoGo, $SOGo);
 
         self::$isError = FALSE;
         //* get init scriupt for sogo
@@ -198,7 +210,7 @@ class Installer {
             echo "Not installing server files, server folder not found" . PHP_EOL;
         }
     }
-    
+
     //* quick lazy alias
     public static function copyFiles($index) {
         if (isset(self::$files_copy[$index])) {
@@ -284,6 +296,19 @@ class Installer {
             }
             self::$isError = FALSE;
         }
+    }
+
+    /**
+     * look for SOGo binarys
+     * @return boolean
+     */
+    public static function isSOGoOnServer() {
+        $sogo_tool_binary = exec("which sogo-tool");
+        $sogo_binary = exec("which sogod");
+        if ((!empty($sogo_tool_binary) && file_exists($sogo_tool_binary)) && (!empty($sogo_binary) && file_exists($sogo_binary))) {
+            return true;
+        }
+        return false;
     }
 
     /**
