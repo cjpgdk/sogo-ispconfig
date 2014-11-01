@@ -43,10 +43,7 @@ $conf['sogo_domain_extra_vars'] = array(
 $conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
 $conf['sogo_gnu_step_defaults_sogod.plist'] = '/var/lib/sogo/GNUstep/Defaults/sogod.plist';
 
-/* 
- not integraded but will be 
- template to use for table names in sogo db
-*/
+//* template to use for table names in sogo db
 $conf['sogo_domain_table_tpl'] = "{domain}_users";
 /*
 SOGoEncryptionKey ?? if password change shall be enabled.!

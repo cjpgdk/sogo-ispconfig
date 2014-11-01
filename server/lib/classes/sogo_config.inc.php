@@ -20,6 +20,9 @@
 
 class sogo_config {
 
+    const CONFIG_FULL = "sogod";
+    const CONFIG_PLIST = "plist";
+
     /** @var DOMDocument */
     private static $_DOMDocument = NULL;
 
@@ -28,13 +31,12 @@ class sogo_config {
      * @var string
      */
     public $sogod = "";
-
-    /**
-     * holder for sogod.plist
-     * @var string
-     */
-    public $sogodplist = "";
     
+    public function clearAll() {
+        self::$_DOMDocument=null;
+        $this->sogod="";
+    }
+
     /**
      * Bare fordi
      * @param boolean $die
@@ -47,6 +49,34 @@ class sogo_config {
         return print_r(self::$_DOMDocument, TRUE);
     }
 
+    public function getConfigReplace($type = sogo_config::CONFIG_FULL, $replace = array(), $values = array()) {
+        $conf = $this->getConfig($type);
+        return str_replace($replace, $values, $conf);
+    }
+
+    /**
+     * Get the final configuration file
+     * @param string $type sogo_config::CONFIG_FULL || sogo_config::CONFIG_PLIST
+     */
+    public function getConfig($type = sogo_config::CONFIG_FULL) {
+        $conf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                . "<!DOCTYPE plist PUBLIC \"-//GNUstep//DTD plist 0.9//EN\" \"http://www.gnustep.org/plist-0_9.xml\">\n";
+        if ($type == sogo_config::CONFIG_FULL) {
+            $conf .= "<plist version=\"0.9\">\n"
+                    . "\t<dict>\n"
+                    . "\t\t<key>NSGlobalDomain</key>\n"
+                    . "\t\t<dict></dict>\n";
+        } else {
+            $conf .= "<plist version=\"0.9\">\n";
+        }
+        $conf .= $this->sogod;
+        if ($type == sogo_config::CONFIG_FULL) {
+            $conf .= "\t</dict>\n";
+        }
+        $conf .= "</plist>\n";
+        return $conf;
+    }
+
     /**
      * create the config layout
      * @param array $array array('sogod'=>array( * FULL SOGO CONF HERE EXCLUDING THE DOMAINS CONFIG * )) !! NSGlobalDomain is written as empty
@@ -54,23 +84,8 @@ class sogo_config {
      * @todo som sort of validation..
      */
     public function createConfig($array) {
-        //* sogod.plist
-        $this->sogodplist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" . PHP_EOL
-                . "<!DOCTYPE plist PUBLIC \"-//GNUstep//DTD plist 0.9//EN\" \"http://www.gnustep.org/plist-0_9.xml\">" . PHP_EOL
-                . "<plist version=\"0.9\">" . PHP_EOL
-                . "\t<key>sogod</key>" . PHP_EOL
-                . "\t<dict>" . PHP_EOL;
-
-        //* preserve the tabs "\t" makes it easy to debug the config file.
-        //* sogo.conf
-        $this->sogod = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" . PHP_EOL
-                . "<!DOCTYPE plist PUBLIC \"-//GNUstep//DTD plist 0.9//EN\" \"http://www.gnustep.org/plist-0_9.xml\">" . PHP_EOL
-                . "<plist version=\"0.9\">" . PHP_EOL
-                . "\t<dict>" . PHP_EOL
-                . "\t\t<key>NSGlobalDomain</key>" . PHP_EOL
-                . "\t\t<dict></dict>" . PHP_EOL
-                . "\t\t<key>sogod</key>" . PHP_EOL
-                . "\t\t<dict>" . PHP_EOL;
+        $this->sogod = "\t\t<key>sogod</key>\n"
+                . "\t\t<dict>\n";
         $SOGoCustomXML = "";
         foreach ($array['sogod'] as $key => $value) {
 //            if ($key == 'SOGoSubscriptionFolderFormat') {
@@ -84,46 +99,22 @@ class sogo_config {
             //* we do not write empty values!
             if (!empty($value) && is_string($value)) {
                 $this->escape_values($value);
-                //* sogo.conf
-                $this->sogod .= "\t\t\t<key>{$key}</key>" . PHP_EOL
-                        . "\t\t\t<string>{$value}</string>" . PHP_EOL;
-                //* sogod.plist
-                $this->sogodplist .= "\t\t<key>{$key}</key>" . PHP_EOL
-                        . "\t\t<string>{$value}</string>" . PHP_EOL;
+                $this->sogod .= "\t\t\t<key>{$key}</key>\n"
+                        . "\t\t\t<string>{$value}</string>\n";
             } else if (!empty($value) && is_array($value)) {
-                //* sogo.conf
-                $this->sogod .= "\t\t\t<key>{$key}</key>" . PHP_EOL
-                        . "\t\t\t<array>" . PHP_EOL;
-                //* sogod.plist
-                $this->sogodplist .= "\t\t<key>{$key}</key>" . PHP_EOL
-                        . "\t\t<array>" . PHP_EOL;
+                $this->sogod .= "\t\t\t<key>{$key}</key>\n"
+                        . "\t\t\t<array>\n";
                 foreach ($value as $k => $v) {
                     $this->escape_values($v);
-                    //* sogo.conf
-                    $this->sogod .= "\t\t\t\t<string>{$v}</string>" . PHP_EOL;
-                    //* sogod.plist
-                    $this->sogodplist .= "\t\t\t<string>{$v}</string>" . PHP_EOL;
+                    $this->sogod .= "\t\t\t\t<string>{$v}</string>\n";
                 }
-                //* sogo.conf
-                $this->sogod .= "\t\t\t</array>" . PHP_EOL;
-                //* sogod.plist
-                $this->sogodplist .= "\t\t</array>" . PHP_EOL;
+                $this->sogod .= "\t\t\t</array>\n";
             }
         }
-        //* sogo.conf
-        $this->sogod .= "\t\t\t{$SOGoCustomXML}" . PHP_EOL;
-        $this->sogod .= "\t\t\t<key>domains</key>" . PHP_EOL;
-        $this->sogod .= "\t\t\t<dict>{{SOGODOMAINSCONF}}</dict>" . PHP_EOL;
-        $this->sogod .= "\t\t</dict>" . PHP_EOL
-                . "\t</dict>" . PHP_EOL
-                . "</plist>" . PHP_EOL;
-
-        //* sogod.plist
-        $this->sogodplist .= "\t\t\t{$SOGoCustomXML}" . PHP_EOL;
-        $this->sogodplist .= "\t\t<key>domains</key>" . PHP_EOL;
-        $this->sogodplist .= "\t\t<dict>{{SOGODOMAINSCONF}}</dict>" . PHP_EOL;
-        $this->sogodplist .= "\t</dict>" . PHP_EOL;
-        $this->sogodplist .= "</plist>" . PHP_EOL;
+        $this->sogod .= "\t\t\t{$SOGoCustomXML}\n"
+                . "\t\t\t<key>domains</key>\n"
+                . "\t\t\t<dict>{SOGODOMAINSCONF}</dict>\n"
+                . "\t\t</dict>\n";
 
         return true;
     }
@@ -140,7 +131,6 @@ class sogo_config {
 
 
         //* make sure key, plist, dict, array and string is not manipulated
-
         $val = str_replace(
                 array(
             //* key
@@ -157,7 +147,7 @@ class sogo_config {
             '&lt;/plist&gt;',
             //* dict
             '&lt;dict&gt;',
-            '&lt;/dict&gt;', ), array(
+            '&lt;/dict&gt;',), array(
             //* key
             '<key>',
             '</key>',
@@ -172,7 +162,7 @@ class sogo_config {
             '</plist>',
             //* dict
             '<dict>',
-            '</dict>', ), $val);
+            '</dict>',), $val);
     }
 
     /**
