@@ -37,6 +37,7 @@ class sogo_helper {
 
     /** @var sogo_module_settings */
     public $module_settings;
+    static private $sogo_server = array();
 
     /**
      * query all mail domains, based on module settings
@@ -113,7 +114,7 @@ class sogo_helper {
             $sql = array();
             for ($index = 0; $index < intval(($acount - $dtacount)); $index++) {
                 $_i = (int) ($dtacount + $index);
-                $sql[] = "ALTER TABLE `{$this->getValidSOGoTableName($domain)}_users` ADD `alias_{$_i}` VARCHAR( 500 ) NOT NULL ";
+                $sql[] = "ALTER TABLE `{$this->getValidSOGoTableName($domain)}` ADD `alias_{$_i}` VARCHAR( 500 ) NOT NULL ";
             }
             $sqlres = & $this->sqlConnect();
             foreach ($sql as $value) {
@@ -143,6 +144,18 @@ class sogo_helper {
         return false;
     }
 
+
+    public function getServer($sid) {
+        if (!isset(self::$sogo_server[$sid])) {
+            global $app, $conf;
+            if ($sid === NULL || !is_int($sid))
+                $sid = $conf['server_id'];
+            $sql = "SELECT * FROM `server` WHERE `server_id`=" . intval($sid);
+            self::$sogo_server[$sid] = $app->db->queryOneRecord($sql);
+        }
+        return self::$sogo_server[$sid];
+    }
+
     /**
      * get config by server id
      * @global app $app
@@ -165,7 +178,7 @@ class sogo_helper {
                 return self::$sCache[$server_id];
             }
             //* vaules we don't need in sogo config.
-            unset($server_default['sogo_id'], $server_default['server_id'], $server_default['server_name'], $server_default['sys_userid'], $server_default['sys_groupid'], $server_default['sys_perm_user'], $server_default['sys_perm_group'], $server_default['sys_perm_other']);
+            $this->removeUselessValues($server_default);
             self::$sCache[$server_id] = $server_default;
             return self::$sCache[$server_id];
         }
@@ -233,6 +246,7 @@ class sogo_helper {
                 self::$dnCache[$domain_name] = $ret_srv;
                 return self::$dnCache[$domain_name];
             }
+            
             $parse_url = parse_url($domain_default["SOGoSieveServer"]);
             $domain_default["SOGoSieveServer"] = (isset($parse_url['host']) ? $parse_url['host'] : (isset($parse_url['path']) && $parse_url['path'] == $domain_default["SOGoSieveServer"] ? $domain_default["SOGoSieveServer"] : ""));
             $parse_url = parse_url($domain_default["SOGoIMAPServer"]);
@@ -251,8 +265,11 @@ class sogo_helper {
                     unset($domain_default["{$value['Field']}"]);
                 }
             }
+            $_save = $domain_default['server_name'];
             $this->removeUselessValues($domain_default);
             self::$dnCache[$domain_name] = $domain_default;
+            self::$dnCache[$domain_name]['server_name'] = $_save;
+            unset($_save);
             return self::$dnCache[$domain_name];
         } else {
             self::$dnCache[$domain_name] = $this->is_domain_active($domain_name);
@@ -312,12 +329,12 @@ class sogo_helper {
             $sql1 = "SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA`='{$sqlres->escape_string($conf['sogo_database_name'])}' AND `TABLE_NAME`='{$sqlres->escape_string($domain)}'";
             $tmp = $sqlres->query($sql1);
             while ($obj = $tmp->fetch_object()) {
-                if ($obj->TABLE_NAME == $domain . '_users') {
+                if ($obj->TABLE_NAME == $domain) {
                     self::$sutCache[$domain] = true;
                     return self::$sutCache[$domain];
                 }
             }
-            $this->logDebug("SOGo table do not exists [{$domain}_users]");
+            $this->logDebug("SOGo table do not exists [{$domain}]");
             self::$sutCache[$domain] = false;
             return self::$sutCache[$domain];
         }
@@ -331,7 +348,8 @@ class sogo_helper {
      */
     public function getValidSOGoTableName($domain_name) {
         global $conf;
-        return str_replace('{domain}', $conf['sogo_domain_table_tpl'], str_replace(array('-', '.'), '_', $domain_name));
+        $domain_name = str_replace(array('-', '.'), '_', $domain_name);
+        return str_replace('{domain}', $domain_name, $conf['sogo_domain_table_tpl']);
     }
 
     /**
@@ -443,7 +461,7 @@ class sogo_helper {
      */
     private function removeUselessValues(& $param) {
         if (is_array($param))
-            unset($param['sogo_id'], $param['sys_groupid'], $param['sys_perm_group'], $param['domain_id'], $param['sys_userid'], $param['sys_perm_user'], $param['sys_perm_other']);
+            unset($param['sogo_id'], $param['sys_groupid'], $param['sys_perm_group'], $param['domain_id'], $param['sys_userid'], $param['sys_perm_user'], $param['sys_perm_other'], $param['server_id'], $param['server_name']);
     }
 
     public function dbEscapeString($str) {

@@ -19,9 +19,10 @@
  */
 
 class sogo_plugin {
-/*
- * @todo make use of the same column name for all emails not mix it with c_uid, c_imaplogin c_uid is master and should be the only column to check
- */
+    /*
+     * @todo make use of the same column name for all emails not mix it with c_uid, c_imaplogin c_uid is master and should be the only column to check
+     */
+
     var $plugin_name = 'sogo_plugin';
     var $class_name = 'sogo_plugin';
 
@@ -217,7 +218,7 @@ class sogo_plugin {
         //* check this is an alias
         if (!$app->sogo_helper->isEqual($data['new']['type'], 'alias'))
             return;
-        
+
         list($source_user, $source_domain) = explode('@', $data['new']['source']);
         list($destination_user, $destination_domain) = explode('@', $data['new']['destination']);
 
@@ -609,8 +610,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
             return false; //* do nothing
-        
-        //* create domain table id it do not exists
+        //* create domain table if it do not exists
         if (!$app->sogo_helper->sogoTableExists($domain_name)) {
             $this->__create_sogo_table($domain_name);
         }
@@ -621,6 +621,8 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                 $app->sogo_helper->logError("SOGo Sync Mail Users - Unable to fetch the domain config for domain [{$domain_name}]");
                 return false;
             }
+            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', $domain_config['server_name'], $domain_config['SOGoSieveServer']);
+            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', $domain_config['server_name'], $domain_config['SOGoIMAPServer']);
             $_tmpSQL = array('users' => array(), 'alias' => array());
             foreach ($emails as $email) {
                 if ($this->__sogo_mail_user_exists($email['login'], "{$app->sogo_helper->getValidSOGoTableName($domain_name)}")) {
@@ -811,7 +813,18 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                     if ($tpl !== null && $tpl instanceof tpl) {
                         //* loop domain config
                         foreach ($dconf as $key => $value2) {
-                            if ($sconf[$key] == $value2) {
+                            if (($sconf[$key] == $value2 || $key == 'server_name') &&
+                                    ($key != 'SOGoSMTPServer'/* && $key != 'SOGoIMAPServer' && $key != 'SOGoSieveServer'*/)) {
+                                /*
+{tmpl_if name="SOGoIMAPServer"}
+                    <key>SOGoIMAPServer</key>
+                    <string>{tmpl_var name='SOGoIMAPServer'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoSieveServer"}
+                    <key>SOGoSieveServer</key>
+                    <string>{tmpl_var name='SOGoSieveServer'}</string>
+{/tmpl_if
+                                 */
                                 //* skip config settings that is default the server!
                             } else if ($key == 'SOGoSuperUsernames') {
                                 //* force array on selected item
@@ -843,7 +856,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                         }
                         //* set domain name var
                         $tpl->setVar('domain', $value['domain']);
-                        //* use md5 as uniq is based on domain name
+                        //* use md5 as uniq id based on domain name
                         $tpl->setVar('SOGOUNIQID', md5($value['domain']));
                         //* set connection view
                         $tpl->setVar('CONNECTIONVIEWURL', "mysql://{$conf['sogo_database_user']}:{$conf['sogo_database_passwd']}@{$conf['sogo_database_host']}:{$conf['sogo_database_port']}/{$conf['sogo_database_name']}/{$app->sogo_helper->getValidSOGoTableName($value['domain'])}");
@@ -857,7 +870,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                         }
                         $tpl->setLoop('MailFieldNames', $MailFieldNames); //* set alias names loop
                         //* grab the build config xml and append to (holder for builded domain xml config)
-                        $sogodomsconf .= $tpl->grab();
+                        $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array($dconf['server_name'], $value['domain']), $tpl->grab());
                     }
 
                     //$app->sogo_helper->logDebug(print_r($sconf, TRUE));
@@ -866,8 +879,9 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                 }
                 //* END: mail domains loop
             }
-            $replace_vars = array('{SOGODOMAINSCONF}', '{SOGOUSERN}', '{SOGOUSERPW}', '{MYSQLHOST}', '{MYSQLPORT}', '{SOGODB}',);
-            $replace_values = array($sogodomsconf, $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_host'], $conf['sogo_database_port'], $conf['sogo_database_name'],);
+            $this_server = $app->sogo_helper->getServer((int) $conf['server_id']);
+            $replace_vars = array('{SOGODOMAINSCONF}', '{SOGOUSERN}', '{SOGOUSERPW}', '{MYSQLHOST}', '{MYSQLPORT}', '{SOGODB}', '{SERVERNAME}',);
+            $replace_values = array($sogodomsconf, $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_host'], $conf['sogo_database_port'], $conf['sogo_database_name'], $this_server['server_name'],);
             //* replace default vars in default sogo config
             $sogod = $app->sogo_config->getConfigReplace(sogo_config::CONFIG_FULL, $replace_vars, $replace_values);
             //* replace default vars in sogo config (sogod.plist)
@@ -904,7 +918,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                 $app->sogo_helper->logDebug("Failed SOGo XML Config:" . PHP_EOL . $sogod);
             }
         } else {
-            $app->sogo_helper->logDebug("Server config not found");
+            $app->sogo_helper->logDebug("SOGo Server config not found");
         }
     }
 
