@@ -1,0 +1,133 @@
+<?php
+
+/*
+ * Copyright (C) 2014  Christian M. Jensen
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  @author Christian M. Jensen <christian@cmjscripter.net>
+ *  @copyright 2014 Christian M. Jensen
+ *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ */
+
+$tform_def_file = "form/sogo_domains.tform.php";
+
+require_once '../../lib/config.inc.php';
+require_once '../../lib/app.inc.php';
+
+$app->auth->check_module_permissions('mail');
+
+$app->uses('tpl,tform,functions,sogo_helper');
+$app->load('tform_actions');
+
+class tform_action extends tform_actions {
+
+    /** @global app $app */
+    public function onLoad() {
+        global $app;
+        $dId = (int) (
+                isset($_REQUEST["domain_id"]) ?
+                        intval($_REQUEST["domain_id"]) :
+                        (
+                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
+                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
+                );
+        $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+
+        //* if no config for domain exists set id = 0 to create a new
+        if ($dId != 0 && !$app->sogo_helper->configDomainExists($dId)) {
+            $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
+            if (!isset($result['domain_id']) && !isset($result['server_id'])) {
+                //* domain do not exists.!
+                echo "HEADER_REDIRECT:mail/sogo_mail_domains_list.php";
+                exit;
+            } else {
+                //* domain exists but no config exists yet
+                $result2 = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($result['server_id']));
+                $_REQUEST["id"] = 0;
+                $this->__domain_id = $result['domain_id'];
+                $this->__domain_name = $result['domain'];
+                $this->__server_id = $result['server_id'];
+                $this->__server_name = $result2['server_name'];
+            }
+        } else if ($dId != 0 && $dConfId != 0 && $app->sogo_helper->configDomainExists($dId)) {
+            //* server config found, redirect to get correct vars page loaded
+            if (!isset($_REQUEST["id"])) {
+                echo "HEADER_REDIRECT:mail/sogo_mail_domains_edit.php?id=" . $dConfId . '&domain_id=' . $dId;
+                exit;
+            }
+        } else {
+            //* nothing is valid
+            echo "HEADER_REDIRECT:mail/sogo_mail_domains_list.php";
+            exit;
+        }
+        $_SESSION['s']['module']["sogo_conifg_domain_id"] = $dId;
+        parent::onLoad();
+    }
+
+    /** @global app $app */
+    public function onShow() {
+        global $app;
+
+        $dId = (int) (
+                isset($_REQUEST["domain_id"]) ?
+                        intval($_REQUEST["domain_id"]) :
+                        (
+                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
+                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
+                );
+        $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . $dId);
+        //* replace var "{DOMAINNAME}" in query string
+        if (isset($result['domain'])) {
+            $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
+        }
+        parent::onShow();
+    }
+
+    public function onAfterInsert() {
+        $this->__fixDomainOwner();
+        parent::onAfterInsert();
+    }
+
+    public function onAfterUpdate() {
+        $this->__fixDomainOwner();
+        parent::onAfterUpdate();
+    }
+
+    /** @global app $app */
+    private function __fixDomainOwner() {
+        global $app;
+        $dId = (int) (
+                isset($_REQUEST["domain_id"]) ?
+                        intval($_REQUEST["domain_id"]) :
+                        (
+                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
+                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
+                );
+        $result = $app->db->queryOneRecord('SELECT `sys_userid`,`sys_groupid`,`sys_perm_user`,`sys_perm_group`,`sys_perm_other` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
+        if (isset($result['sys_userid']) && isset($result['sys_groupid']) && isset($result['sys_perm_user']) && isset($result['sys_perm_group']) && isset($result['sys_perm_other'])) {
+            $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+            $app->db->query("UPDATE `sogo_domains` SET "
+                    . "`sys_userid` = '" . intval($result['sys_userid']) . "', "
+                    . "`sys_groupid` = '" . intval($result['sys_groupid']) . "', "
+                    . "`sys_perm_user` = '{$result['sys_perm_user']}', "
+                    . "`sys_perm_group` = '{$result['sys_perm_group']}', "
+                    . "`sys_perm_other` = '{$result['sys_perm_other']}' "
+                    . "WHERE `sogo_id` ='{$dConfId}' AND `domain_id` ='{$dId}';");
+        }
+    }
+}
+
+$app->tform_action = new tform_action();
+$app->tform_action->onLoad();

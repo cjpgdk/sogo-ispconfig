@@ -1,0 +1,9 @@
+<?php
+$wb["list_head_txt"] = 'SOGo Domains';
+$wb["active_txt"] = 'Active';
+$wb["server_id_txt"] = 'Server';
+$wb["domain_txt"] = 'Domain';
+$wb["list_desc_txt"] = 'All your mail domains is listed here'
+        . '<br />only domains with SOGo configuration has delete icon'
+        . '<br />by clicking on delete icon, you delete ONLY the SOGo configuration not the domain';
+?>

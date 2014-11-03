@@ -25,12 +25,12 @@
 //* SOGo config option.
 if ($app->auth->get_client_limit($app->auth->get_user_id(), 'maildomain') != 0) {
     $items = array(
-        /*array(
+        array(
             'title' => 'Domains',
             'target' => 'content',
             'link' => 'mail/sogo_mail_domain_list.php',
             'html_id' => 'sogo_mail_domain_list'
-        ),*/
+        ),
         array(
             'title' => 'Plugins',
             'target' => 'content',
