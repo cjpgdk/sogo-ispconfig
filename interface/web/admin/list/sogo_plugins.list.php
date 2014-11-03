@@ -50,9 +50,9 @@ $liste['item'][] = array(
     'field' => 'client_id',
     'datatype' => 'VARCHAR',
     'formtype' => 'SELECT',
-    'op' => 'like',
-    'prefix' => '%',
-    'suffix' => '%',
+    'op' => '=',
+    'prefix' => '',
+    'suffix' => '',
     'datasource' => array(
         'type' => 'SQL',
         'querystring' => 'SELECT client_id,contact_name FROM client WHERE {AUTHSQL} ORDER BY contact_name',
@@ -74,8 +74,8 @@ $liste['item'][] = array(
 $liste['item'][] = array(
     'field' => 'description',
     'datatype' => 'VARCHAR',
-    'op' => '=',
-    'prefix' => '',
-    'suffix' => '',
+    'op' => 'like',
+    'prefix' => '%',
+    'suffix' => '%',
     'width' => ''
 );
