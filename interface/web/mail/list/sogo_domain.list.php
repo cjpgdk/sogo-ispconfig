@@ -34,7 +34,7 @@ $liste["search_prefix"] = "search_";
 $liste["records_per_page"] = "15";
 $liste["file"] = "sogo_mail_domain_list.php";
 $liste["edit_file"] = "sogo_mail_domains_edit.php";
-$liste["delete_file"] = "sogo_mail_domains_del.php";
+$liste["delete_file"] = "sogo_mail_domain_del.php";
 $liste["paging_tpl"] = "templates/paging.tpl.htm";
 $liste["auth"] = "yes";
 
