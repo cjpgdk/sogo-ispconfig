@@ -811,7 +811,8 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
             if ($mail_domains = $app->sogo_helper->getMailDomainNames('y')) {
                 //* on success loop mail domains, prepare config
                 foreach ($mail_domains as $value) {
-                    //* get full config for this domain.!
+                    if (!$app->sogo_helper->sogoTableExists($value['domain']))
+                        continue;
                     $dconf = $app->sogo_helper->getDomainConfig($value['domain'], TRUE);
 
                     //* get domain config template for domains (conf-custom then main conf)
@@ -819,21 +820,9 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                     if ($tpl !== null && $tpl instanceof tpl) {
                         //* loop domain config
                         foreach ($dconf as $key => $value2) {
-                            if (($sconf[$key] == $value2 || $key == 'server_name') &&
-                                    ($key != 'SOGoSMTPServer'/* && $key != 'SOGoIMAPServer' && $key != 'SOGoSieveServer'*/)) {
-                                /*
-{tmpl_if name="SOGoIMAPServer"}
-                    <key>SOGoIMAPServer</key>
-                    <string>{tmpl_var name='SOGoIMAPServer'}</string>
-{/tmpl_if}
-{tmpl_if name="SOGoSieveServer"}
-                    <key>SOGoSieveServer</key>
-                    <string>{tmpl_var name='SOGoSieveServer'}</string>
-{/tmpl_if
-                                 */
+                            if (($sconf[$key] == $value2 || $key == 'server_name') && ($key != 'SOGoSMTPServer')) {
                                 //* skip config settings that is default the server!
                             } else if ($key == 'SOGoSuperUsernames') {
-                                //* force array on selected item
                                 $_arr = explode(',', $dconf['SOGoSuperUsernames']);
                                 $arr = array();
                                 foreach ($_arr as $value3)
@@ -842,7 +831,6 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                             } else if ($key == 'SOGoCalendarDefaultRoles') {
                                 if (implode(',', $sconf[$key]) == $dconf['SOGoCalendarDefaultRoles'])
                                     continue;
-                                //* force array on selected item
                                 $_arr = explode(',', $dconf['SOGoCalendarDefaultRoles']);
                                 $arr = array();
                                 foreach ($_arr as $value3)
@@ -851,7 +839,6 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                             } else if ($key == 'SOGoMailListViewColumnsOrder') {
                                 if (implode(',', $sconf[$key]) == $dconf['SOGoMailListViewColumnsOrder'])
                                     continue;
-                                //* force array on selected item
                                 $_arr = explode(',', $dconf['SOGoMailListViewColumnsOrder']);
                                 $arr = array();
                                 foreach ($_arr as $value3)
@@ -860,22 +847,16 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                             } else
                                 $tpl->setVar($key, $value2); //* default isset as normal var
                         }
-                        //* set domain name var
                         $tpl->setVar('domain', $value['domain']);
-                        //* use md5 as uniq id based on domain name
                         $tpl->setVar('SOGOUNIQID', md5($value['domain']));
-                        //* set connection view
                         $tpl->setVar('CONNECTIONVIEWURL', "mysql://{$conf['sogo_database_user']}:{$conf['sogo_database_passwd']}@{$conf['sogo_database_host']}:{$conf['sogo_database_port']}/{$conf['sogo_database_name']}/{$app->sogo_helper->getValidSOGoTableName($value['domain'])}");
-                        //* set vars from static config in config.local file
                         $tpl->setVar($conf['sogo_domain_extra_vars']);
-                        //* fetch and set alias columns names
                         $MailFieldNames = array();
                         $dtacount = (int) $app->sogo_helper->getSOGoTableAliasColumnCount($value['domain']); //* get alias columns in table for domain
                         for ($i = 0; $i < $dtacount; $i++) {
                             $MailFieldNames[] = array('MailFieldName' => 'alias_' . $i);
                         }
                         $tpl->setLoop('MailFieldNames', $MailFieldNames); //* set alias names loop
-                        //* grab the build config xml and append to (holder for builded domain xml config)
                         $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array($dconf['server_name'], $value['domain']), $tpl->grab());
                     }
 
