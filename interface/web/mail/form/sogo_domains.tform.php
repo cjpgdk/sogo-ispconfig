@@ -21,7 +21,7 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$form["title"] = "SOGo Domains";
+$form["title"] = "SOGo Domain";
 $form["description"] = "";
 $form["name"] = "sogo_domains";
 $form["action"] = "sogo_mail_domains_edit.php";
@@ -104,7 +104,7 @@ $form["tabs"]['domain'] = array(
         'SOGoSieveServer' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
-            'default' => 'sieve://localhost:4190',
+            'default' => 'sieve://{SERVERNAME}:4190',
             'value' => '',
             'maxlength' => '',
             'required' => 0,
@@ -152,7 +152,7 @@ $form["tabs"]['domain'] = array(
         'SOGoIMAPServer' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
-            'default' => 'imaps://127.0.0.1:143/?tls=YES',
+            'default' => 'imaps://{SERVERNAME}:143/?tls=YES',
             'value' => '',
             'maxlength' => '',
             'required' => 0,
@@ -161,7 +161,7 @@ $form["tabs"]['domain'] = array(
         'SOGoSMTPServer' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
-            'default' => '127.0.0.1',
+            'default' => '{SERVERNAME}',
             'value' => '',
             'maxlength' => '',
             'required' => 0,
@@ -299,6 +299,7 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
+        /* use system tab for this settings
         'SOGoForceExternalLoginWithEmail' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
@@ -311,6 +312,7 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
+        */
         'SOGoMailAuxiliaryUserAccountsEnabled' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
@@ -364,21 +366,6 @@ $form["tabs"]['domain'] = array(
 //                    'errmsg' => $app->lng('Calendar Default Roles can\'t be larger than 5'),
 //                )
 //            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoContactsDefaultRoles' => array(
-            'value' => array(
-                'ObjectViewer' => 'ObjectViewer',
-                'ObjectEditor' => 'ObjectEditor',
-                'ObjectCreator' => 'ObjectCreator',
-                'ObjectEraser' => 'ObjectEraser',
-            ),
-            'datatype' => 'VARCHAR',
-            'formtype' => 'CHECKBOXARRAY',
-            'default' => 'ObjectEditor',
-            'separator' => ',',
             'maxlength' => '',
             'required' => 0,
             'width' => 100,

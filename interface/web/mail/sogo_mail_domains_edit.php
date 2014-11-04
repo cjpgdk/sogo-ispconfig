@@ -50,7 +50,7 @@ class tform_action extends tform_actions {
             $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
             if (!isset($result['domain_id']) && !isset($result['server_id'])) {
                 //* domain do not exists.!
-                echo "HEADER_REDIRECT:mail/sogo_mail_domains_list.php";
+                echo "HEADER_REDIRECT:mail/sogo_mail_domain_list.php";
                 exit;
             } else {
                 //* domain exists but no config exists yet
@@ -69,7 +69,7 @@ class tform_action extends tform_actions {
             }
         } else {
             //* nothing is valid
-            echo "HEADER_REDIRECT:mail/sogo_mail_domains_list.php";
+            echo "HEADER_REDIRECT:mail/sogo_mail_domain_list.php";
             exit;
         }
         $_SESSION['s']['module']["sogo_conifg_domain_id"] = $dId;
@@ -92,7 +92,52 @@ class tform_action extends tform_actions {
         if (isset($result['domain'])) {
             $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
         }
+
+        //* i like this to be translated WHY IS THIS NOT DONE IN CORE FILES..!..! :-(
+        foreach ($app->tform->formDef["tabs"]['domain']['fields'] as $key => & $value) {
+            if (isset($value['value']) && is_array($value['value'])) {
+                foreach ($value['value'] as $innerkey => & $innervalue) {
+                    if (isset($app->tform->wordbook[$innerkey])) {
+                        //* using the key og the field to translate
+                        $innervalue = $app->tform->wordbook[$innerkey];
+                    } else if (isset($app->tform->wordbook[$innervalue])) {
+                        //* using the value og the field to translate
+                        $innervalue = $app->tform->wordbook[$innervalue];
+                    }
+                }
+            }
+        }
         parent::onShow();
+    }
+
+    /** @global app $app */
+    public function onShowEnd() {
+        global $app;
+        $app->tpl->setVar('domain_id', $this->__domain_id);
+        $app->tpl->setVar('domain_name', $this->__domain_name);
+        $app->tpl->setVar('server_id', $this->__server_id);
+        $app->tpl->setVar('server_name', $this->__server_name);
+        parent::onShowEnd();
+    }
+
+    /** @global app $app */
+    public function onShowNew() {
+        global $app;
+        //* @todo change this to insert new row with server default then show edit..
+        if ($app->sogo_helper->configExists($this->__server_id)) {
+            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
+            //* on new copy all default values from server config if exists
+            foreach ($app->tform->formDef["tabs"] as $key => & $value) {
+                foreach ($value['fields'] as $key => & $value) {
+                    if ($key == "sogo_id" || $key == "sys_userid" || $key == "sys_groupid" || $key == "sys_perm_user" || $key == "sys_perm_group" || $key == "sys_perm_other" || $key == "server_id" || $key == "server_name" || $key == "domain_id" || $key == "domain_name" || $key == "SOGoCustomXML") {
+                        continue;
+                    } else {
+                        $value['default'] = (isset($sConf[$key]) ? $sConf[$key] : $value['default']);
+                    }
+                }
+            }
+        }
+        parent::onShowNew();
     }
 
     public function onAfterInsert() {
@@ -127,6 +172,7 @@ class tform_action extends tform_actions {
                     . "WHERE `sogo_id` ='{$dConfId}' AND `domain_id` ='{$dId}';");
         }
     }
+
 }
 
 $app->tform_action = new tform_action();

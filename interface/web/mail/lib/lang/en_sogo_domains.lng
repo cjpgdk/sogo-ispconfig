@@ -1,57 +1,119 @@
 <?php
-$wb["domain_id_txt"] = 'domain_id';
-$wb["domain_name_txt"] = 'domain_name';
-$wb["server_id_txt"] = 'server_id';
-$wb["server_name_txt"] = 'server_name';
-$wb["SOGoSieveScriptsEnabled_txt"] = 'SOGoSieveScriptsEnabled';
-$wb["SOGoSieveServer_txt"] = 'SOGoSieveServer';
-$wb["SOGoVacationEnabled_txt"] = 'SOGoVacationEnabled';
-$wb["SOGoDraftsFolderName_txt"] = 'SOGoDraftsFolderName';
-$wb["SOGoSentFolderName_txt"] = 'SOGoSentFolderName';
-$wb["SOGoTrashFolderName_txt"] = 'SOGoTrashFolderName';
-$wb["SOGoIMAPServer_txt"] = 'SOGoIMAPServer';
-$wb["SOGoSMTPServer_txt"] = 'SOGoSMTPServer';
-$wb["SOGoMailingMechanism_txt"] = 'SOGoMailingMechanism';
-$wb["SOGoMailSpoolPath_txt"] = 'SOGoMailSpoolPath';
-$wb["SOGoSearchMinimumWordLength_txt"] = 'SOGoSearchMinimumWordLength';
-$wb["SOGoSieveFolderEncoding_txt"] = 'SOGoSieveFolderEncoding';
-$wb["SOGoSubscriptionFolderFormat_txt"] = 'SOGoSubscriptionFolderFormat';
-$wb["SOGoTimeZone_txt"] = 'SOGoTimeZone';
-$wb["SOGoACLsSendEMailNotifications_txt"] = 'SOGoACLsSendEMailNotifications';
-$wb["SOGoAppointmentSendEMailNotifications_txt"] = 'SOGoAppointmentSendEMailNotifications';
-$wb["SOGoFoldersSendEMailNotifications_txt"] = 'SOGoFoldersSendEMailNotifications';
-$wb["SOGoNotifyOnPersonalModifications_txt"] = 'SOGoNotifyOnPersonalModifications';
-$wb["SOGoNotifyOnExternalModifications_txt"] = 'SOGoNotifyOnExternalModifications';
-$wb["SOGoForceExternalLoginWithEmail_txt"] = 'SOGoForceExternalLoginWithEmail';
-$wb["SOGoMailAuxiliaryUserAccountsEnabled_txt"] = 'SOGoMailAuxiliaryUserAccountsEnabled';
-$wb["SOGoMailCustomFromEnabled_txt"] = 'SOGoMailCustomFromEnabled';
-$wb["SOGoCalendarDefaultRoles_txt"] = 'SOGoCalendarDefaultRoles';
-$wb["SOGoContactsDefaultRoles_txt"] = 'SOGoContactsDefaultRoles';
-$wb["SOGoSuperUsernames_txt"] = 'SOGoSuperUsernames';
-$wb["SOGoIMAPAclConformsToIMAPExt_txt"] = 'SOGoIMAPAclConformsToIMAPExt';
-$wb["SOGoCalendarDefaultReminder_txt"] = 'SOGoCalendarDefaultReminder';
-$wb["SOGoCalendarEventsDefaultClassification_txt"] = 'SOGoCalendarEventsDefaultClassification';
-$wb["SOGoCalendarTasksDefaultClassification_txt"] = 'SOGoCalendarTasksDefaultClassification';
-$wb["SOGoCalendarShouldDisplayWeekend_txt"] = 'SOGoCalendarShouldDisplayWeekend';
-$wb["SOGoDayStartTime_txt"] = 'SOGoDayStartTime';
-$wb["SOGoDayEndTime_txt"] = 'SOGoDayEndTime';
-$wb["SOGoFirstDayOfWeek_txt"] = 'SOGoFirstDayOfWeek';
-$wb["SOGoFirstWeekOfYear_txt"] = 'SOGoFirstWeekOfYear';
-$wb["SOGoLanguage_txt"] = 'SOGoLanguage';
-$wb["SOGoLoginModule_txt"] = 'SOGoLoginModule';
-$wb["SOGoMailComposeMessageType_txt"] = 'SOGoMailComposeMessageType';
-$wb["SOGoMailListViewColumnsOrder_txt"] = 'SOGoMailListViewColumnsOrder';
-$wb["SOGoMailMessageCheck_txt"] = 'SOGoMailMessageCheck';
-$wb["SOGoMailMessageForwarding_txt"] = 'SOGoMailMessageForwarding';
-$wb["SOGoMailReplyPlacement_txt"] = 'SOGoMailReplyPlacement';
-$wb["SOGoMailSignaturePlacement_txt"] = 'SOGoMailSignaturePlacement';
-$wb["SOGoTimeFormat_txt"] = 'SOGoTimeFormat';
-$wb["SOGoMailUseOutlookStyleReplies_txt"] = 'SOGoMailUseOutlookStyleReplies';
-$wb["SOGoCalendarDefaultCategoryColor_txt"] = 'SOGoCalendarDefaultCategoryColor';
-$wb["SOGoDefaultCalendar_txt"] = 'SOGoDefaultCalendar';
-$wb["SOGoCustomXML_txt"] = 'SOGoCustomXML';
+
+$wb["list_desc_txt"] = 'What you se here is default settings for the domain, many of these settings can be set by the user from within the SOGo web interface';
+$wb["domain_id_txt"] = 'Domain Id';
+$wb["domain_name_txt"] = 'Domain Name';
+$wb["server_id_txt"] = 'Server Id';
+$wb["server_name_txt"] = 'Server Name';
+$wb["SOGoCustomXML_txt"] = 'Custom XML';
+$wb["SOGoCalendarDefaultReminder_txt"] = 'Calendar Default Reminder';
+$wb["SOGoCalendarEventsDefaultClassification_txt"] = 'Calendar Events Default Classification';
+$wb["SOGoCalendarTasksDefaultClassification_txt"] = 'Calendar Tasks Default Classification';
+$wb["SOGoCalendarShouldDisplayWeekend_txt"] = 'Calendar Should Display Weekend';
+$wb["SOGoDayStartTime_txt"] = 'Day Start Time';
+$wb["SOGoDayEndTime_txt"] = 'Day End Time';
+$wb["SOGoFirstDayOfWeek_txt"] = 'First Day Of Week';
+$wb["SOGoFirstWeekOfYear_txt"] = 'First Week Of Year';
+$wb["SOGoLanguage_txt"] = 'Language';
+$wb["SOGoLoginModule_txt"] = 'Login Module';
+$wb["SOGoMailComposeMessageType_txt"] = 'Mail Compose Message Type';
+$wb["SOGoMailListViewColumnsOrder_txt"] = 'Mail List View Columns Order';
+$wb["SOGoMailMessageCheck_txt"] = 'Mail Message Check';
+$wb["SOGoMailMessageForwarding_txt"] = 'Mail Message Forwarding';
+$wb["SOGoMailReplyPlacement_txt"] = 'Mail Reply Placement';
+$wb["SOGoMailSignaturePlacement_txt"] = 'Mail Signature Placement';
+$wb["SOGoTimeFormat_txt"] = 'Time Format';
+$wb["SOGoMailUseOutlookStyleReplies_txt"] = 'Mail Use Outlook Style Replies';
+$wb["SOGoCalendarDefaultCategoryColor_txt"] = 'Calendar Default Category Color';
+$wb["SOGoDefaultCalendar_txt"] = 'Default Calendar';
+$wb["SOGoSieveScriptsEnabled_txt"] = 'Sieve Scripts Enabled';
+$wb["SOGoSieveServer_txt"] = 'Sieve Server';
+$wb["SOGoVacationEnabled_txt"] = 'Vacation Enabled';
+$wb["SOGoDraftsFolderName_txt"] = 'Drafts Folder Name';
+$wb["SOGoSentFolderName_txt"] = 'Sent Folder Name';
+$wb["SOGoTrashFolderName_txt"] = 'Trash Folder Name';
+$wb["SOGoIMAPServer_txt"] = 'IMAP Server';
+$wb["SOGoSMTPServer_txt"] = 'SMTP Server';
+$wb["SOGoMailingMechanism_txt"] = 'Mailing Mechanism';
+$wb["SOGoMailSpoolPath_txt"] = 'Mail Spool Path';
+$wb["SOGoSearchMinimumWordLength_txt"] = 'Search Minimum Word Length';
+$wb["SOGoSieveFolderEncoding_txt"] = 'Sieve Folder Encoding';
+$wb["SOGoSubscriptionFolderFormat_txt"] = 'Subscription Folder Format';
+$wb["SOGoTimeZone_txt"] = 'Time Zone';
+$wb["SOGoACLsSendEMailNotifications_txt"] = 'ACLs Send EMail Notifications';
+$wb["SOGoAppointmentSendEMailNotifications_txt"] = 'Appointment Send EMail Notifications';
+$wb["SOGoFoldersSendEMailNotifications_txt"] = 'Folders Send EMail Notifications';
+$wb["SOGoNotifyOnPersonalModifications_txt"] = 'Notify On Personal Modifications';
+$wb["SOGoNotifyOnExternalModifications_txt"] = 'Notify On External Modifications';
+$wb["SOGoForceExternalLoginWithEmail_txt"] = 'Force External Login With Email';
+$wb["SOGoMailAuxiliaryUserAccountsEnabled_txt"] = 'Mail Auxiliary User Accounts Enabled';
+$wb["SOGoMailCustomFromEnabled_txt"] = 'Mail Custom From Enabled';
+$wb["SOGoCalendarDefaultRoles_txt"] = 'Calendar Default Roles';
+$wb["SOGoContactsDefaultRoles_txt"] = 'Contacts Default Roles';
+$wb["SOGoSuperUsernames_txt"] = 'Super Users (Admins)';
+$wb["SOGoIMAPAclConformsToIMAPExt_txt"] = 'IMAP Acl Conforms To IMAPExt';
 $wb["SOGo_user_head_txt"] = 'User default settings';
 $wb["SOGo_domain_head_txt"] = 'Domain Settings';
+$wb["SOGo_imap_head_txt"] = 'IMAP Settings';
+$wb["SOGo_smtp_head_txt"] = 'SMTP Settings';
+$wb["SOGo_sieve_head_txt"] = 'Sieve Settings';
 $wb["SOGo_custom_head_txt"] = 'Custom';
-  
-?>
+$wb["SOGoVacationEnabled_ttip_txt"] = 'Parameter used to activate the edition from the preferences window of a vacation message.'
+    . '<br>Requires Sieve script support on the IMAP host.'
+    . '<br>Default: NO'
+    . '<br>When enabling this parameter, one must also enable the associated cron job in order to activate automatic vacation message expiration.';
+$wb["SOGoACLsSendEMailNotifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email notifications to the involved users of a calendar or address book\'s ACLs'
+    . '<br>Default: YES';
+$wb["SOGoFoldersSendEMailNotifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email notifications on the creation of a calendar or an address book'
+    . '<br>Default: NO';
+$wb["SOGoAppointmentSendEMailNotifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email notifications to meeting participants.'
+    . '<br>Default: YES';
+$wb["SOGoCustomXML_ttip_txt"] = 'Add custom xml entries to SOGo configuration file, important to use VALID XML in GNU Step format otherwise you may break the sogo configuration';
+$wb["SOGoNotifyOnExternalModifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email receipts when a modification is being done to his/her own calendar by someone else. '
+    . '<br>Users can overwrite this from the calendar properties window.';
+$wb["SOGoNotifyOnPersonalModifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email receipts when someone changes his/her own calendar. '
+    . '<br>Users can overwrite this from the calendar properties window.';
+$wb["ObjectViewer"] = 'Grant read privilege (ObjectViewer)';
+$wb["ObjectEditor"] = 'Grant modify privilege (ObjectEditor)';
+$wb["ObjectCreator"] = 'Grant create privilege (ObjectCreator)';
+$wb["ObjectEraser"] = 'Grant delete privilege (ObjectEraser)';
+
+$wb["SOGoTimeZone_ttip_txt"] = 'Parameter used to set a default time zone for users.'
+        . '<br>The default timezone is set to UTC. The Olson database is a standard'
+        . '<br>database that takes all the time zones around the world into account'
+        . '<br>and represents them along with their history. On GNU/Linux systems,'
+        . '<br>time zone definition files are available under /usr/share/zoneinfo.'
+        . '<br>Listing the available files will give you the name of the available'
+        . '<br>time zones. This could be America/New_York, Europe/Berlin,'
+        . '<br>Asia/Tokyo or Africa/Lubumbashi.';
+$wb["SOGoSearchMinimumWordLength_ttip_txt"] = 'Parameter used to control the minimum length to be used for the search string (attendee completion, address book search, etc.) prior triggering the server-side search operation. Default is 2 &ndash; which means a search operation will be triggered on the 3 rd typed character.';
+$wb["SOGoSieveFolderEncoding_ttip_txt"] = 'Used to specify which encoding is used for IMAP folder names in Sieve filters.';
+$wb["SOGoSMTPServer_ttip_txt"] = 'The DNS name or IP address of the SMTP server used when \'Mailing Mechanism\' is set to smtp.';
+$wb["SOGoMailSpoolPath_ttip_txt"] = 'Used to set the path where temporary email drafts are written. If you change this value, you must also modify the daily cronjob sogo-tmpwatch';
+$wb["SOGoMailCustomFromEnabled_ttip_txt"] = 'Used to allow or not users to specify custom From addresses from SOGo preferences panel';
+$wb["SOGoMailAuxiliaryUserAccountsEnabled_ttip_txt"] = 'Parameter used to activate the auxiliary IMAP accounts in SOGo. When set to YES, users can add other IMAP accounts that will be visible from the SOGo Webmail interface. Defaults is NO'
+        . '<br><br>'
+        . 'My advice is to keep this set to NO by default and ONLY allow highly trusted user domains to use this'
+        . 'reason being that all the extra mail account added will use your smtp server to send out emails and make it easy to do a lot of spamming';
+$wb["SOGoSubscriptionFolderFormat_ttip_txt"] = 'Used to set the default formatting of a subscription folder name.'
+        . '<br>Available variables are:'
+        . '<br>%{FolderName}'
+        . '<br>%{UserName}'
+        . '<br>%{Email}'
+        . '<br>Default: %{FolderName} (%{UserName} <%{Email}>)';
+$wb["SOGoTrashFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoTrashFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoTrashFolderName_ttip_txt"] = 'Used to set the IMAP folder name used to store deleted messages.';
+$wb["SOGoSentFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoSentFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoSentFolderName_ttip_txt"] = 'Used to set the IMAP folder name used to store sent messages.';
+$wb["SOGoDraftsFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoDraftsFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoDraftsFolderName_ttip_txt"] = 'Used to set the IMAP folder name used to store drafts messages.';
+$wb["SOGoIMAPServer_ttip_txt"] = 'Parameter used to set the DNS name or IP address of the IMAP server used by SOGo.'
+        . '<br />You can als ouse SSL or TLS by providing a value using an URL, such as:'
+        . '<br />imaps://localhost:993'
+        . '<br />imaps://localhost:143/?tls=YES';
+/*
+ * 
+*/
