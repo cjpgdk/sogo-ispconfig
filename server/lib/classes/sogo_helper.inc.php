@@ -144,7 +144,6 @@ class sogo_helper {
         return false;
     }
 
-
     public function getServer($sid) {
         if (!isset(self::$sogo_server[$sid])) {
             global $app, $conf;
@@ -246,7 +245,7 @@ class sogo_helper {
                 self::$dnCache[$domain_name] = $ret_srv;
                 return self::$dnCache[$domain_name];
             }
-            
+
             $parse_url = parse_url($domain_default["SOGoSieveServer"]);
             $domain_default["SOGoSieveServer"] = (isset($parse_url['host']) ? $parse_url['host'] : (isset($parse_url['path']) && $parse_url['path'] == $domain_default["SOGoSieveServer"] ? $domain_default["SOGoSieveServer"] : ""));
             $parse_url = parse_url($domain_default["SOGoIMAPServer"]);
@@ -272,7 +271,8 @@ class sogo_helper {
             unset($_save);
             return self::$dnCache[$domain_name];
         } else {
-            self::$dnCache[$domain_name] = $this->is_domain_active($domain_name);
+            if (!isset(self::$dnCache[$domain_name]))
+                self::$dnCache[$domain_name] = $this->is_domain_active($domain_name);
         }
         return self::$dnCache[$domain_name];
     }

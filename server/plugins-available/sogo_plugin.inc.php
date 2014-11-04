@@ -796,7 +796,13 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         if ($sconf = $app->sogo_helper->getServerConfig()) {
             $sconf['SOGoMailListViewColumnsOrder'] = explode(',', $sconf['SOGoMailListViewColumnsOrder']);
             $sconf['SOGoCalendarDefaultRoles'] = explode(',', $sconf['SOGoCalendarDefaultRoles']);
-
+            
+            //* if called more then once
+            if(!is_object($app->sogo_config) && !class_exists('sogo_config'))
+                $app->uses('sogo_config');
+            else if(!is_object($app->sogo_config) && class_exists('sogo_config'))
+                $app->sogo_config = new sogo_config();
+            
             //* build XML document
             $app->sogo_config->createConfig(array('sogod' => $sconf));
             //* holder for builded domain xml config
