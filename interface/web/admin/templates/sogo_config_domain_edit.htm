@@ -8,15 +8,21 @@
         <fieldset class="inlineLabels"><legend>SOGo Domain Defaults</legend>
             <div class="ctrlHolder">
                 <label for="SOGoDraftsFolderName">{tmpl_var name='SOGoDraftsFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoDraftsFolderName_ttip_txt'}"></span></label>
-                <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" size="100" maxlength="" type="text" class="textInput" />
+                <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" size="100" maxlength="" type="text" class="textInput" />&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_courier'}">INBOX.Drafts</a>&nbsp;|&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_dovecot'}">Drafts</a>
             </div>
             <div class="ctrlHolder">
                 <label for="SOGoSentFolderName">{tmpl_var name='SOGoSentFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoSentFolderName_ttip_txt'}"></span></label>
-                <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}" size="100" maxlength="" type="text" class="textInput" />
+                <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}" size="100" maxlength="" type="text" class="textInput" />&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoSentFolderName_courier'}">INBOX.Sent</a>&nbsp;|&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoSentFolderName_dovecot'}">Sent</a>
             </div>
             <div class="ctrlHolder">
                 <label for="SOGoTrashFolderName">{tmpl_var name='SOGoTrashFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoTrashFolderName_ttip_txt'}"></span></label>
-                <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}" size="100" maxlength="" type="text" class="textInput" />
+                <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}" size="100" maxlength="" type="text" class="textInput" />&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoTrashFolderName_courier'}">INBOX.Trash</a>&nbsp;|&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoTrashFolderName_dovecot'}">Trash</a>
             </div>
             <div class="ctrlHolder">
                 <label for="SOGoSubscriptionFolderFormat">{tmpl_var name='SOGoSubscriptionFolderFormat_txt'} <span class="ttip" title="{tmpl_var name='SOGoSubscriptionFolderFormat_ttip_txt'}"></span></label>

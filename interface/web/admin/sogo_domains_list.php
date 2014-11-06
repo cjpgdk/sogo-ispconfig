@@ -46,7 +46,6 @@ class listform_action extends listform_actions {
         }
         $app->tpl->setLoop('sogo_domains', $sogo_domains);
         unset($sogo_domains, $_sogo_domains);
-
         parent::onLoad();
     }
 

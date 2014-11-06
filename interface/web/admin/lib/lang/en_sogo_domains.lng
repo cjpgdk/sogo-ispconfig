@@ -50,4 +50,10 @@ $wb["SOGoCalendarDefaultRoles_txt"] = 'Calendar Default Roles';
 $wb["SOGoContactsDefaultRoles_txt"] = 'Contacts Default Roles';
 $wb["SOGoSuperUsernames_txt"] = 'Super Usernames';
 $wb["SOGoIMAPAclConformsToIMAPExt_txt"] = 'IMAP Acl Conforms To IMAPExt';
+$wb["SOGoDefaultCalendar_ttip_txt"] = 'Default for courier imap';
+$wb["SOGoTrashFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoSentFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoSentFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoDraftsFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoDraftsFolderName_dovecot"] = 'Default for dovecot imap';
 ?>

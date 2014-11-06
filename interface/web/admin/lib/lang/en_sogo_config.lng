@@ -130,9 +130,9 @@ $wb["SOGoForceExternalLoginWithEmail_ttip_txt"] = 'Parameter used to specify if,
         . '<br />Default is YES';
 $wb["SOGoMailAuxiliaryUserAccountsEnabled_txt"] = 'Auxiliary User Accounts Enabled';
 $wb["SOGoMailAuxiliaryUserAccountsEnabled_ttip_txt"] = 'Parameter used to activate the auxiliary IMAP accounts in SOGo. When set to YES, users can add other IMAP accounts that will be visible from the SOGo Webmail interface. Defaults is NO'
-        . '<br /><br />'
+        . '<br><br>'
         . 'My advice is to keep this set to no by default and ONLY allow highly trusted user domains to use this'
-        . '<br />reason being that all the extra mail account added will use your smtp server to send out emails and make it easy to do a lot of spamming';
+        . 'reason being that all the extra mail account added will use your smtp server to send out emails and make it easy to do a lot of spamming';
 $wb["SOGoMailCustomFromEnabled_txt"] = 'Mail Custom From Enabled';
 $wb["SOGoMailCustomFromEnabled_ttip_txt"] = 'Parameter used to allow or not users to specify custom \'From\' addresses from SOGo\'s preferences panel. Defaults is NO';
 $wb["SOGoCalendarDefaultRoles_txt"] = 'Calendar Default Roles';
@@ -279,4 +279,10 @@ $wb["list_desc_SOGo_User_Defaults_txt"]='in this section you have configuration 
 $wb["list_desc_SOGo_Custom_txt"]='All other configuration settings can be set here if needed this is will then be added to the main confiration';
 $wb["btn_cancel_txt"]='Cancel';
 $wb["btn_save_txt"]='Save';
+$wb["SOGoDefaultCalendar_ttip_txt"] = 'Default for courier imap';
+$wb["SOGoTrashFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoSentFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoSentFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["SOGoDraftsFolderName_courier"] = 'Default for courier imap';
+$wb["SOGoDraftsFolderName_dovecot"] = 'Default for dovecot imap';
 
