@@ -121,13 +121,13 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `server_id` int(11) NOT NULL DEFAULT '0',
   `server_name` varchar(255) DEFAULT NULL,
   `SOGoSieveScriptsEnabled` varchar(255) NOT NULL DEFAULT 'NO',
-  `SOGoSieveServer` varchar(255) NOT NULL DEFAULT 'sieve://localhost:4190',
+  `SOGoSieveServer` varchar(255) NOT NULL DEFAULT 'sieve://{SERVERNAME}:4190',
   `SOGoVacationEnabled` varchar(255) NOT NULL DEFAULT 'NO',
   `SOGoDraftsFolderName` varchar(255) NOT NULL DEFAULT 'Drafts',
   `SOGoSentFolderName` varchar(255) NOT NULL DEFAULT 'Sent',
   `SOGoTrashFolderName` varchar(255) NOT NULL DEFAULT 'Trash',
-  `SOGoIMAPServer` varchar(255) NOT NULL DEFAULT 'imaps://127.0.0.1:143/?tls=YES',
-  `SOGoSMTPServer` varchar(255) NOT NULL DEFAULT '127.0.0.1',
+  `SOGoIMAPServer` varchar(255) NOT NULL DEFAULT 'imaps://{SERVERNAME}:143/?tls=YES',
+  `SOGoSMTPServer` varchar(255) NOT NULL DEFAULT '{SERVERNAME}',
   `SOGoMailingMechanism` varchar(255) NOT NULL DEFAULT 'below',
   `SOGoMailSpoolPath` varchar(255) NOT NULL DEFAULT '/var/spool/sogo',
   `SOGoSearchMinimumWordLength` int(11) NOT NULL DEFAULT '2',
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `SOGoMailCustomFromEnabled` varchar(255) NOT NULL DEFAULT 'NO',
   `SOGoCalendarDefaultRoles` varchar(255) NOT NULL DEFAULT 'PublicViewer,ConfidentialDAndTViewer',
   `SOGoContactsDefaultRoles` varchar(255) NOT NULL DEFAULT 'ObjectEditor',
-  `SOGoSuperUsernames` varchar(255) NOT NULL DEFAULT 'postmaster@${DOMAIN}',
+  `SOGoSuperUsernames` varchar(255) NOT NULL DEFAULT 'postmaster@{domain}',
   `SOGoIMAPAclConformsToIMAPExt` varchar(255) NOT NULL DEFAULT 'YES',
   `SOGoCalendarDefaultReminder` varchar(255) NOT NULL DEFAULT '-PT5M',
   `SOGoCalendarEventsDefaultClassification` varchar(255) NOT NULL DEFAULT 'PUBLIC',
@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   PRIMARY KEY (`sogo_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+
 CREATE TABLE IF NOT EXISTS `sogo_module` (
   `smid` int(2) NOT NULL AUTO_INCREMENT,
   `sys_userid` int(11) unsigned NOT NULL,
@@ -180,10 +181,11 @@ CREATE TABLE IF NOT EXISTS `sogo_module` (
   `all_domains` enum('y','n') NOT NULL DEFAULT 'y',
   `allow_same_instance` enum('y','n') NOT NULL DEFAULT 'y',
   `sql_of_mail_server` enum('y','n') NOT NULL DEFAULT 'n',
+  `config_rebuild_on_mail_user_insert` enum('n','y') NOT NULL DEFAULT 'n',
   PRIMARY KEY (`smid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-INSERT INTO `sogo_module` (`smid` ,`sys_userid` ,`sys_groupid` ,`sys_perm_user` ,`sys_perm_group` ,`sys_perm_other` ,`all_domains` ,`allow_same_instance` ,`sql_of_mail_server`) VALUES ('1', '1', '0', 'riu', 'riu', NULL , 'y', 'y', 'n');
-
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+INSERT INTO `sogo_module` (`smid`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `all_domains`, `allow_same_instance`, `sql_of_mail_server`, `config_rebuild_on_mail_user_insert`) VALUES
+(1, 1, 0, 'riu', 'riu', NULL, 'y', 'y', 'n', 'n');
 
 CREATE TABLE IF NOT EXISTS `sogo_plugins` (
   `spid` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -208,4 +210,4 @@ INSERT INTO `sogo_plugins` (`spid`, `sys_userid`, `sys_groupid`, `sys_perm_user`
 (3, 1, 1, 'riud', 'riud', 'r', 'y', 0, 'Thunderbird 31 - SOGo Integrator', 'SOGo Connector Thunderbird extension\r\nVersion 31.0.0\r\n\r\nif you are going to use Thunderbird you need this extension along with "SOGo Integrator" to fully integrate with SOGo', 'download', 'sogo-integrator-31.0.0-sogo-demo.xpi');
 
 
-INSERT INTO `sys_config` (`group`, `name`, `value`) VALUES ('interface', 'sogo_interface', '4');
+INSERT INTO `sys_config` (`group`, `name`, `value`) VALUES ('interface', 'sogo_interface', '5');
