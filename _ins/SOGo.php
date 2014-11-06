@@ -67,7 +67,7 @@ class SOGo {
                 $this->echoMessage("Shall i install sogo-activesync? (Y/N) [Y]: ", '');
                 $pkg = "sogo sope4.9-gdl1-mysql memcached rpl";
                 $pkg .= (strtolower(Installer::readInput("y")) == "y" ? " sogo-activesync" : "");
-                echo exec('sudo apt-get install -y ' . $pkg);
+                echo exec('sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ' . $pkg);
                 unset($pkg);
             } else {
                 $this->echoMessage(PHP_EOL . "SOGo is installed nothing to do");
