@@ -7,7 +7,7 @@
   cd sogo-ispconfig-master
   php update.php
  */
-$sogo_interface_version_latest = "4";
+$sogo_interface_version_latest = "5";
 
 require '_ins/Installer.php';
 $ispchome = Installer::getISPConfigHomeDir();
@@ -72,7 +72,4 @@ if ($sogo_interface_version < $sogo_interface_version_latest) {
 } else {
     echo "No database update neded" . PHP_EOL;
 }
-
-echo PHP_EOL;
-
-echo "all done i hope!";
+echo PHP_EOL . "all done i hope!" . PHP_EOL;
