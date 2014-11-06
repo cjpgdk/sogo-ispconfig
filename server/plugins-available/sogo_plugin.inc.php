@@ -329,6 +329,10 @@ class sogo_plugin {
         if ($this->__checkStateDropDomain($domain)) {
             //* a simple sync should be ok 
             $this->__syncMailUsers($domain);
+            if ($app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert) {
+                $method = "sogo_plugin::insert_sogo_mail_user():";
+                $this->__buildSOGoConfig($method);
+            }
         }
         return TRUE;
     }
@@ -610,7 +614,8 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
             return false; //* do nothing
-        //* create domain table if it do not exists
+            
+//* create domain table if it do not exists
         if (!$app->sogo_helper->sogoTableExists($domain_name)) {
             $this->__create_sogo_table($domain_name);
         }
@@ -796,13 +801,13 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         if ($sconf = $app->sogo_helper->getServerConfig()) {
             $sconf['SOGoMailListViewColumnsOrder'] = explode(',', $sconf['SOGoMailListViewColumnsOrder']);
             $sconf['SOGoCalendarDefaultRoles'] = explode(',', $sconf['SOGoCalendarDefaultRoles']);
-            
+
             //* if called more then once
-            if(!is_object($app->sogo_config) && !class_exists('sogo_config'))
+            if (!is_object($app->sogo_config) && !class_exists('sogo_config'))
                 $app->uses('sogo_config');
-            else if(!is_object($app->sogo_config) && class_exists('sogo_config'))
+            else if (!is_object($app->sogo_config) && class_exists('sogo_config'))
                 $app->sogo_config = new sogo_config();
-            
+
             //* build XML document
             $app->sogo_config->createConfig(array('sogod' => $sconf));
             //* holder for builded domain xml config

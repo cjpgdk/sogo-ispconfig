@@ -176,7 +176,6 @@ class sogo_helper {
                 self::$sCache[$server_id] = false;
                 return self::$sCache[$server_id];
             }
-            //* vaules we don't need in sogo config.
             $this->removeUselessValues($server_default);
             self::$sCache[$server_id] = $server_default;
             return self::$sCache[$server_id];
@@ -241,7 +240,7 @@ class sogo_helper {
                     }
                 }
                 //* return server config if domain config do not exists!
-                $this->removeUselessValues($ret_srv);
+                $this->removeUselessValues($ret_srv, array('server_name'));
                 self::$dnCache[$domain_name] = $ret_srv;
                 return self::$dnCache[$domain_name];
             }
@@ -264,11 +263,8 @@ class sogo_helper {
                     unset($domain_default["{$value['Field']}"]);
                 }
             }
-            $_save = $domain_default['server_name'];
-            $this->removeUselessValues($domain_default);
+            $this->removeUselessValues($domain_default, array('server_name'));
             self::$dnCache[$domain_name] = $domain_default;
-            self::$dnCache[$domain_name]['server_name'] = $_save;
-            unset($_save);
             return self::$dnCache[$domain_name];
         } else {
             if (!isset(self::$dnCache[$domain_name]))
@@ -459,9 +455,15 @@ class sogo_helper {
     /**
      * unset all possible wars in an array that is of no use to SOGo
      */
-    private function removeUselessValues(& $param) {
+    private function removeUselessValues(& $param, $keep = array()) {
+        $useless_values = array(
+            'sogo_id', 'sys_groupid', 'sys_perm_group', 'domain_id', 'sys_userid',
+            'sys_perm_user', 'sys_perm_other', 'server_id', 'server_name'
+        );
         if (is_array($param))
-            unset($param['sogo_id'], $param['sys_groupid'], $param['sys_perm_group'], $param['domain_id'], $param['sys_userid'], $param['sys_perm_user'], $param['sys_perm_other'], $param['server_id'], $param['server_name']);
+            foreach ($param as $key => & $value)
+                if (in_array($key, $useless_values) && !in_array($key, $keep))
+                    unset($param[$key]);
     }
 
     public function dbEscapeString($str) {
@@ -538,5 +540,11 @@ class sogo_module_settings {
      * @var boolean
      */
     public $sql_of_mail_server = FALSE;
+
+    /**
+     * always rebuild SOGo configuration when a mail user is inserted
+     * @var boolean
+     */
+    public $config_rebuild_on_mail_user_insert = TRUE;
 
 }
