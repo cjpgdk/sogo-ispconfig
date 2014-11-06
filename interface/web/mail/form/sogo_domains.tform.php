@@ -45,7 +45,6 @@ $form["auth_preset"]["perm_other"] = ''; //r = read, i = insert, u = update, d =
  * SOGoFreeBusyDefaultInterval
  * SOGoMailPollingIntervals
  * 
- * 
  */
 
 $form["tabs"]['domain'] = array(
@@ -94,18 +93,9 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoSieveServer' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'sieve://{SERVERNAME}:4190',
-            'value' => '',
             'maxlength' => '',
             'required' => 0,
             'width' => 100,
@@ -115,75 +105,9 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoDraftsFolderName' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'Drafts',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoSentFolderName' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'Sent',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoTrashFolderName' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'Trash',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoIMAPServer' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => 'imaps://{SERVERNAME}:143/?tls=YES',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoSMTPServer' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '{SERVERNAME}',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoMailingMechanism' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'below',
-            'value' => array(
-                'smtp' => $app->lng('SMTP'),
-                'sendmail' => $app->lng('SendMail'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoMailSpoolPath' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '/var/spool/sogo',
-            'value' => '',
             'maxlength' => '',
             'required' => 0,
             'width' => 100,
@@ -193,18 +117,6 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'TEXT',
             'default' => 2,
             'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoSieveFolderEncoding' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'UTF-7',
-            'value' => array(
-                'UTF-7' => 'UTF-7',
-                'UTF-8' => 'UTF-8',
-            ),
             'maxlength' => '',
             'required' => 0,
             'width' => 100,
@@ -244,8 +156,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'YES',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -256,8 +168,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'YES',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -268,8 +180,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -280,8 +192,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -292,51 +204,27 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
             'width' => 100,
         ),
         /* use system tab for this settings
-        'SOGoForceExternalLoginWithEmail' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'YES',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        */
-        'SOGoMailAuxiliaryUserAccountsEnabled' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'NO',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
-        'SOGoMailCustomFromEnabled' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'NO',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
+          'SOGoForceExternalLoginWithEmail' => array(
+          'datatype' => 'VARCHAR',
+          'formtype' => 'SELECT',
+          'default' => 'YES',
+          'value' => array(
+          'NO' => 'No',
+          'YES' => 'Yes',
+          ),
+          'maxlength' => '',
+          'required' => 0,
+          'width' => 100,
+          ),
+         */
         'SOGoCalendarDefaultRoles' => array(
             'value' => array(
                 'PublicViewer' => 'PublicViewer',
@@ -363,7 +251,7 @@ $form["tabs"]['domain'] = array(
 //                    'type' => 'CUSTOM',
 //                    'class' => 'validate_sogo',
 //                    'function' => 'isValidCalendarDefaultRolesField',
-//                    'errmsg' => $app->lng('Calendar Default Roles can\'t be larger than 5'),
+//                    'errmsg' => 'Calendar Default Roles can\'t be larger than 5',
 //                )
 //            ),
             'maxlength' => '',
@@ -401,35 +289,23 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
-        'SOGoIMAPAclConformsToIMAPExt' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'SELECT',
-            'default' => 'YES',
-            'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
-            ),
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-        ),
         'SOGoCalendarDefaultReminder' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => '-PT5M',
             'value' => array(
-                '-PT5M' => $app->lng('5_MINUTES_BEFORE'),
-                '-PT10M' => $app->lng('10_MINUTES_BEFORE'),
-                '-PT15M' => $app->lng('15_MINUTES_BEFORE'),
-                '-PT30M' => $app->lng('30_MINUTES_BEFORE'),
-                '-PT45M' => $app->lng('45_MINUTES_BEFORE'),
-                '-PT1H' => $app->lng('1_HOUR_BEFORE'),
-                '-PT2H' => $app->lng('2_HOURS_BEFORE'),
-                '-PT5H' => $app->lng('5_HOURS_BEFORE'),
-                '-PT15H' => $app->lng('15_HOURS_BEFORE'),
-                '-P1D' => $app->lng('1_DAY_BEFORE'),
-                '-P2D' => $app->lng('2_DAYS_BEFORE'),
-                '-P1W' => $app->lng('1_WEEK_BEFORE'),
+                '-PT5M' => '5_MINUTES_BEFORE',
+                '-PT10M' => '10_MINUTES_BEFORE',
+                '-PT15M' => '15_MINUTES_BEFORE',
+                '-PT30M' => '30_MINUTES_BEFORE',
+                '-PT45M' => '45_MINUTES_BEFORE',
+                '-PT1H' => '1_HOUR_BEFORE',
+                '-PT2H' => '2_HOURS_BEFORE',
+                '-PT5H' => '5_HOURS_BEFORE',
+                '-PT15H' => '15_HOURS_BEFORE',
+                '-P1D' => '1_DAY_BEFORE',
+                '-P2D' => '2_DAYS_BEFORE',
+                '-P1W' => '1_WEEK_BEFORE',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -440,9 +316,9 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'PUBLIC',
             'value' => array(
-                'PUBLIC' => $app->lng('Public'),
-                'CONFIDENTIAL' => $app->lng('Confidential'),
-                'PRIVATE' => $app->lng('Private'),
+                'PUBLIC' => 'Public',
+                'CONFIDENTIAL' => 'Confidential',
+                'PRIVATE' => 'Private',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -453,9 +329,9 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'PUBLIC',
             'value' => array(
-                'PUBLIC' => $app->lng('Public'),
-                'CONFIDENTIAL' => $app->lng('Confidential'),
-                'PRIVATE' => $app->lng('Private'),
+                'PUBLIC' => 'Public',
+                'CONFIDENTIAL' => 'Confidential',
+                'PRIVATE' => 'Private',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -466,8 +342,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'YES',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -496,13 +372,13 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 1,
             'value' => array(
-                0 => $app->lng('Sunday'),
-                1 => $app->lng('Monday'),
-                2 => $app->lng('Tuesday'),
-                3 => $app->lng('Wednesday'),
-                4 => $app->lng('Thursday'),
-                5 => $app->lng('Friday'),
-                6 => $app->lng('Saturday'),
+                0 => 'Sunday',
+                1 => 'Monday',
+                2 => 'Tuesday',
+                3 => 'Wednesday',
+                4 => 'Thursday',
+                5 => 'Friday',
+                6 => 'Saturday',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -513,9 +389,9 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'FirstFullWeek',
             'value' => array(
-                'January1' => $app->lng('January 1'),
-                'First4DayWeek' => $app->lng('First 4 Day Week'),
-                'FirstFullWeek' => $app->lng('First Full Week'),
+                'January1' => 'January 1',
+                'First4DayWeek' => 'First 4 Day Week',
+                'FirstFullWeek' => 'First Full Week',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -560,9 +436,9 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'Mail',
             'value' => array(
-                'Calendar' => $app->lng('Calendar'),
-                'Mail' => $app->lng('Mail'),
-                'Contacts' => $app->lng('Contacts'),
+                'Calendar' => 'Calendar',
+                'Mail' => 'Mail',
+                'Contacts' => 'Contacts',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -573,8 +449,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'text',
             'value' => array(
-                'text' => $app->lng('Text'),
-                'html' => $app->lng('HTML'),
+                'text' => 'Text',
+                'html' => 'HTML',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -607,14 +483,14 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'every_minute',
             'value' => array(
-                'once_per_hour' => $app->lng('once_per_hour'),
-                'every_30_minutes' => $app->lng('every_30_minutes'),
-                'every_20_minutes' => $app->lng('every_20_minutes'),
-                'every_10_minutes' => $app->lng('every_10_minutes'),
-                'every_5_minutes' => $app->lng('every_5_minutes'),
-                'every_2_minutes' => $app->lng('every_2_minutes'),
-                'every_minute' => $app->lng('every_minute'),
-                'manually' => $app->lng('manually'),
+                'once_per_hour' => 'once_per_hour',
+                'every_30_minutes' => 'every_30_minutes',
+                'every_20_minutes' => 'every_20_minutes',
+                'every_10_minutes' => 'every_10_minutes',
+                'every_5_minutes' => 'every_5_minutes',
+                'every_2_minutes' => 'every_2_minutes',
+                'every_minute' => 'every_minute',
+                'manually' => 'manually',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -625,8 +501,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'inline',
             'value' => array(
-                'inline' => $app->lng('Inline'),
-                ' attached' => $app->lng('Attached'),
+                'inline' => 'Inline',
+                ' attached' => 'Attached',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -637,8 +513,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'below',
             'value' => array(
-                'above' => $app->lng('Above'),
-                'below' => $app->lng('Below'),
+                'above' => 'Above',
+                'below' => 'Below',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -649,8 +525,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'below',
             'value' => array(
-                'above' => $app->lng('Above'),
-                'below' => $app->lng('Below'),
+                'above' => 'Above',
+                'below' => 'Below',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -670,8 +546,8 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'NO',
             'value' => array(
-                'NO' => $app->lng('No'),
-                'YES' => $app->lng('Yes'),
+                'NO' => 'No',
+                'YES' => 'Yes',
             ),
             'maxlength' => '',
             'required' => 0,
@@ -691,24 +567,158 @@ $form["tabs"]['domain'] = array(
             'formtype' => 'SELECT',
             'default' => 'selected',
             'value' => array(
-                'selected' => $app->lng('Selected'),
-                'personal' => $app->lng('Personal'),
-                'first' => $app->lng('First'),
+                'selected' => 'Selected',
+                'personal' => 'Personal',
+                'first' => 'First',
             ),
             'maxlength' => '',
             'required' => 0,
             'width' => 100,
         ),
-        'SOGoCustomXML' => array(
-            'datatype' => 'TEXT',
-            'formtype' => 'TEXTAREA',
-            'default' => '',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 0,
-            'width' => 100,
-            'rows' => 20,
-            'cols' => 30,
-        ),
     )
 );
+//* admin and resellers
+if ($app->auth->is_admin() || $app->auth->has_clients($app->auth->get_user_id())) {
+
+    //* IMAP
+    $form["tabs"]['domain']['fields']['SOGoDraftsFolderName'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => 'Drafts',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoSentFolderName'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => 'Sent',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoTrashFolderName'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => 'Trash',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+}
+//* Admins only
+if ($app->auth->is_admin()) {
+    $form["tabs"]['domain']['fields']['SOGoCustomXML'] = array(
+        'datatype' => 'TEXT',
+        'formtype' => 'TEXTAREA',
+        'default' => '',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+        'rows' => 20,
+        'cols' => 30,
+    );
+    //* SIEVE
+    $form["tabs"]['domain']['fields']['SOGoSieveServer'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => 'sieve://{SERVERNAME}:4190',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoSieveFolderEncoding'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'SELECT',
+        'default' => 'UTF-7',
+        'value' => array(
+            'UTF-7' => 'UTF-7',
+            'UTF-8' => 'UTF-8',
+        ),
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    //* SMTP
+    $form["tabs"]['domain']['fields']['SOGoMailCustomFromEnabled'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'SELECT',
+        'default' => 'NO',
+        'value' => array(
+            'NO' => 'No',
+            'YES' => 'Yes',
+        ),
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoMailSpoolPath'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => '/var/spool/sogo',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoMailingMechanism'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'SELECT',
+        'default' => 'below',
+        'value' => array(
+            'smtp' => 'SMTP',
+            'sendmail' => 'SendMail',
+        ),
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoSMTPServer'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => '{SERVERNAME}',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    //* IMAP
+    $form["tabs"]['domain']['fields']['SOGoMailAuxiliaryUserAccountsEnabled'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'SELECT',
+        'default' => 'NO',
+        'value' => array(
+            'NO' => 'No',
+            'YES' => 'Yes',
+        ),
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoIMAPServer'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'TEXT',
+        'default' => 'imaps://{SERVERNAME}:143/?tls=YES',
+        'value' => '',
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+    $form["tabs"]['domain']['fields']['SOGoIMAPAclConformsToIMAPExt'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'SELECT',
+        'default' => 'YES',
+        'value' => array(
+            'NO' => 'No',
+            'YES' => 'Yes',
+        ),
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
+}

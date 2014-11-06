@@ -132,21 +132,10 @@
             <div class="subsectiontoggle"><span class=""></span>{tmpl_var name='SOGo_imap_head_txt'}<em class=""></em></div>
             <div style="display: none;">
                 <div class="ctrlHolder">
-                    <label for="SOGoIMAPAclConformsToIMAPExt">{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_txt'}</label>
-                    <select name="SOGoIMAPAclConformsToIMAPExt" id="SOGoIMAPAclConformsToIMAPExt" class="selectInput">
-                        {tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}
-                    </select>
-                </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoIMAPServer">{tmpl_var name='SOGoIMAPServer_txt'} <span class="ttip" title="{tmpl_var name='SOGoIMAPServer_ttip_txt'}"></span></label>
-                    <input name="SOGoIMAPServer" id="SOGoIMAPServer" value="{tmpl_var name='SOGoIMAPServer'}" type="text" class="textInput" />&nbsp;
-                    <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
-                </div>
-                <div class="ctrlHolder">
                     <label for="SOGoDraftsFolderName">{tmpl_var name='SOGoDraftsFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoDraftsFolderName_ttip_txt'}"></span></label>
                     <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" type="text" class="textInput" />&nbsp;
-                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_courier'}">INBOX.Trash</a>&nbsp;|&nbsp;
-                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_dovecot'}">Trash</a>
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_courier'}">INBOX.Drafts</a>&nbsp;|&nbsp;
+                    <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_dovecot'}">Drafts</a>
                 </div>
                 <div class="ctrlHolder">
                     <label for="SOGoSentFolderName">{tmpl_var name='SOGoSentFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoSentFolderName_ttip_txt'}"></span></label>
@@ -167,43 +156,12 @@
                     <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoTrashFolderName_dovecot'}">%{UserName}</a>&nbsp;
                     <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoTrashFolderName_dovecot'}">%{Email}</a>
                 </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoMailAuxiliaryUserAccountsEnabled">{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_ttip_txt'}"></span></label>
-                    <select name="SOGoMailAuxiliaryUserAccountsEnabled" id="SOGoMailAuxiliaryUserAccountsEnabled" class="selectInput">
-                        {tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled'}
-                    </select>
-                </div>
-            </div>
-            
-            <div class="subsectiontoggle"><span class=""></span>{tmpl_var name='SOGo_smtp_head_txt'}<em class=""></em></div>
-            <div style="display: none;">
-                <div class="ctrlHolder">
-                    <label for="SOGoSMTPServer">{tmpl_var name='SOGoSMTPServer_txt'} <span class="ttip" title="{tmpl_var name='SOGoSMTPServer_ttip_txt'}"></span></label>
-                    <input name="SOGoSMTPServer" id="SOGoSMTPServer" value="{tmpl_var name='SOGoSMTPServer'}" type="text" class="textInput" />&nbsp;
-                    <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
-                </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoMailingMechanism">{tmpl_var name='SOGoMailingMechanism_txt'}</label>
-                    <select name="SOGoMailingMechanism" id="SOGoMailingMechanism" class="selectInput">
-                        {tmpl_var name='SOGoMailingMechanism'}
-                    </select>
-                </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoMailSpoolPath">{tmpl_var name='SOGoMailSpoolPath_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailSpoolPath_ttip_txt'}"></span></label>
-                    <input name="SOGoMailSpoolPath" id="SOGoMailSpoolPath" value="{tmpl_var name='SOGoMailSpoolPath'}" type="text" class="textInput" />
-                </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoMailCustomFromEnabled">{tmpl_var name='SOGoMailCustomFromEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailCustomFromEnabled_ttip_txt'}"></span></label>
-                    <select name="SOGoMailCustomFromEnabled" id="SOGoMailCustomFromEnabled" class="selectInput">
-                        {tmpl_var name='SOGoMailCustomFromEnabled'}
-                    </select>
-                </div>
             </div>
             
             <div class="subsectiontoggle"><span class=""></span>{tmpl_var name='SOGo_sieve_head_txt'}<em class=""></em></div>
             <div style="display: none;">
                 <p>
-                    To enable sieve for combined use between ISPConfig and SOGo please read <a target="_blank" href="https://github.com/cmjnisse/sogo-ispconfig/wiki/Use-manage-sieve-protocol">this wiki page</a>
+                    {tmpl_var name='reseller_sieve_filters_message'}
                 </p>
                 <div class="ctrlHolder">
                     <label for="SOGoVacationEnabled">{tmpl_var name='SOGoVacationEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoVacationEnabled_ttip_txt'}"></span></label>
@@ -216,17 +174,6 @@
                     <select name="SOGoSieveScriptsEnabled" id="SOGoSieveScriptsEnabled" class="selectInput">
                         {tmpl_var name='SOGoSieveScriptsEnabled'}
                     </select>
-                </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoSieveFolderEncoding">{tmpl_var name='SOGoSieveFolderEncoding_txt'} <span class="ttip" title="{tmpl_var name='SOGoSieveFolderEncoding_ttip_txt'}"></span></label>
-                    <select name="SOGoSieveFolderEncoding" id="SOGoSieveFolderEncoding" class="selectInput">
-                        {tmpl_var name='SOGoSieveFolderEncoding'}
-                    </select>
-                </div>
-                <div class="ctrlHolder">
-                    <label for="SOGoSieveServer">{tmpl_var name='SOGoSieveServer_txt'}</label>
-                    <input name="SOGoSieveServer" id="SOGoSieveServer" value="{tmpl_var name='SOGoSieveServer'}" type="text" class="textInput" />&nbsp;
-                    <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
                 </div>
             </div>
             
@@ -270,12 +217,6 @@
                         {tmpl_var name='SOGoNotifyOnExternalModifications'}
                     </select>
                 </div>
-                <!--<div class="ctrlHolder">
-                    <label for="SOGoForceExternalLoginWithEmail">{tmpl_var name='SOGoForceExternalLoginWithEmail_txt'}</label>
-                    <select name="SOGoForceExternalLoginWithEmail" id="SOGoForceExternalLoginWithEmail" class="selectInput">
-                        {tmpl_var name='SOGoForceExternalLoginWithEmail'}
-                    </select>
-                </div>-->
                 <div class="ctrlHolder">
                     <p class="label">
                         {tmpl_var name='SOGoCalendarDefaultRoles_txt'}<br><br>
@@ -291,19 +232,6 @@
                     <div class="multiField">
                         {tmpl_var name='SOGoContactsDefaultRoles'}
                     </div>
-                </div>
-            </div>
-
-            <div class="subsectiontoggle"><span class=""></span>{tmpl_var name='SOGo_custom_head_txt'}<em class=""></em></div>
-            <div style="display: none;">
-                <div class="ctrlHolder">
-                    <label for="SOGoCustomXML">
-                        {tmpl_var name='SOGoCustomXML_txt'}
-                        <span class="ttip" title="{tmpl_var name='SOGoCustomXML_ttip_txt'}"></span>
-                        <br><span style="white-space: pre-wrap; float: left; padding-top: 10px;">&lt;key>ValidKeyName&lt;/key>
-&lt;string>I am valid but i will never be used by SOGo&lt;/string></span>
-                    </label>
-                    <textarea name="SOGoCustomXML" id="SOGoCustomXML" rows='20' cols='30'>{tmpl_var name='SOGoCustomXML'}</textarea>
                 </div>
             </div>
 

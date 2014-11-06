@@ -73,7 +73,17 @@ class tform_action extends tform_actions {
             exit;
         }
         $_SESSION['s']['module']["sogo_conifg_domain_id"] = $dId;
-        parent::onLoad();
+        if (!$app->sogo_helper->configExists($this->__server_id) && !$app->sogo_helper->configExistsByDomain($dId)) {
+            global $tform_def_file;
+            $app->tform->loadFormDef($tform_def_file);
+            if (!$app->auth->is_admin()) {
+                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+            } else {
+                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND'];
+            }
+            $app->error($msg);
+        } else
+            parent::onLoad();
     }
 
     /** @global app $app */
@@ -107,6 +117,7 @@ class tform_action extends tform_actions {
                 }
             }
         }
+
         parent::onShow();
     }
 
@@ -125,14 +136,16 @@ class tform_action extends tform_actions {
         global $app;
         //* @todo change this to insert new row with server default then show edit..
         if ($app->sogo_helper->configExists($this->__server_id)) {
-            $sConf = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
+
+            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
+
             //* on new copy all default values from server config if exists
             foreach ($app->tform->formDef["tabs"] as $key => & $value) {
                 foreach ($value['fields'] as $key => & $value) {
                     if ($key == "sogo_id" || $key == "sys_userid" || $key == "sys_groupid" || $key == "sys_perm_user" || $key == "sys_perm_group" || $key == "sys_perm_other" || $key == "server_id" || $key == "server_name" || $key == "domain_id" || $key == "domain_name" || $key == "SOGoCustomXML") {
                         continue;
                     } else {
-                        $value['default'] = (isset($sConf[$key]) ? $sConf[$key] : $value['default']);
+                        $value['default'] = (isset($server_config[$key]) ? $server_config[$key] : $value['default']);
                     }
                 }
             }
@@ -141,6 +154,36 @@ class tform_action extends tform_actions {
     }
 
     public function onAfterInsert() {
+        global $app;
+        //* if reseller or client fix missing server default values..!
+        if (!$app->auth->is_admin()) {
+            $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
+            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
+            $server_id = @$this->dataRecord['server_id'];
+            $domain_id = @$this->dataRecord['domain_id'];
+            $missing_values = array();
+            foreach ($domain_config_fileds as $key => $value) {
+                if (!isset($this->dataRecord[$key])) {
+                    if ($key == "SOGoCustomXML")
+                        continue;
+                    $value['default'] = isset($server_config[$key]) ? $server_config[$key] : $value['default'];
+                    $missing_values[$key] = $value;
+                }
+            }
+            unset($domain_config_fileds, $server_config);
+            $sql = " UPDATE `sogo_domains` ";
+            $sql_where = " WHERE `domain_id`=" . intval($domain_id) . " AND `server_id`=" . intval($server_id); //* domain_name server_name
+            $sql_set = " SET ";
+
+            if (!empty($missing_values) && count($missing_values) > 1) {
+                foreach ($missing_values as $key => $value) {
+                    $sql_set .= " `{$key}`='{$value['default']}',";
+                }
+            }
+            $sql .= trim($sql_set, ',') . " {$sql_where}";
+            $app->db->query($sql);
+            unset($sql, $sql_set, $sql_where, $missing_values, $key, $value, $domain_id, $server_id);
+        }
         $this->__fixDomainOwner();
         parent::onAfterInsert();
     }
