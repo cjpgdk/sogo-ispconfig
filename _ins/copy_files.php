@@ -4,7 +4,7 @@ $files_copy = array(
     'interface' => array(
         'lib/classes/sogo_helper.inc.php',
         'lib/config.inc.local.sogo-sample.php',
-    //* #ADMIN#
+        //* #ADMIN#
         //* admin
         'web/admin/sogo_conifg_del.php',
         'web/admin/sogo_conifg_edit.php',
@@ -49,22 +49,36 @@ $files_copy = array(
         'web/admin/templates/sogo_module_edit.htm',
         'web/admin/templates/sogo_plugins_edit.htm',
         'web/admin/templates/sogo_plugins_list.htm',
-    //* /#ADMIN#
-    
-    //* #MAIL#
+        //* /#ADMIN#
+        //* #MAIL#
         //* mail
+        'web/mail/sogo_mail_domain_del.php',
+        'web/mail/sogo_mail_domain_list.php',
+        'web/mail/sogo_mail_domains_edit.php',
         'web/mail/sogo_mail_plugins_list.php',
         'web/mail/sogo_plugins_download.php',
         //* form
+        'web/mail/form/sogo_domains.tform.php',
         //* lng
+        'web/mail/lib/lang/en_sogo_domains.lng',
+        'web/mail/lib/lang/en_sogo_domains_list.lng',
+        'web/mail/lib/lang/en_sogo_domains_reseller_list.lng',
+        'web/mail/lib/lang/en_sogo_domains_user_list.lng',
         'web/mail/lib/lang/en_sogo_plugins_list.lng',
         'web/mail/lib/lang/en_sogo_plugins_reseller_list.lng',
         'web/mail/lib/lang/en_sogo_plugins_user_list.lng',
         //* menu
         'web/mail/lib/menu.d/sogo.menu.php',
         //* list
+        'web/mail/list/sogo_domain.list.php',
         'web/mail/list/sogo_plugins.list.php',
         //* templates
+        'web/mail/templates/sogo_domains_edit.htm',
+        'web/mail/templates/sogo_domains_list.htm',
+        'web/mail/templates/sogo_domains_reseller_edit.htm',
+        'web/mail/templates/sogo_domains_reseller_list.htm',
+        'web/mail/templates/sogo_domains_user_edit.htm',
+        'web/mail/templates/sogo_domains_user_list.htm',
         'web/mail/templates/sogo_plugins_list.htm',
         'web/mail/templates/sogo_plugins_reseller_list.htm',
         'web/mail/templates/sogo_plugins_user_list.htm',
