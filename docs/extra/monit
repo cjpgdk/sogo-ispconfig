@@ -1,0 +1,90 @@
+#
+# SOGo
+# preferable use a script to force restart memcached and SOGo
+# since if SOGo failed 1 out of 10 memcached is the cause
+#
+check process sogo with pidfile /var/run/sogo/sogo.pid
+   group mail
+   start program = "/etc/init.d/sogo start"
+   stop  program = "/etc/init.d/sogo stop"
+   if failed host 127.0.0.1 port 20000 protocol http then restart
+#   if cpu is greater than 60% for 2 cycles then alert
+#   if cpu > 80% for 5 cycles then restart
+#   if totalmem > 850 MB for 5 cycles then restart
+#   if children > 550 then restart
+#   if loadavg(5min) greater than 10 for 8 cycles then stop
+   if 3 restarts within 5 cycles then timeout
+   depends on sogod_bin
+   depends on sogod_rc
+   depends on gdomap
+   depends on memcached
+
+check file sogod_bin with path /usr/sbin/sogod
+   group mail
+   if failed checksum then unmonitor
+   if failed permission 755 then unmonitor
+   if failed uid root then unmonitor
+   if failed gid root then unmonitor
+
+check file sogod_rc with path /etc/init.d/sogo
+   group mail
+   if failed checksum then unmonitor
+   if failed permission 755 then unmonitor
+   if failed uid root then unmonitor
+   if failed gid root then unmonitor
+   
+#
+# gdomap: a daemon used by GNUstep programs
+# http://www.gnustep.org/resources/documentation/Developer/Tools/Reference/gdomap.html
+#
+check process gdomap with pidfile /var/run/gdomap.pid
+   group system
+   start program = "/etc/init.d/gdomap start"
+   stop  program = "/etc/init.d/gdomap stop"
+#   if failed host 127.0.0.1 port 538 type udp then restart
+   if failed host 127.0.0.1 port 538 type tcp then restart
+   if 3 restarts within 5 cycles then timeout
+   depends on gdomap_bin
+   depends on gdomap_rc
+
+check file gdomap_bin with path /usr/bin/gdomap
+   group system
+   if failed checksum then unmonitor
+   if failed permission 755 then unmonitor
+   if failed uid root then unmonitor
+   if failed gid root then unmonitor
+
+check file gdomap_rc with path /etc/init.d/gdomap
+   group system
+   if failed checksum then unmonitor
+   if failed permission 755 then unmonitor
+   if failed uid root then unmonitor
+   if failed gid root then unmonitor
+
+#
+# memcached
+#
+check process memcached with pidfile /var/run/memcached.pid
+   group memcached
+    start program = "/etc/init.d/memcached start"
+    stop program = "/etc/init.d/memcached stop"
+    if failed host 127.0.0.1 port 11211 protocol MEMCACHE then restart
+    if cpu > 70% for 2 cycles then alert
+    if cpu > 98% for 5 cycles then restart
+    if 2 restarts within 3 cycles then timeout
+   depends memcached_rc
+   depends memcached_bin
+
+check file memcached_rc with path /etc/init.d/memcached
+   group memcached
+   if failed checksum then unmonitor
+   if failed permission 755 then unmonitor
+   if failed uid root then unmonitor
+   if failed gid root then unmonitor
+
+check file memcached_bin with path /usr/bin/memcached
+   group memcached
+   if failed checksum then unmonitor
+   if failed permission 755 then unmonitor
+   if failed uid root then unmonitor
+   if failed gid root then unmonitor
