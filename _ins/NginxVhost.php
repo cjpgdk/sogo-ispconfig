@@ -78,7 +78,7 @@ class NginxVhost extends VhostBase {
 #   listen      80 default;
 #   server_name {SOGoHostname};
 #   ## redirect http to https ##
-#   rewrite        ^ `https://\$server_name\$request_uri?` permanent; 
+#   rewrite        ^ https://\$server_name\$request_uri? permanent; 
 #}
 server
 {
@@ -93,18 +93,18 @@ server
    proxy_http_version 1.1;
    
    location = / {
-      rewrite ^ `http://\$server_name:\$server_port/SOGo`; 
+      rewrite ^ http://\$server_name:\$server_port/SOGo; 
       allow all; 
    }
    # For IOS 7 
 
    location = /principals/ {
-      rewrite ^ `http://\$server_name:\$server_port/SOGo/dav`; 
+      rewrite ^ http://\$server_name:\$server_port/SOGo/dav; 
       allow all; 
    }
    location ^~/SOGo {
-      proxy_pass `http://{SOGoListenIpPort}`; 
-      proxy_redirect `http://{SOGoListenIpPort}` default; 
+      proxy_pass http://{SOGoListenIpPort}; 
+      proxy_redirect http://{SOGoListenIpPort} default; 
       # forward user's IP address 
       proxy_set_header X-Real-IP \$remote_addr; 
       proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for; 
@@ -112,7 +112,7 @@ server
       proxy_set_header x-webobjects-server-protocol HTTP/1.0; 
       proxy_set_header x-webobjects-remote-host 127.0.0.1; 
       proxy_set_header x-webobjects-server-name \$server_name; 
-      proxy_set_header x-webobjects-server-url \$scheme://\$host; 
+      proxy_set_header x-webobjects-server-url \$scheme://\$host:\$server_port; 
       proxy_set_header x-webobjects-server-port \$server_port; 
       proxy_connect_timeout 90;
       proxy_send_timeout 90;
