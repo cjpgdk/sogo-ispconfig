@@ -172,10 +172,10 @@ class Installer {
             echo PHP_EOL . "Setup basic Apache vhost (Y/N) [Y]: ";
             if (strtolower(self::readInput("y")) == "y")
                 ApacheVhost::Run();
-            else{
-            echo PHP_EOL . "Setup basic Nginx vhost (Y/N) [Y]: ";
-            if (strtolower(self::readInput("y")) == "y")
-                NginxVhost::Run();
+            else {
+                echo PHP_EOL . "Setup basic Nginx vhost (Y/N) [Y]: ";
+                if (strtolower(self::readInput("y")) == "y")
+                    NginxVhost::Run();
             }
         } elseif (self::$type == 'mysqltables') {
             $this->installTablesMySQL();
@@ -222,6 +222,9 @@ class Installer {
     //* quick lazy alias
     public static function copyFiles($index) {
         if (isset(self::$files_copy[$index])) {
+            if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d')) {
+                mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d');
+            }
             foreach (self::$files_copy[$index] as $file) {
                 if (file_exists($index . '/' . $file)) {
                     if (!copy($index . '/' . $file, self::$ispc_home_dir . '/' . $index . '/' . $file)) {
@@ -289,6 +292,32 @@ class Installer {
             echo PHP_EOL;
             $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password} {$mysql_database} < " . self::$mysql_tables_ispc;
             echo exec($command) . PHP_EOL;
+
+
+            echo PHP_EOL . "Add SOGo database? (Y/N) [Y]:";
+            if (strtolower(self::readInput("y")) == "y") {
+                echo PHP_EOL . "SOGo database? [dbsogo]: ";
+                $sogo_database = self::readInput("dbsogo");
+
+                echo PHP_EOL . "SOGo database user? [sogo]: ";
+                $sogo_user = self::readInput("sogo");
+
+                $passwd = sha1(md5('Jeg er en Nisse og mit navn er Udvikler?-' . microtime(true)));
+                echo PHP_EOL . "SOGo database user password? [{$passwd}]: ";
+                $sogo_passwd = self::readInput($passwd);
+
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"CREATE USER '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}';\"";
+                echo exec($command) . PHP_EOL;
+
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"GRANT USAGE ON * . * TO '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;\"";
+                echo exec($command) . PHP_EOL;
+
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"CREATE DATABASE IF NOT EXISTS {$sogo_database} ;\"";
+                echo exec($command) . PHP_EOL;
+
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"GRANT ALL PRIVILEGES ON {$sogo_database}. * TO '{$sogo_user}'@'localhost';\"";
+                echo exec($command) . PHP_EOL;
+            }
         } else {
             self::$error = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" . PHP_EOL . "Redownload the tables and import them manualy before using";
             self::$errors['mysql'][] = self::$error;
