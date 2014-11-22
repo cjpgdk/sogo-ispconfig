@@ -172,6 +172,11 @@ class Installer {
             echo PHP_EOL . "Setup basic Apache vhost (Y/N) [Y]: ";
             if (strtolower(self::readInput("y")) == "y")
                 ApacheVhost::Run();
+            else{
+            echo PHP_EOL . "Setup basic Nginx vhost (Y/N) [Y]: ";
+            if (strtolower(self::readInput("y")) == "y")
+                NginxVhost::Run();
+            }
         } elseif (self::$type == 'mysqltables') {
             $this->installTablesMySQL();
         }

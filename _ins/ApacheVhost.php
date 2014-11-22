@@ -20,32 +20,11 @@
  *  @copyright 2014 Christian M. Jensen
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
+if (!class_exists('VhostBase')) {
+    require 'VhostBase.php';
+}
 
-class ApacheVhost {
-
-    public static function getSOGoGnuStepDir($libdir = "/usr/lib") {
-        if (file_exists("{$libdir}/GNUstep/SOGo/") || is_dir("{$libdir}/GNUstep/SOGo/")) {
-            //* $libdir is set we must trut the user ´know what the hell he/she is doing
-            $GnuStepDir = "{$libdir}/GNUstep/SOGo";
-        } else if (file_exists("/usr/lib/GNUstep/SOGo/") || is_dir("/usr/lib/GNUstep/SOGo/")) {
-            //* default (Debian && Ubuntu [32Bit & 64Bit])
-            $GnuStepDir = "/usr/lib/GNUstep/SOGo";
-        } else if (file_exists("/usr/lib64/GNUstep/SOGo/") || is_dir("/usr/lib64/GNUstep/SOGo/")) {
-            //* seen on CentOS 64 bit
-            $GnuStepDir = "/usr/lib64/GNUstep/SOGo";
-        } else {
-            $GnuStepDir = "/usr/lib/GNUstep/SOGo";
-        }
-        echo PHP_EOL . "SOGo Web Resources Dir [{$GnuStepDir}]: ";
-        return Installer::readInput($GnuStepDir);
-    }
-
-    static $GnuStepDir = "/usr/lib/GNUstep/SOGo";
-    static $SOGoListenIpPort = "127.0.0.1:20000";
-    static $EnableMSActiveSync = "#";
-    static $SOGoHostname = NULL;
-    static $SOGoHostPort = "8080";
-    static $SOGoServerURL = "https://server1.example.com:8080";
+class ApacheVhost extends VhostBase {
 
     public static function Run() {
         //* locate "usr/lib/GNUstep/SOGo"
@@ -96,34 +75,21 @@ class ApacheVhost {
             if (empty($apachebin) || !file_exists($apachebin))
                 die(PHP_EOL . "No apache2 or httpd binary" . PHP_EOL . "*Here is the vhost config file i created, installed it manualy" . PHP_EOL . "{$httpconfdir}/SOGo.conf");
 
-            exec('a2enmod proxy proxy_http headers rewrite', $out);
+            self::execWriteOut('a2enmod proxy proxy_http headers rewrite', $out);
             if (isset($out) && is_array($out)) {
-                foreach ($out as $value) {
-                    echo PHP_EOL . $value;
-                }
             } else {
                 echo PHP_EOL . PHP_EOL . 'please verify the following modules for apache is enabled';
                 echo PHP_EOL . 'a2enmod proxy proxy_http headers rewrite' . PHP_EOL;
             }
             if ($apaversion != "2.2") {
-                exec('a2enconf SOGo', $out);
-                if (isset($out) && is_array($out)) {
-                    foreach ($out as $value) {
-                        echo PHP_EOL . $value;
-                    }
-                }
+                self::execWriteOut('a2enconf SOGo', $out);
             }
             if (file_exists("/etc/init.d/httpd"))
                 $init = "/etc/init.d/httpd restart";
             else
                 $init = "/etc/init.d/apache2 restart";
 
-            exec($init, $out);
-            if (isset($out) && is_array($out)) {
-                foreach ($out as $value) {
-                    echo PHP_EOL . $value;
-                }
-            }
+            self::execWriteOut($init, $out);
             echo PHP_EOL . PHP_EOL;
         } else {
             echo PHP_EOL . PHP_EOL . str_repeat('=', 12) . PHP_EOL . PHP_EOL . self::printCronfig() . PHP_EOL . PHP_EOL . str_repeat('=', 12) . PHP_EOL . PHP_EOL;
@@ -146,36 +112,6 @@ class ApacheVhost {
             self::$SOGoHostname,
             self::$SOGoServerURL
                 ), self::$tpl);
-    }
-
-    static $novConf = TRUE;
-
-    public static function SOGovHostConfig() {
-
-        //* SOGo vHost hostname
-        $hostname = self::$SOGoHostname == null ? exec('hostname --fqdn') : self::$SOGoHostname;
-        echo PHP_EOL . "SOGo Hostname [{$hostname}]: ";
-        self::$SOGoHostname = Installer::readInput($hostname);
-        //* SOGo port number
-        echo PHP_EOL . "SOGo Host Port [" . self::$SOGoHostPort . "]: ";
-        self::$SOGoHostPort = Installer::readInput(self::$SOGoHostPort);
-        //* SOGo port number
-        echo PHP_EOL . "Will you be using (http/https) [https]: ";
-        $SOGoHostProto = Installer::readInput('https');
-        self::$SOGoServerURL = "{$SOGoHostProto}://" . self::$SOGoHostname . ":" . self::$SOGoHostPort;
-        echo PHP_EOL . "is this how you intend to access SOGo " . self::$SOGoServerURL . "/SOGo (Y/N) [Y]: ";
-        if ((strtolower(Installer::readInput('y')) == 'n')) {
-            echo PHP_EOL . "Okay would you like try again (Y/N) [Y]: ";
-            if ((strtolower(Installer::readInput('y')) == 'n'))
-                return self::$novConf;
-            else {
-                self::$novConf = self::SOGovHostConfig();
-                return self::$novConf;
-            }
-            self::$novConf = TRUE;
-        }
-        self::$novConf = FALSE;
-        return self::$novConf;
     }
 
     /**
