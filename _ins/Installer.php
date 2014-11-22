@@ -123,6 +123,8 @@ class Installer {
         self::$sogo_tool_binary = Installer::getSOGoToolBinary();
         //* get sogo home dir
         self::$sogo_home_dir = Installer::getSOGoHomeDir();
+        self::$_server_config_local = str_replace('{SOGOTOOLBIN}', self::$sogo_tool_binary, self::$_server_config_local);
+        self::$_server_config_local = str_replace('{SOGOHOMEDIR}', self::$sogo_home_dir, self::$_server_config_local);
         //* SOGo init script ?
         if (empty(self::$sogo_init_script)) {
             self::$error = "[FAIL]: Unable to locate SOGo init script";
@@ -213,6 +215,8 @@ class Installer {
                         echo str_repeat('=', 8) . PHP_EOL;
                     }
                 }
+                //* create sogo local config in server
+                @file_put_contents(self::$ispc_home_dir . '/server/lib/config.inc.local.sogo-sample.php', self::$_server_config_local);
             }
         } else {
             echo "Not installing server files, server folder not found" . PHP_EOL;
@@ -317,6 +321,10 @@ class Installer {
 
                 $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"GRANT ALL PRIVILEGES ON {$sogo_database}. * TO '{$sogo_user}'@'localhost';\"";
                 echo exec($command) . PHP_EOL;
+
+                self::$_server_config_local = str_replace('{SOGODB}', $sogo_database, self::$_server_config_local);
+                self::$_server_config_local = str_replace('{SOGODBUSER}', $sogo_user, self::$_server_config_local);
+                self::$_server_config_local = str_replace('{SOGODBPW}', $sogo_passwd, self::$_server_config_local);
             }
         } else {
             self::$error = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" . PHP_EOL . "Redownload the tables and import them manualy before using";
@@ -406,5 +414,59 @@ class Installer {
         $line = fgets($handle);
         return (!empty($line) && trim($line) != "" ? trim($line) : $default);
     }
+
+    private static $_server_config_local = <<< EOF
+<?php
+
+/*
+ SOGo sudo command to use when executing a SOGo binary
+ eg. 
+ su -p -c '{command}' sogo
+ sudo -u sogo {command}
+ **** if you must quote the command ONLY USE ' (Single quote) NOT "(Double quote)
+*/
+\$conf['sogo_su_command'] = 'sudo -u sogo {command}';
+/*
+  //* full path to sogo binary
+  \$conf['sogo_binary'] = '/usr/sbin/sogod';
+ */
+//* full path to sogo-tool binary 
+\$conf['sogo_tool_binary'] = '{SOGOTOOLBIN}';
+//* name of the database used for SOGo
+\$conf['sogo_database_name'] = '{SOGODB}';
+//* name of the database user used for SOGo db
+\$conf['sogo_database_user'] = '{SOGODBUSER}';
+//* name of the database user password used for SOGo db
+\$conf['sogo_database_passwd'] = '{SOGODBPW}';
+//* database host where SOGo db is hosted
+\$conf['sogo_database_host'] = '127.0.0.1';
+//* database port number
+\$conf['sogo_database_port'] = '3306';
+//* vars added to the domain template
+\$conf['sogo_domain_extra_vars'] = array(
+    //* password algorithm default is crypt
+    //* Possible algorithms are: plain, md5, crypt-md5, sha, ssha (including 256/512 variants),
+    'userPasswordAlgorithm' => 'crypt',
+    /*
+      The default behaviour is to store newly set
+      passwords with out the scheme (default: NO). 
+      This can be overridden by setting to YES
+      and will result in passwords stored as {scheme}encryptedPass
+     */
+    'prependPasswordScheme' => 'NO',
+    //* human identification name of the address book
+    'displayName' => 'Users in {domain}',
+);
+//* sogo default configuration file(s)
+\$conf['sogo_gnu_step_defaults'] = '{SOGOHOMEDIR}/GNUstep/Defaults/.GNUstepDefaults';
+\$conf['sogo_gnu_step_defaults_sogod.plist'] = '{SOGOHOMEDIR}/var/lib/sogo/GNUstep/Defaults/sogod.plist';
+
+//* template to use for table names in sogo db
+\$conf['sogo_domain_table_tpl'] = "{domain}_users";
+/*
+SOGoEncryptionKey ?? if password change shall be enabled.!
+*/
+
+EOF;
 
 }
