@@ -93,13 +93,13 @@ server
    proxy_http_version 1.1;
    
    location = / {
-      rewrite ^ `http://\$server_name/SOGo`; 
+      rewrite ^ `http://\$server_name:\$server_port/SOGo`; 
       allow all; 
    }
    # For IOS 7 
 
    location = /principals/ {
-      rewrite ^ `http://\$server_name/SOGo/dav`; 
+      rewrite ^ `http://\$server_name:\$server_port/SOGo/dav`; 
       allow all; 
    }
    location ^~/SOGo {
