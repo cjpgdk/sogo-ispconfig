@@ -42,8 +42,8 @@ class NginxVhost extends VhostBase {
         if (strtolower(Installer::readInput('y')) == 'y') {
             //* write config file
             @file_put_contents("/etc/nginx/sites-available/SOGo.vhost", self::printCronfig());
-            self::execWriteOut("ln -s /etc/nginx/sites-available/SOGo.vhost /etc/nginx/sites-enabled/");
-            self::execWriteOut("/etc/init.d/nginx restart");
+            self::execWriteOut("ln -s /etc/nginx/sites-available/SOGo.vhost /etc/nginx/sites-enabled/", $out);
+            self::execWriteOut("/etc/init.d/nginx restart", $out);
             echo PHP_EOL . PHP_EOL;
         } else {
             echo PHP_EOL . PHP_EOL . str_repeat('=', 12) . PHP_EOL . PHP_EOL . self::printCronfig() . PHP_EOL . PHP_EOL . str_repeat('=', 12) . PHP_EOL . PHP_EOL;
