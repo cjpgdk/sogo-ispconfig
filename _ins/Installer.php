@@ -227,7 +227,7 @@ class Installer {
     public static function copyFiles($index) {
         if (isset(self::$files_copy[$index])) {
             if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d')) {
-                mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d');
+                @mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d');
             }
             foreach (self::$files_copy[$index] as $file) {
                 if (file_exists($index . '/' . $file)) {
@@ -454,7 +454,7 @@ class Installer {
       and will result in passwords stored as {scheme}encryptedPass
      */
     'prependPasswordScheme' => 'NO',
-    //* human identification name of the address book
+    //* human identification name of the addressÂ book
     'displayName' => 'Users in {domain}',
 );
 //* sogo default configuration file(s)
