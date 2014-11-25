@@ -24,6 +24,13 @@ License
 
 GNU General Public License version 3
 
+includes Sortable (MIT LICENSE)
+Copyright 2013 Lebedev Konstantin http://rubaxa.github.io/Sortable/
+
+Sortable — is a minimalist JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery. Support AngularJS.
+
+http://rubaxa.github.io/Sortable/
+
 
 ##### NOTE
 DONT'T USE THIS VERSION ON TOP OF "[Update 9](https://github.com/cmjnisse/sogo-ispconfig/tree/6108d77c99ae2bd75efa38f2b60c77cc542885dd)"
