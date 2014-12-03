@@ -289,12 +289,12 @@ class Installer {
             $mysql_admin = self::readInput("root");
             echo PHP_EOL;
             echo "MySQL password? []: ";
-            $mysql_password = self::readInput("");
+            $mysql_password = str_replace('"', '\"', self::readInput(""));
             echo PHP_EOL;
             echo "ISPConfig database? [dbispconfig]: ";
             $mysql_database = self::readInput("dbispconfig");
             echo PHP_EOL;
-            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password} {$mysql_database} < " . self::$mysql_tables_ispc;
+            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\" {$mysql_database} < " . self::$mysql_tables_ispc;
             echo exec($command) . PHP_EOL;
 
 
@@ -310,16 +310,16 @@ class Installer {
                 echo PHP_EOL . "SOGo database user password? [{$passwd}]: ";
                 $sogo_passwd = self::readInput($passwd);
 
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"CREATE USER '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}';\"";
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"CREATE USER '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}';\"";
                 echo exec($command) . PHP_EOL;
 
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"GRANT USAGE ON * . * TO '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;\"";
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"GRANT USAGE ON * . * TO '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;\"";
                 echo exec($command) . PHP_EOL;
 
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"CREATE DATABASE IF NOT EXISTS {$sogo_database} ;\"";
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"CREATE DATABASE IF NOT EXISTS {$sogo_database} ;\"";
                 echo exec($command) . PHP_EOL;
 
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p{$mysql_password}  -e \"GRANT ALL PRIVILEGES ON {$sogo_database}. * TO '{$sogo_user}'@'localhost';\"";
+                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"GRANT ALL PRIVILEGES ON {$sogo_database}. * TO '{$sogo_user}'@'localhost';\"";
                 echo exec($command) . PHP_EOL;
 
                 self::$_server_config_local = str_replace('{SOGODB}', $sogo_database, self::$_server_config_local);
@@ -454,7 +454,7 @@ class Installer {
       and will result in passwords stored as {scheme}encryptedPass
      */
     'prependPasswordScheme' => 'NO',
-    //* human identification name of the address book
+    //* human identification name of the address book
     'displayName' => 'Users in {domain}',
 );
 //* sogo default configuration file(s)
