@@ -7,7 +7,7 @@
   cd sogo-ispconfig-master
   php update.php
  */
-$sogo_interface_version_latest = "5";
+$sogo_interface_version_latest = "6";
 
 require '_ins/Installer.php';
 $ispchome = Installer::getISPConfigHomeDir();

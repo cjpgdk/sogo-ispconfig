@@ -18,7 +18,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Struktur-dump for tabellen `sogo_config`
 --
-
 CREATE TABLE IF NOT EXISTS `sogo_config` (
   `sogo_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `sys_userid` int(11) NOT NULL DEFAULT '0',
@@ -77,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
   `SOGoMailCustomFromEnabled` varchar(255) NOT NULL DEFAULT 'NO',
   `SOGoCalendarDefaultRoles` varchar(255) NOT NULL DEFAULT 'PublicViewer,ConfidentialDAndTViewer',
   `SOGoContactsDefaultRoles` varchar(255) NOT NULL DEFAULT 'ObjectEditor',
-  `SOGoForwardEnabled` varchar(255) NOT NULL DEFAULT 'NO',
+  `SOGoForwardEnabled` enum('YES','NO') NOT NULL DEFAULT 'NO',
   `SOGoIMAPAclConformsToIMAPExt` varchar(255) NOT NULL DEFAULT 'NO',
   `SOGoCalendarDefaultReminder` varchar(255) NOT NULL DEFAULT '-PT5M',
   `SOGoCalendarEventsDefaultClassification` varchar(255) NOT NULL DEFAULT 'PUBLIC',
@@ -91,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
   `SOGoLoginModule` varchar(255) NOT NULL DEFAULT 'Mail',
   `SOGoMailComposeMessageType` varchar(255) NOT NULL DEFAULT 'text',
   `SOGoMailListViewColumnsOrder` varchar(255) NOT NULL DEFAULT 'Flagged,Attachment,Priority,From,Subject,Unread,Date,Size',
-  `SOGoMailMessageCheck` varchar(255) NOT NULL DEFAULT 'every_minute',
+  `SOGoRefreshViewCheck` varchar(255) NOT NULL DEFAULT 'every_minute',
   `SOGoMailMessageForwarding` varchar(255) NOT NULL DEFAULT 'inline',
   `SOGoMailReplyPlacement` varchar(255) NOT NULL DEFAULT 'below',
   `SOGoMailSignaturePlacement` varchar(255) NOT NULL DEFAULT 'below',
@@ -100,6 +99,12 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
   `SOGoCalendarDefaultCategoryColor` varchar(255) NOT NULL DEFAULT '#aaa',
   `SOGoDefaultCalendar` varchar(255) NOT NULL DEFAULT 'selected',
   `SOGoCustomXML` text,
+  `SOGoIMAPAclStyle` enum('rfc2086','rfc4314') NOT NULL DEFAULT 'rfc4314',
+  `SOGoMaximumSyncWindowSize` int(11) NOT NULL DEFAULT '0',
+  `SOGoMaximumPingInterval` int(11) NOT NULL DEFAULT '10',
+  `SOGoMaximumSyncInterval` int(11) NOT NULL DEFAULT '30',
+  `SOGoInternalSyncInterval` int(11) NOT NULL DEFAULT '10',
+  `SOGoMailShowSubscribedFoldersOnly` enum('YES','NO') NOT NULL DEFAULT 'NO',
   PRIMARY KEY (`sogo_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -158,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `SOGoLoginModule` varchar(255) NOT NULL DEFAULT 'Mail',
   `SOGoMailComposeMessageType` varchar(255) NOT NULL DEFAULT 'text',
   `SOGoMailListViewColumnsOrder` varchar(255) NOT NULL DEFAULT 'Flagged,Attachment,Priority,From,Subject,Unread,Date,Size',
-  `SOGoMailMessageCheck` varchar(255) NOT NULL DEFAULT 'every_minute',
+  `SOGoRefreshViewCheck` varchar(75) NOT NULL DEFAULT 'every_minute',
   `SOGoMailMessageForwarding` varchar(255) NOT NULL DEFAULT 'inline',
   `SOGoMailReplyPlacement` varchar(255) NOT NULL DEFAULT 'below',
   `SOGoMailSignaturePlacement` varchar(255) NOT NULL DEFAULT 'below',
@@ -167,6 +172,9 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `SOGoCalendarDefaultCategoryColor` varchar(255) NOT NULL DEFAULT '#aaa',
   `SOGoDefaultCalendar` varchar(255) NOT NULL DEFAULT 'selected',
   `SOGoCustomXML` text,
+  `SOGoIMAPAclStyle` enum('rfc2086','rfc4314') NOT NULL DEFAULT 'rfc4314',
+  `SOGoForwardEnabled` enum('YES','NO') NOT NULL DEFAULT 'NO',
+  `SOGoMailShowSubscribedFoldersOnly` enum('YES','NO') NOT NULL DEFAULT 'NO',
   PRIMARY KEY (`sogo_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -210,4 +218,4 @@ INSERT INTO `sogo_plugins` (`spid`, `sys_userid`, `sys_groupid`, `sys_perm_user`
 (3, 1, 1, 'riud', 'riud', 'r', 'y', 0, 'Thunderbird 31 - SOGo Integrator', 'SOGo Connector Thunderbird extension\r\nVersion 31.0.0\r\n\r\nif you are going to use Thunderbird you need this extension along with "SOGo Integrator" to fully integrate with SOGo', 'download', 'sogo-integrator-31.0.0-sogo-demo.xpi');
 
 
-INSERT INTO `sys_config` (`group`, `name`, `value`) VALUES ('interface', 'sogo_interface', '5');
+INSERT INTO `sys_config` (`group`, `name`, `value`) VALUES ('interface', 'sogo_interface', '6');
