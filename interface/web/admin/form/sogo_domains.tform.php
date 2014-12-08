@@ -122,6 +122,18 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
+        'SOGoForwardEnabled' => array(
+            'datatype' => 'VARCHAR',
+            'formtype' => 'SELECT',
+            'default' => 'NO',
+            'value' => array(
+                'NO' => $app->lng('No'),
+                'YES' => $app->lng('Yes'),
+            ),
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
         'SOGoDraftsFolderName' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',

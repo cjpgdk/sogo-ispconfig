@@ -16,6 +16,12 @@
                 <input name="SOGoSieveServer" id="SOGoSieveServer" value="{tmpl_var name='SOGoSieveServer'}"  type="text" class="textInput" />&nbsp;
                 <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
             </div>
+                <div class="ctrlHolder">
+                    <label for="SOGoForwardEnabled">{tmpl_var name='SOGoForwardEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoForwardEnabled_ttip_txt'}"></span></label>
+                    <select name="SOGoForwardEnabled" id="SOGoForwardEnabled" class="selectInput">
+                        {tmpl_var name='SOGoForwardEnabled'}
+                    </select>
+                </div>
             <div class="ctrlHolder">
                 <label for="SOGoVacationEnabled">{tmpl_var name='SOGoVacationEnabled_txt'}</label>
                 <select name="SOGoVacationEnabled" id="SOGoVacationEnabled" class="selectInput">
