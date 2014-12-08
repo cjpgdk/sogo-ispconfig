@@ -138,6 +138,10 @@
                     <key>SOGoMailMessageCheck</key>
                     <string>{tmpl_var name='SOGoMailMessageCheck'}</string>
 {/tmpl_if}
+{tmpl_if name="SOGoRefreshViewCheck"}
+                    <key>SOGoRefreshViewCheck</key>
+                    <string>{tmpl_var name='SOGoRefreshViewCheck'}</string>
+{/tmpl_if}
 {tmpl_if name="SOGoMailMessageForwarding"}
                     <key>SOGoMailMessageForwarding</key>
                     <string>{tmpl_var name='SOGoMailMessageForwarding'}</string>

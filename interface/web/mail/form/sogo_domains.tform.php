@@ -478,7 +478,7 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
-        'SOGoMailMessageCheck' => array(
+        'SOGoRefreshViewCheck' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
             'default' => 'every_minute',

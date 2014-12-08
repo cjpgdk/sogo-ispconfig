@@ -849,7 +849,11 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                                 foreach ($_arr as $value3)
                                     $arr[] = array('SOGoMailListViewColumn' => $value3);
                                 $tpl->setLoop('SOGoMailListViewColumnsOrder', $arr);
-                            } else
+                            }  else if ($key == 'SOGoMailMessageCheck' || $key == 'SOGoRefreshViewCheck') {
+                                //* write both for compatibility with debian lenny (SOGo 2.0.6b)
+                                $tpl->setVar('SOGoMailMessageCheck', $value2);
+                                $tpl->setVar('SOGoRefreshViewCheck', $value2);
+                            }else
                                 $tpl->setVar($key, $value2); //* default isset as normal var
                         }
                         $tpl->setVar('domain', $value['domain']);
