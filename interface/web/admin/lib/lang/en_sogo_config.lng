@@ -287,4 +287,5 @@ $wb["SOGoSentFolderName_courier"] = 'Default for courier imap';
 $wb["SOGoSentFolderName_dovecot"] = 'Default for dovecot imap';
 $wb["SOGoDraftsFolderName_courier"] = 'Default for courier imap';
 $wb["SOGoDraftsFolderName_dovecot"] = 'Default for dovecot imap';
+$wb["sogo_debug_settings_txt"] = 'A few debug settings';
 

@@ -12,6 +12,60 @@
                     <span class="ttip" title="{tmpl_var name='SOGoCustomXML_ttip_txt'}"></span>
                     <br><span style="white-space: pre-wrap; float: left; padding-top: 10px;">&lt;key>ValidKeyName&lt;/key>
 &lt;string>I am valid but i will never be used by SOGo&lt;/string></span>
+                    <br><span style="float: left; width: 100%; margin-top: 10px; margin-bottom: 10px;">{tmpl_var name='sogo_debug_settings_txt'}</span><br>
+                    <span class="jqhov" onclick="addSetting('GCSFolderDebugEnabled', 'YES')">GCSFolderDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('GCSFolderStoreDebugEnabled', 'YES')">GCSFolderStoreDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('LDAPDebugEnabled', 'YES')">LDAPDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('MySQL4DebugEnabled', 'YES')">MySQL4DebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('ImapDebugEnabled', 'YES')">ImapDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('OCSFolderManagerSQLDebugEnabled', 'YES')">OCSFolderManagerSQLDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('PGDebugEnabled', 'YES')">PGDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugObjectTraversal', 'YES')">SoDebugObjectTraversal (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugBaseURL', 'YES')">SoDebugBaseURL (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('DAVParserDebugProp', 'YES')">DAVParserDebugProp (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SOGoDebugRequests', 'NO')">DAVParserDebugProp (Default: YES)</span><br>
+                    <span class="jqhov" onclick="addSetting('SOGoUIxDebugEnabled', 'YES')">SOGoUIxDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoClassRegistryDebugEnabled', 'YES')">SoClassRegistryDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugKeyLookup', 'YES')">SoDebugKeyLookup (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugProductLoading', 'YES')">SoDebugProductLoading (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugProductRegistry', 'YES')">SoDebugProductRegistry (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugRequestClassification', 'YES')">SoDebugRequestClassification (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoDebugTraversal', 'YES')">SoDebugTraversal (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSDebugAuthLookup', 'YES')">SoOFSDebugAuthLookup (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSDebugFactory', 'YES')">SoOFSDebugFactory (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSDebugNegotiate', 'YES')">SoOFSDebugNegotiate (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSDebugPlistObject', 'YES')">SoOFSDebugPlistObject (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSDebugRestore', 'YES')">SoOFSDebugRestore (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSResourceManagerDebugEnabled', 'YES')">SoOFSResourceManagerDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoOFSWebMethodDebugEnabled', 'YES')">SoOFSWebMethodDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjCClassDebugEnabled', 'YES')">SoObjCClassDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjectDAVDispatcherDebugEnabled', 'YES')">SoObjectDAVDispatcherDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjectDataSourceDebugEnabled', 'YES')">SoObjectDataSourceDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjectMethodDispatcherDebugEnabled', 'YES')">SoObjectMethodDispatcherDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjectRequestHandlerDebugEnabled', 'YES')">SoObjectRequestHandlerDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjectSOAPDispatcherDebugEnabled', 'YES')">SoObjectSOAPDispatcherDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoObjectXmlRpcDispatcherDebugEnabled', 'YES')">SoObjectXmlRpcDispatcherDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoPageInvocationDebugEnabled', 'YES')">SoPageInvocationDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoProductResourceManagerDebugEnabled', 'YES')">SoProductResourceManagerDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoRendererDebugEnabled', 'YES')">SoRendererDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('SoSecurityManagerDebugEnabled', 'YES')">SoSecurityManagerDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugActions', 'YES')">WODebugActions (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugComponentAwake', 'YES')">WODebugComponentAwake (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugComponentDefinition', 'YES')">WODebugComponentDefinition (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugComponentLookup', 'YES')">WODebugComponentLookup (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugCursor', 'YES')">WODebugCursor (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugHttpTransaction', 'YES')">WODebugHttpTransaction (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugKeyPathAssociation', 'YES')">WODebugKeyPathAssociation (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugResourceLookup', 'YES')">WODebugResourceLookup (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugStaticLinkProcessing', 'YES')">WODebugStaticLinkProcessing (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugTakeValues', 'YES')">WODebugTakeValues (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebugZipResponse', 'YES')">WODebugZipResponse (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WODebuggingEnabled', 'YES')">WODebuggingEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WOPageRequestHandlerDebugEnabled', 'YES')">WOPageRequestHandlerDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WOResourceURLAssociationDebugEnabled', 'YES')">WOResourceURLAssociationDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WOSimpleHTTPParserDebugEnabled', 'YES')">WOSimpleHTTPParserDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WOSimpleHTTPParserHeavyDebugEnabled', 'YES')">WOSimpleHTTPParserHeavyDebugEnabled (Default: NO)</span><br>
+                    <span class="jqhov" onclick="addSetting('WOxComponentElemBuilderDebugEnabled', 'YES')">WOxComponentElemBuilderDebugEnabled (Default: NO)</span><br>
                 </label>
                 <textarea name="SOGoCustomXML" id="SOGoCustomXML" rows='20' cols='30' style="width: 630px; height: 492px;">{tmpl_var name='SOGoCustomXML'}</textarea>
             </div>
@@ -28,3 +82,23 @@
     </div>
 
 </div>
+
+<script type="text/javascript">
+    $(".jqhov").css('font-size', '10px');
+    jQuery(document).ready(function() {
+        $(".jqhov").hover(function(){
+            $(this).css( "color", "blue" );
+            $(this).css( "font-weight", "bold" );
+            $(this).css('font-size', '18px');
+        }, function(){
+            $(this).css( "color", "black" );
+            $(this).css( "font-weight", "normal" );
+            $(this).css('font-size', '10px');
+        });
+    });
+    function addSetting(key, value) {
+        var box = $("#SOGoCustomXML");
+        var txt = $.trim(box.text());
+        box.val(box.val() + "\n<key>" + key + "</key><string>" + value + "</string>\n");
+    }
+</script>
