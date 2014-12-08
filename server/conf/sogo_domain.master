@@ -2,6 +2,10 @@
 
                 <key>{tmpl_var name='domain'}</key>
                 <dict>
+{tmpl_if name="SOGoIMAPAclStyle"}
+                    <key>SOGoIMAPAclStyle</key>
+                    <string>{tmpl_var name='SOGoIMAPAclStyle'}</string>
+{/tmpl_if}
 {tmpl_if name="SOGoSieveScriptsEnabled"}
                     <key>SOGoSieveScriptsEnabled</key>
                     <string>{tmpl_var name='SOGoSieveScriptsEnabled'}</string>

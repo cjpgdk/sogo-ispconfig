@@ -174,6 +174,8 @@ $wb["SOGoIMAPAclConformsToIMAPExt_ttip_txt"] = 'Parameter used to specify if the
         . '<br />YES'
         . '<br />NO'
         . '<br />Defaults is NO';
+$wb["SOGoIMAPAclStyle_txt"] = 'IMAP Acl Style';
+$wb["SOGoIMAPAclStyle_ttip_txt"] = 'Parameter used to specify which RFC the IMAP server implements with respect to ACLs.';
 $wb["SOGoPageTitle_txt"] = 'Page Title';
 $wb["SOGoPageTitle_ttip_txt"] = 'Defne the Web page title.';
 $wb["SOGoMemcachedHost_txt"] = 'Memcached Host';

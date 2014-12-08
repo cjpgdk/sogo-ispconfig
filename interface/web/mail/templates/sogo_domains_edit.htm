@@ -132,6 +132,12 @@
             <div class="subsectiontoggle"><span class=""></span>{tmpl_var name='SOGo_imap_head_txt'}<em class=""></em></div>
             <div style="display: none;">
                 <div class="ctrlHolder">
+                    <label for="SOGoIMAPAclStyle">{tmpl_var name='SOGoIMAPAclStyle_txt'} <span class="ttip" title="{tmpl_var name='SOGoIMAPAclStyle_ttip_txt'}"></span></label>
+                    <select name="SOGoIMAPAclStyle" id="SOGoIMAPAclStyle" class="selectInput">
+                        {tmpl_var name='SOGoIMAPAclStyle'}
+                    </select>
+                </div>
+                <div class="ctrlHolder">
                     <label for="SOGoIMAPAclConformsToIMAPExt">{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_txt'}</label>
                     <select name="SOGoIMAPAclConformsToIMAPExt" id="SOGoIMAPAclConformsToIMAPExt" class="selectInput">
                         {tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}

@@ -667,6 +667,17 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
+        'SOGoIMAPAclStyle' => array(
+            'datatype' => 'VARCHAR',
+            'formtype' => 'SELECT',
+            'default' => 'rfc4314',
+            'value' => array(
+                'rfc2086' => 'RFC 2086', 'rfc4314' => 'RFC 4314',
+            ),
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
     )
 );
 
