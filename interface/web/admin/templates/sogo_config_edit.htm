@@ -140,6 +140,25 @@
                 <label for="WOSendMail">{tmpl_var name='WOSendMail_txt'} <span class="ttip" title="{tmpl_var name='WOSendMail_ttip_txt'}"></span></label>
                 <input name="WOSendMail" id="WOSendMail" value="{tmpl_var name='WOSendMail'}" size="100" type="text" class="textInput" />
             </div>
+            <div class="ctrlHolder">
+                <b>Microsoft ActiveSync (See: http://www.sogo.nu/files/docs/SOGo%20Installation%20Guide.pdf [Chapter 7])</b>
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMaximumPingInterval">{tmpl_var name='SOGoMaximumPingInterval_txt'}</label>
+                <input name="SOGoMaximumPingInterval" id="SOGoMaximumPingInterval" value="{tmpl_var name='SOGoMaximumPingInterval'}" size="100" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMaximumSyncInterval">{tmpl_var name='SOGoMaximumSyncInterval_txt'}</label>
+                <input name="SOGoMaximumSyncInterval" id="SOGoMaximumSyncInterval" value="{tmpl_var name='SOGoMaximumSyncInterval'}" size="100" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoInternalSyncInterval">{tmpl_var name='SOGoInternalSyncInterval_txt'}</label>
+                <input name="SOGoInternalSyncInterval" id="SOGoInternalSyncInterval" value="{tmpl_var name='SOGoInternalSyncInterval'}" size="100" type="text" class="textInput" />
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMaximumSyncWindowSize">{tmpl_var name='SOGoMaximumSyncWindowSize_txt'}</label>
+                <input name="SOGoMaximumSyncWindowSize" id="WOSendMail" value="{tmpl_var name='SOGoMaximumSyncWindowSize'}" size="100" type="text" class="textInput" />
+            </div>
         </fieldset>
 
         <input type="hidden" name="id" value="{tmpl_var name='id'}">

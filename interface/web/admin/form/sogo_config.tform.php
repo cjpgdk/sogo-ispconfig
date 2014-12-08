@@ -318,11 +318,42 @@ $form["tabs"]['sogo'] = array(
             'required' => 0,
             'width' => 100,
         ),
-    /* We are on multi domains config so this is required and set in sogo_config_edit.php on save/update
-     * <key>domains</key>
-      <dict>{{SOGODOMAINSCONF}}
-      </dict>
-     */
+        'SOGoMaximumSyncWindowSize' => array(
+            'datatype' => 'INTEGER',
+            'formtype' => 'TEXT',
+            'default' => '0',
+            'value' => '0',
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
+        'SOGoMaximumPingInterval' => array(
+            'datatype' => 'INTEGER',
+            'formtype' => 'TEXT',
+            'default' => '10',
+            'value' => '10',
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
+        'SOGoMaximumSyncInterval' => array(
+            'datatype' => 'INTEGER',
+            'formtype' => 'TEXT',
+            'default' => '30',
+            'value' => '30',
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
+        'SOGoInternalSyncInterval' => array(
+            'datatype' => 'VARCHAR',
+            'formtype' => 'TEXT',
+            'default' => '10',
+            'value' => '10',
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
     )
 );
 
