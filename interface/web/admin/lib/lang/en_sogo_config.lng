@@ -36,6 +36,7 @@ $wb["SOGoTimeFormat_txt"] = 'Time Format';
 $wb["SOGoMailUseOutlookStyleReplies_txt"] = 'Use Outlook Style Replies';
 $wb["SOGoCalendarDefaultCategoryColor_txt"] = 'Calendar Default Category Color';
 $wb["SOGoDefaultCalendar_txt"] = 'Default Calendar';
+$wb["SOGoMailShowSubscribedFoldersOnly_txt"] = 'Show Subscribed FoldersOnly';
 $wb["SOGoSieveScriptsEnabled_txt"] = 'Sieve Scripts Enabled';
 $wb["SOGoSieveScriptsEnabled_ttip_txt"] = 'Enable sieve scripts for use in sogo, requires you to set up sieve server to support this';
 $wb["SOGoSieveServer_txt"] = 'Sieve Server';

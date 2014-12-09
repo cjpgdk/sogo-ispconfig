@@ -10,6 +10,7 @@ $wb["SOGoCalendarDefaultReminder_txt"] = 'Calendar Default Reminder';
 $wb["SOGoCalendarEventsDefaultClassification_txt"] = 'Calendar Events Default Classification';
 $wb["SOGoCalendarTasksDefaultClassification_txt"] = 'Calendar Tasks Default Classification';
 $wb["SOGoCalendarShouldDisplayWeekend_txt"] = 'Calendar Should Display Weekend';
+$wb["SOGoMailShowSubscribedFoldersOnly_txt"] = 'Show Subscribed Folders Only';
 $wb["SOGoDayStartTime_txt"] = 'Day Start Time';
 $wb["SOGoDayEndTime_txt"] = 'Day End Time';
 $wb["SOGoFirstDayOfWeek_txt"] = 'First Day Of Week';

@@ -131,6 +131,12 @@
                 </select>
             </div>
             <div class="ctrlHolder">
+                <label for="SOGoMailShowSubscribedFoldersOnly">{tmpl_var name='SOGoMailShowSubscribedFoldersOnly_txt'}</label>
+                <select name="SOGoMailShowSubscribedFoldersOnly" id="SOGoMailShowSubscribedFoldersOnly" class="selectInput">
+                    {tmpl_var name='SOGoMailUseOutlookStyleReplies'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
                 <label for="SOGoMailListViewColumnsOrder">{tmpl_var name='SOGoMailListViewColumnsOrder_txt'}</label>
                 <input name="SOGoMailListViewColumnsOrder" id="SOGoMailListViewColumnsOrder" value="{tmpl_var name='SOGoMailListViewColumnsOrder'}" size="100" type="hidden" />
                 <ul id="SOGoMailListViewColumnsOrderSortableItems" style="margin-left: 21%; list-style: none outside none;">

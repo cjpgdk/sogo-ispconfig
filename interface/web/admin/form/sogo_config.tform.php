@@ -1022,6 +1022,18 @@ $form["tabs"]['user'] = array(
             'required' => 0,
             'width' => 100,
         ),
+        'SOGoMailShowSubscribedFoldersOnly' => array(
+            'datatype' => 'VARCHAR',
+            'formtype' => 'SELECT',
+            'default' => 'YES',
+            'value' => array(
+                'NO' => $app->lng('No'),
+                'YES' => $app->lng('Yes'),
+            ),
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
     )
 );
 
