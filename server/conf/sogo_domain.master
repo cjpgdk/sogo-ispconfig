@@ -2,6 +2,14 @@
 
                 <key>{tmpl_var name='domain'}</key>
                 <dict>
+{tmpl_if name="SOGoSMTPAuthenticationType"}
+                    <key>SOGoSMTPAuthenticationType</key>
+                    <string>{tmpl_var name='SOGoSMTPAuthenticationType'}</string>
+{/tmpl_if}
+{tmpl_if name="SOGoMailShowSubscribedFoldersOnly"}
+                    <key>SOGoMailShowSubscribedFoldersOnly</key>
+                    <string>{tmpl_var name='SOGoMailShowSubscribedFoldersOnly'}</string>
+{/tmpl_if}
 {tmpl_if name="SOGoForwardEnabled"}
                     <key>SOGoForwardEnabled</key>
                     <string>{tmpl_var name='SOGoForwardEnabled'}</string>

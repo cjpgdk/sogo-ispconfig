@@ -162,6 +162,12 @@
                     {tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}
                 </select>
             </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSMTPAuthenticationType">{tmpl_var name='SOGoSMTPAuthenticationType_txt'} <span class="ttip" title="{tmpl_var name='SOGoSMTPAuthenticationType_ttip_txt'}"></span></label>
+                <select name="SOGoSMTPAuthenticationType" id="SOGoSMTPAuthenticationType" class="selectInput">
+                    {tmpl_var name='SOGoSMTPAuthenticationType'}
+                </select>
+            </div>
         </fieldset>
 
         <input type="hidden" name="id" value="{tmpl_var name='id'}">

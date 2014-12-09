@@ -635,6 +635,18 @@ if ($app->auth->is_admin() || $app->auth->has_clients($app->auth->get_user_id())
 }
 //* Admins only
 if ($app->auth->is_admin()) {
+    $form["tabs"]['domain']['fields']['SOGoSMTPAuthenticationType'] = array(
+        'datatype' => 'VARCHAR',
+        'formtype' => 'SELECT',
+        'default' => 'YES',
+        'value' => array(
+            'NO' => $app->lng('No'),
+            'PLAIN' => $app->lng('Plain'),
+        ),
+        'maxlength' => '',
+        'required' => 0,
+        'width' => 100,
+    );
     $form["tabs"]['domain']['fields']['SOGoCustomXML'] = array(
         'datatype' => 'TEXT',
         'formtype' => 'TEXTAREA',

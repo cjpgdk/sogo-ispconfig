@@ -449,6 +449,18 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
+        'SOGoSMTPAuthenticationType' => array(
+            'datatype' => 'VARCHAR',
+            'formtype' => 'SELECT',
+            'default' => 'YES',
+            'value' => array(
+                'NO' => $app->lng('No'),
+                'PLAIN' => $app->lng('Plain'),
+            ),
+            'maxlength' => '',
+            'required' => 0,
+            'width' => 100,
+        ),
     )
 );
 

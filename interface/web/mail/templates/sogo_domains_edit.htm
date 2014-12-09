@@ -210,6 +210,12 @@
                         {tmpl_var name='SOGoMailCustomFromEnabled'}
                     </select>
                 </div>
+                <div class="ctrlHolder">
+                    <label for="SOGoSMTPAuthenticationType">{tmpl_var name='SOGoSMTPAuthenticationType_txt'} <span class="ttip" title="{tmpl_var name='SOGoSMTPAuthenticationType_ttip_txt'}"></span></label>
+                    <select name="SOGoSMTPAuthenticationType" id="SOGoSMTPAuthenticationType" class="selectInput">
+                        {tmpl_var name='SOGoSMTPAuthenticationType'}
+                    </select>
+                </div>
             </div>
             
             <div class="subsectiontoggle"><span class=""></span>{tmpl_var name='SOGo_sieve_head_txt'}<em class=""></em></div>

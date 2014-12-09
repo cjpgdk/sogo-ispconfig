@@ -152,4 +152,8 @@ $wb["1_WEEK_BEFORE"] = '1 Week Before';
 $wb["SOGO_SERVER_CONFIG_NOT_FOUND"] = 'SOGo server configuration is missing';
 $wb["SOGO_SERVER_CONFIG_NOT_FOUND2"] = 'Sorry but we are experiencing some difficulties at the moment please try again later';
 $wb["reseller_sieve_filters_message"] = 'If you can&lsquo;t see any fields here, contact your provider to get more information<br>Possible reasons are that you dont have mail filters enabled, or that you are supposed to use the filter settings under edit mail account!';
+$wb["SOGoSMTPAuthenticationType_txt"] = 'SMTP Authentication Type';
+$wb["SOGoSMTPAuthenticationType_ttip_txt"] = 'Activate SMTP authentication and specifies which type is in use. Current, only PLAIN is sup-ported and other values will be ignored.<br>Set to NO to disable';
+
+
 
