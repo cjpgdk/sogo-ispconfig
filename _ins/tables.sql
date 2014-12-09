@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
   `SOGoLoginModule` varchar(255) NOT NULL DEFAULT 'Mail',
   `SOGoMailComposeMessageType` varchar(255) NOT NULL DEFAULT 'text',
   `SOGoMailListViewColumnsOrder` varchar(255) NOT NULL DEFAULT 'Flagged,Attachment,Priority,From,Subject,Unread,Date,Size',
-  `SOGoRefreshViewCheck` varchar(255) NOT NULL DEFAULT 'every_minute',
+  `SOGoRefreshViewCheck` varchar(75) NOT NULL DEFAULT 'every_minute',
   `SOGoMailMessageForwarding` varchar(255) NOT NULL DEFAULT 'inline',
   `SOGoMailReplyPlacement` varchar(255) NOT NULL DEFAULT 'below',
   `SOGoMailSignaturePlacement` varchar(255) NOT NULL DEFAULT 'below',
@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
   `SOGoMaximumSyncInterval` int(11) NOT NULL DEFAULT '30',
   `SOGoInternalSyncInterval` int(11) NOT NULL DEFAULT '10',
   `SOGoMailShowSubscribedFoldersOnly` enum('YES','NO') NOT NULL DEFAULT 'NO',
+  `SOGoSMTPAuthenticationType` enum('PLAIN','NO') NOT NULL DEFAULT 'PLAIN',
   PRIMARY KEY (`sogo_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -175,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `SOGoIMAPAclStyle` enum('rfc2086','rfc4314') NOT NULL DEFAULT 'rfc4314',
   `SOGoForwardEnabled` enum('YES','NO') NOT NULL DEFAULT 'NO',
   `SOGoMailShowSubscribedFoldersOnly` enum('YES','NO') NOT NULL DEFAULT 'NO',
+  `SOGoSMTPAuthenticationType` enum('PLAIN','NO') NOT NULL DEFAULT 'PLAIN',
   PRIMARY KEY (`sogo_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

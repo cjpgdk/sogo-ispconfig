@@ -226,8 +226,8 @@ class Installer {
     //* quick lazy alias
     public static function copyFiles($index) {
         if (isset(self::$files_copy[$index])) {
-            if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d')) {
-                @mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d');
+            if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/')) {
+                @mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/');
             }
             foreach (self::$files_copy[$index] as $file) {
                 if (file_exists($index . '/' . $file)) {

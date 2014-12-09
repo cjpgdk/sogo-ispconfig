@@ -16,6 +16,9 @@ ADD `SOGoInternalSyncInterval` INT NOT NULL DEFAULT '10';
 -- Add SOGoMailShowSubscribedFoldersOnly
 ALTER TABLE `sogo_config` ADD `SOGoMailShowSubscribedFoldersOnly` ENUM( 'YES', 'NO' ) NOT NULL DEFAULT 'NO';
 ALTER TABLE `sogo_domains` ADD `SOGoMailShowSubscribedFoldersOnly` ENUM( 'YES', 'NO' ) NOT NULL DEFAULT 'NO';
+-- Add SOGoSMTPAuthenticationType
+ALTER TABLE `sogo_config` ADD `SOGoSMTPAuthenticationType` ENUM( 'PLAIN', 'NO' ) NOT NULL DEFAULT 'PLAIN';
+ALTER TABLE `sogo_domains` ADD `SOGoSMTPAuthenticationType` ENUM( 'PLAIN', 'NO' ) NOT NULL DEFAULT 'PLAIN';
 
 UPDATE 
     `sys_config`
