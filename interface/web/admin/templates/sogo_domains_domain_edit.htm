@@ -6,6 +6,12 @@
     <div class="pnl_formsarea">
         <fieldset class="inlineLabels"><legend>SOGo Domain Defaults</legend>
             <div class="ctrlHolder">
+                <label for="server_id">{tmpl_var name='server_id_txt'}</label>
+                <select name="server_id" id="server_id" class="selectInput">
+                    {tmpl_var name='server_id'}
+                </select>
+            </div>
+            <div class="ctrlHolder">
                 <label for="SOGoSieveScriptsEnabled">{tmpl_var name='SOGoSieveScriptsEnabled_txt'}</label>
                 <select name="SOGoSieveScriptsEnabled" id="SOGoSieveScriptsEnabled" class="selectInput">
                     {tmpl_var name='SOGoSieveScriptsEnabled'}
@@ -173,7 +179,6 @@
         <input type="hidden" name="id" value="{tmpl_var name='id'}">
         <input name="domain_id" id="domain_id" value="{tmpl_var name='domain_id'}" type="hidden"/>
         <input name="domain_name" id="domain_name" value="{tmpl_var name='domain_name'}" type="hidden" />
-        <input name="server_id" id="server_id" value="{tmpl_var name='server_id'}" type="hidden" />
         <input name="server_name" id="server_name" value="{tmpl_var name='server_name'}" type="hidden" />
 
         <div class="buttonHolder buttons">

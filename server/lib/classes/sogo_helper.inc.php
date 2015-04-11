@@ -1,25 +1,24 @@
 <?php
 
-/*
- * Copyright (C) 2014 Christian M. Jensen
- *
+/**
+ * Copyright (C) 2015  Christian M. Jensen
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- */
-
-/**
- * SOGo helper for ISPConfig server plugin (sogo_plugin.inc.php)
+ *
+ *  @author Christian M. Jensen <christian@cmjscripter.net>
+ *  @copyright 2014 Christian M. Jensen
+ *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 class sogo_helper {
 
@@ -65,11 +64,7 @@ class sogo_helper {
             $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='y' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=" . intval($conf['server_id']);
         }
         if ($mail_domains_sql !== FALSE) {
-            if ($conf['dbmaster_host'] != '' && $conf['dbmaster_host'] != $conf['db_host']) {
-                return $app->dbmaster->queryAllRecords($mail_domains_sql);
-            } else {
-                return $app->db->queryAllRecords($mail_domains_sql);
-            }
+            return $this->getDB()->queryAllRecords($mail_domains_sql);
         } else
             return FALSE;
     }
@@ -78,11 +73,8 @@ class sogo_helper {
         global $app;
         //* $server_id are for the future
         $query = "SELECT * FROM `sogo_module` WHERE smid=1;";
-        $settings = $app->db->queryOneRecord($query);
-        if (!$settings && is_object($this->dbmaster)) {
-            //* if local db fails to sync or table sogo_module not created try master db
-            $settings = $app->dbmaster->queryOneRecord($query);
-        }
+        $settings = $this->getDB()->queryOneRecord($query);
+        
         $this->module_settings = new sogo_module_settings();
         if ($settings !== FALSE) {
             foreach ($settings as $key => $value) {
@@ -129,15 +121,13 @@ class sogo_helper {
 
     /**
      * check if a domain has any email addresses
-     * @global app $app
      * @global array $conf
      * @param string $domain_name
      * @param boolean $imap_enabled if set to false will count all email addresses, is set to true will only count email addresses with imap enabled
      * @return boolean
      */
     public function has_mail_users($domain_name, $imap_enabled = true) {
-        global $app;
-        $emails = $app->db->queryOneRecord("SELECT count(*) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        $emails = $this->getDB()->queryOneRecord("SELECT count(*) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
         if ($emails !== FALSE && ((int) $emails['cnt'] > 0)) {
             return true;
         }
@@ -150,7 +140,7 @@ class sogo_helper {
             if ($sid === NULL || !is_int($sid))
                 $sid = $conf['server_id'];
             $sql = "SELECT * FROM `server` WHERE `server_id`=" . intval($sid);
-            self::$sogo_server[$sid] = $app->db->queryOneRecord($sql);
+            self::$sogo_server[$sid] = $this->getDB()->queryOneRecord($sql);
         }
         return self::$sogo_server[$sid];
     }
@@ -169,8 +159,8 @@ class sogo_helper {
                 $server_id = $conf['server_id'];
 
             $sql = "SELECT * FROM `sogo_config` WHERE `server_id`=" . intval($server_id);
+            $server_default = $this->getDB()->queryOneRecord($sql);
 
-            $server_default = $app->db->queryOneRecord($sql);
             if (!$server_default) {
                 $this->logError("SOGo get server config failed.");
                 self::$sCache[$server_id] = false;
@@ -186,7 +176,8 @@ class sogo_helper {
     public function is_domain_active($domain_name) {
         global $app;
         if (!isset(self::$dnCache['active' . $domain_name])) {
-            $res = $app->db->queryOneRecord("SELECT `active` FROM `mail_domain` WHERE `domain`='{$this->dbEscapeString($domain_name)}'");
+            $sql = "SELECT `active` FROM `mail_domain` WHERE `domain`='{$this->dbEscapeString($domain_name)}'";
+            $res = $this->getDB()->queryOneRecord($sql);
             if ($res !== FALSE && isset($res['active']))
                 self::$dnCache['active' . $domain_name] = (strtolower($res['active']) == 'y' ? TRUE : FALSE);
             else
@@ -206,10 +197,19 @@ class sogo_helper {
         if (!isset(self::$dnCache[$domain_name]) && $this->is_domain_active($domain_name)) {
             global $app;
             //* get server default config (BASED on domain name)
-            $server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
-            $server_default = $app->db->queryOneRecord($server_default_sql);
+            
+            //$server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
+            //* better for multi server but not sure if multi SOGo server? (@todo propper testing)
+            $server_default_sql = "SELECT sc.*, 
+(SELECT `server_name` FROM `mail_domain` md, `server` s WHERE md.`domain`='cmjscripter.lan' AND md.`server_id`=s.`server_id`) as server_name_real 
+FROM `server` s, `mail_domain` md, `sogo_config` sc 
+WHERE md.`domain` = '{$domain_name}' 
+AND sc.`server_name` = s.`server_name";
+            $server_default = $this->getDB()->queryOneRecord($server_default_sql);
+
             if (!$server_default) {
                 $this->logWarn("sogo_helper::getDomainConfig(): failed. Unable to get server config from domain {$domain_name}");
+                $this->logWarn("sogo_helper::getDomainConfig(): {$server_default_sql}");
                 self::$dnCache[$domain_name] = false; //* if server default is not isset we must stop it from running to prevent SOGo or system failures
                 return self::$dnCache[$domain_name];
             }
@@ -222,11 +222,11 @@ class sogo_helper {
             $server_default["SOGoSMTPServer"] = (isset($parse_url['host']) ? $parse_url['host'] : (isset($parse_url['path']) && $parse_url['path'] == $server_default["SOGoSMTPServer"] ? $server_default["SOGoSMTPServer"] : ""));
             unset($parse_url);
             //* get configuration fields for domains
-            $domains_columns = $app->db->queryAllRecords("SHOW COLUMNS FROM `sogo_domains`");
+            $domains_columns = $this->getDB()->queryAllRecords("SHOW COLUMNS FROM `sogo_domains`");
 
             //* get domain configuration
             $domain_default_sql = "SELECT * FROM `sogo_domains` WHERE `domain_name`='{$domain_name}'";
-            $domain_default = $app->db->queryOneRecord($domain_default_sql);
+            $domain_default = $this->getDB()->queryOneRecord($domain_default_sql);
             if (!$domain_default) {
                 //* return empty array if domain conf do not exists unless $full_conf == TRUE
                 if (!$full_server_conf) {
@@ -263,7 +263,9 @@ class sogo_helper {
                     unset($domain_default["{$value['Field']}"]);
                 }
             }
-            $this->removeUselessValues($domain_default, array('server_name'));
+            //* for SOGo on difrent host than mail server of domain, (server_name_real == mail server of domain)
+            $domain_default["server_name_real"] = $server_default['server_name_real'];
+            $this->removeUselessValues($domain_default, array('server_name', 'server_name_real'));
             self::$dnCache[$domain_name] = $domain_default;
             return self::$dnCache[$domain_name];
         } else {
@@ -381,7 +383,7 @@ class sogo_helper {
             $active = 'y';
         $sql = "SELECT DISTINCT (SELECT COUNT(*) FROM `mail_forwarding` WHERE `destination`=mf.`destination` AND `type`='alias' AND `active`='{$active}') AS alias_cnt FROM `mail_forwarding` mf WHERE `destination`='{$destination}' AND `type`='alias' AND `active`='{$active}'";
         if (!isset(self::$daCache[md5($sql)])) {
-            $res = $app->db->queryOneRecord($sql);
+            $res = $this->getDB()->queryOneRecord($sql);
             self::$daCache[md5($sql)] = (int) (isset($res['alias_cnt']) ? $res['alias_cnt'] : 0);
         }
         return (int) self::$daCache[md5($sql)];
@@ -401,7 +403,7 @@ class sogo_helper {
             $active = 'y';
         $sql = "SELECT DISTINCT `destination`,  (SELECT COUNT(*) FROM `mail_forwarding` WHERE `destination`=mf.`destination` AND `type`='alias' AND `active`='{$active}') AS alias_cnt FROM `mail_forwarding` mf WHERE `destination` LIKE '%@{$domain_name}' AND `type`='alias' AND `active`='{$active}'";
         if (!isset(self::$daCache[md5($sql)])) {
-            $res = $app->db->queryAllRecords($sql);
+            $res = $this->getDB()->queryAllRecords($sql);
             self::$daCache[md5($sql)] = $res;
         }
         return self::$daCache[md5($sql)];
@@ -436,14 +438,33 @@ class sogo_helper {
         return self::$_sqlObject;
     }
 
+    /**
+     * get ISPConfig database connection
+     * @global app $app
+     * @param boolean $dbmaster
+     * @return NULL|db
+     */
+    public function getDB($dbmaster = true) {
+        global $app;
+        if ($dbmaster && property_exists($app, 'dbmaster')) {
+            return $app->dbmaster;
+        } else if (property_exists($app, 'db')) {
+            return $app->db;
+        } else
+            $app->log('sogo_helper::getDB() : No database connection object found', LOGLEVEL_WARN);
+        return NULL;
+    }
+
+    /**
+     * get template object (tpl)
+     * @global app $app
+     * @param string $file
+     * @return \tpl
+     */
     public function getTemplateObject($file = "sogo_domain.master") {
         global $app;
-        if (!is_object($app->tpl))
+        if (!property_exists($app, 'tpl') || !is_object($app->tpl))
             $app->uses('tpl');
-        /*
-          if (!class_exists('tpl'))
-          $app->load('tpl');
-         */
         $tpl = NULL;
         if (file_exists(ISPC_ROOT_PATH . "/conf-custom/{$file}"))
             $tpl = new tpl(ISPC_ROOT_PATH . "/conf-custom/{$file}");
@@ -465,13 +486,19 @@ class sogo_helper {
                 if (in_array($key, $useless_values) && !in_array($key, $keep))
                     unset($param[$key]);
     }
-
+    /**
+     * Escape string for mysql query use
+     * @param mixed $str
+     * @return mixed
+     */
     public function dbEscapeString($str) {
-        global $app;
-        if (method_exists($app->db, 'escape_string')) {
-            return $app->db->escape_string($str);
-        } else if (method_exists($app->db, 'quote')) {
-            return $app->db->quote($str);
+        $db = $this->getDB();
+        if ($db === null || $db === FALSE)
+            return $str;
+        if (method_exists($db, 'escape_string')) {
+            return $db->escape_string($str);
+        } else if (method_exists($db, 'quote')) {
+            return $db->quote($str);
         }
         return $str;
     }

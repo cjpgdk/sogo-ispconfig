@@ -1,7 +1,7 @@
 <?php
 
-/*
- * Copyright (C) 2014  Christian M. Jensen
+/**
+ * Copyright (C) 2015  Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,26 @@
  *  @copyright 2014 Christian M. Jensen
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
-
 class sogo_helper {
 
     public function __construct() {
         global $app;
         if (!is_object($app->functions))
             $app->uses('functions');
+    }
+
+    public function getSOGoModuleConf($server_id = 1, $field = "all") {
+        global $app;
+        $result = $app->db->queryOneRecord('SELECT * FROM `sogo_module` WHERE `smid`=' . intval($server_id));
+        if (strtolower($field) == 'all')
+            return $result;
+        else {
+            if (isset($result[$field]))
+                return $result[$field];
+            else
+                return "";
+        }
+        return array();
     }
 
     /**
@@ -67,23 +80,6 @@ class sogo_helper {
         return isset($result['sogo_id']) ? $result['sogo_id'] : 0;
     }
 
-//    
-//    /**
-//     * get a list of server name+id of server with sogo configurations
-//     * @param app $app
-//     * @return sogo_servers_list[]
-//     */
-//    public static function list_servers(&$app) {
-//        $list = array();
-//        $result = $app->db->queryAllRecords('SELECT `server_id`,`server_name` FROM `sogo_config`');
-//        if ($result === FALSE)
-//            return $list;
-//        foreach ($result as $value) {
-//            $list[] = new sogo_servers_list($value['server_id'], $value['server_name']);
-//        }
-//        return $list;
-//    }
-
     /**
      * fetch all system servers with or without sogo config
      * @param boolean $all set to true to fetch all servers in system
@@ -115,6 +111,7 @@ class sogo_helper {
         $result = $app->db->queryOneRecord('SELECT `server_id` FROM `sogo_config` WHERE `server_id`=' . intval($server_id));
         return (boolean) ($result['server_id'] == $server_id) && (isset($result['server_id']) && $result['server_id'] > 0);
     }
+
     public function configExistsByDomain($domain_id) {
         global $app;
         $result = $app->db->queryOneRecord('SELECT sc.`server_id`, sd.`domain_id` FROM `sogo_config` sc, `sogo_domains` sd WHERE sc.`server_id`=sd.`server_id` AND sd.`domain_id`=' . intval($domain_id));

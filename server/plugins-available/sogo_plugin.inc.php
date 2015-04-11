@@ -1,23 +1,25 @@
 <?php
 
-/*
- * Copyright (C) 2014 Christian M. Jensen
- *
+/**
+ * Copyright (C) 2014  Christian M. Jensen
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
+ *  @author Christian M. Jensen <christian@cmjscripter.net>
+ *  @copyright 2014 Christian M. Jensen
+ *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
-
 class sogo_plugin {
     /*
      * @todo make use of the same column name for all emails not mix it with c_uid, c_imaplogin c_uid is master and should be the only column to check
@@ -414,6 +416,7 @@ class sogo_plugin {
             return;
 
         if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
+            $app->sogo_helper->logDebug("CALL FROM HERE");
             $this->__create_sogo_table($data['new']['domain']);
             $method = "sogo_plugin::insert_sogo_mail_domain():";
             $this->__buildSOGoConfig($method);
@@ -434,7 +437,7 @@ class sogo_plugin {
             $change_domain = $change_server = FALSE;
             if ($data['old']['domain'] != $data['new']['domain']) {
                 //* change domain name (sogo_domains)
-                $app->db->query("UPDATE `sogo_domains` SET `domain_name` = '{$data['new']['domain']}' WHERE `domain_name` = '{$data['old']['domain']}' AND `domain_id` = '{$data['old']['domain_id']}';");
+                $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` SET `domain_name` = '{$data['new']['domain']}' WHERE `domain_name` = '{$data['old']['domain']}' AND `domain_id` = '{$data['old']['domain_id']}';");
 
                 $app->sogo_helper->logDebug("sogo_plugin::update_sogo_mail_domain(): change domain name [{$data['old']['domain']}] => [{$data['new']['domain']}] IN table sogo_domains");
 
@@ -443,7 +446,7 @@ class sogo_plugin {
                 $this->__create_sogo_table($data['new']['domain']);
                 $change_domain = TRUE;
             }
-            $owner_check = $app->db->queryOneRecord('SELECT `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other` FROM `sogo_domains` WHERE `domain_id`=' . intval($data['old']['domain_id']));
+            $owner_check = $app->sogo_helper->getDB()->queryOneRecord('SELECT `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other` FROM `sogo_domains` WHERE `domain_id`=' . intval($data['old']['domain_id']));
             if ($owner_check !== FALSE && ( (
                     ($data['old']['sys_userid'] != $data['new']['sys_userid']) ||
                     ($data['old']['sys_groupid'] != $data['new']['sys_groupid']) ||
@@ -463,7 +466,7 @@ class sogo_plugin {
                  * One would expect it function like any other domain update 
                  * BUT NO NO, no call to plugins if owner is changed!! 
                  */
-                $app->db->query("UPDATE `sogo_domains` "
+                $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` "
                         . "SET `sys_userid` = '{$data['new']['sys_userid']}'"
                         . ", `sys_groupid` = '{$data['new']['sys_groupid']}'"
                         . ", `sys_perm_user` = '{$data['new']['sys_perm_user']}'"
@@ -476,8 +479,8 @@ class sogo_plugin {
 
             if ($data['old']['server_id'] != $data['new']['server_id']) {
                 //* change domain server
-                $server_name = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($data['new']['server_id']));
-                $app->db->query("UPDATE `sogo_domains` "
+                $server_name = $app->sogo_helper->getDB()->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($data['new']['server_id']));
+                $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` "
                         . "SET `server_name` = '{$server_name['server_name']}'"
                         . ", `server_id` = '{$data['new']['server_id']}'"
                         . " WHERE `domain_id` = '{$data['old']['domain_id']}';");
@@ -526,10 +529,10 @@ class sogo_plugin {
         global $app;
         if ($event_name == 'mail_domain_delete') {
             if ((int) $data['old']['domain_id'] == $data['old']['domain_id'] && (intval($data['old']['domain_id']) > 0)) {
-                $SOGoDomainID = $app->db->queryOneRecord("SELECT `sogo_id` FROM `sogo_domains` WHERE `domain_id`=" . intval($data['old']['domain_id']));
+                $SOGoDomainID = $app->sogo_helper->getDB()->queryOneRecord("SELECT `sogo_id` FROM `sogo_domains` WHERE `domain_id`=" . intval($data['old']['domain_id']));
                 //* delete SOGo domain config if exists
                 if ($SOGoDomainID['sogo_id'] == intval($SOGoDomainID['sogo_id']) && (intval($SOGoDomainID['sogo_id']) > 0)) {
-                    $app->db->datalogDelete('sogo_domains', 'sogo_id', $SOGoDomainID['sogo_id']);
+                    $app->sogo_helper->getDB()->datalogDelete('sogo_domains', 'sogo_id', $SOGoDomainID['sogo_id']);
                     $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_domain(): delete SOGo config for domain: {$data['old']['domain_id']}#{$data['old']['domain']}");
                 } else {
                     /*
@@ -538,7 +541,7 @@ class sogo_plugin {
                      * 
                      * IMPORTANT KEEP index == -1 (avoid deleting an existing records)
                      */
-                    $app->db->datalogSave('sogo_domains', 'DELETE', 'sogo_id', -1, $data['old'], $data['new'], TRUE);
+                    $app->sogo_helper->getDB()->datalogSave('sogo_domains', 'DELETE', 'sogo_id', -1, $data['old'], $data['new'], TRUE);
                 }
             }
         }
@@ -614,22 +617,26 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
             return false; //* do nothing
+
+
             
 //* create domain table if it do not exists
         if (!$app->sogo_helper->sogoTableExists($domain_name)) {
             $this->__create_sogo_table($domain_name);
         }
-        $emails = $app->db->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        $emails = $app->sogo_helper->getDB()->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
         if (!empty($emails)) {
             $domain_config = $app->sogo_helper->getDomainConfig($domain_name, true);
             if (!$domain_config || !is_array($domain_config)) {
                 $app->sogo_helper->logError("SOGo Sync Mail Users - Unable to fetch the domain config for domain [{$domain_name}]");
                 return false;
             }
-            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', $domain_config['server_name'], $domain_config['SOGoSieveServer']);
-            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', $domain_config['server_name'], $domain_config['SOGoIMAPServer']);
+            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoSieveServer']);
+            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoIMAPServer']);
             $_tmpSQL = array('users' => array(), 'alias' => array());
+            $good_mails = array();
             foreach ($emails as $email) {
+                $good_mails[] = $email['login'];
                 if ($this->__sogo_mail_user_exists($email['login'], "{$app->sogo_helper->getValidSOGoTableName($domain_name)}")) {
                     $_tmpSQL['users'][] = "UPDATE `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` SET "
                             . " `c_uid` = '{$app->sogo_helper->dbEscapeString($email['login'])}' ,"
@@ -658,7 +665,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                             . "'{$app->sogo_helper->dbEscapeString($email['password'])}'"
                             . ");";
                 }
-                $mail_aliases = $app->db->queryAllRecords("SELECT `source` FROM `mail_forwarding` WHERE `destination` = '{$app->sogo_helper->dbEscapeString($email['login'])}' AND `type`='alias' AND `active`='y';");
+                $mail_aliases = $app->sogo_helper->getDB()->queryAllRecords("SELECT `source` FROM `mail_forwarding` WHERE `destination` = '{$app->sogo_helper->dbEscapeString($email['login'])}' AND `type`='alias' AND `active`='y';");
                 //* get alias columns in table for domain
                 $dtacount = (int) $app->sogo_helper->getSOGoTableAliasColumnCount($domain_name);
 
@@ -724,6 +731,14 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                     $app->sogo_helper->logError("sogo_plugin::__syncMailUsers(): sync users aliases failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1));
                 }
                 self::$_queryHash[] = $_queryHash;
+            }
+
+            //* for SOGo on other server than mail server, make sure delete users gets removed
+            $sql = "SELECT c_uid FROM `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` WHERE NOT `c_uid` IN ('" . implode("','", $good_mails) . "')";
+            if ($tmp = $sqlres->query($sql)) {
+                while ($obj = $tmp->fetch_object())
+                    if (isset($obj->c_uid) && !in_array($obj->c_uid, $good_mails))
+                        $this->__deleteMailUser($obj->c_uid);
             }
         }
         $app->sogo_helper->logDebug("Sync Mail Users in {$domain_name}");
@@ -849,11 +864,11 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                                 foreach ($_arr as $value3)
                                     $arr[] = array('SOGoMailListViewColumn' => $value3);
                                 $tpl->setLoop('SOGoMailListViewColumnsOrder', $arr);
-                            }  else if ($key == 'SOGoMailMessageCheck' || $key == 'SOGoRefreshViewCheck') {
+                            } else if ($key == 'SOGoMailMessageCheck' || $key == 'SOGoRefreshViewCheck') {
                                 //* write both for compatibility with debian lenny (SOGo 2.0.6b)
                                 $tpl->setVar('SOGoMailMessageCheck', $value2);
                                 $tpl->setVar('SOGoRefreshViewCheck', $value2);
-                            }else
+                            } else
                                 $tpl->setVar($key, $value2); //* default isset as normal var
                         }
                         $tpl->setVar('domain', $value['domain']);
@@ -866,7 +881,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                             $MailFieldNames[] = array('MailFieldName' => 'alias_' . $i);
                         }
                         $tpl->setLoop('MailFieldNames', $MailFieldNames); //* set alias names loop
-                        $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array($dconf['server_name'], $value['domain']), $tpl->grab());
+                        $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array((isset($dconf['server_name_real']) ? $dconf['server_name_real'] : $dconf['server_name']), $value['domain']), $tpl->grab());
                     }
 
                     //$app->sogo_helper->logDebug(print_r($sconf, TRUE));

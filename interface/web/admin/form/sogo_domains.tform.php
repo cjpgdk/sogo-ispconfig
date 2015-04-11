@@ -73,12 +73,16 @@ $form["tabs"]['domain'] = array(
         ),
         'server_id' => array(
             'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
+            'formtype' => 'SELECT',
             'default' => 0,
-            'value' => '',
-            'maxlength' => '',
+            'value' => array(0=>$app->lng('Select Server')),
+            'datasource' => array(
+                'type' => 'SQL',
+                'querystring' => 'SELECT a.`server_id`,a.`server_name` FROM `server` a, `sogo_config` b WHERE b.`server_id`=a.`server_id`',
+                'keyfield' => 'server_id',
+                'valuefield' => 'server_name'
+            ),
             'required' => 1,
-            'width' => 100,
         ),
         'server_name' => array(
             'datatype' => 'VARCHAR',
