@@ -23,18 +23,18 @@
 
 class SOGo {
 
-    public $source_list = "/etc/apt/sources.list";
-    //* we start writing the file here.. 
+    public $source_list = "/etc/apt/sources.list"; 
     public $source_list_dir = "/etc/apt/sources.list.d/";
     public $os = "debian";
     public $os_name = "wheezy";
+    public $os_supported = array('debian', 'ubuntu');
 
     public function run() {
         if (!$this->getOS()) {
             $this->echoMessage($this->os . ' is not supported by this installer');
             return;
         }
-        if ($this->os == "debian" || $this->os == "ubuntu") {
+        if (in_array($this->os, $this->os_supported)) {
             if (!file_exists($this->source_list)) {
                 $this->echoMessage($this->source_list . ' is not found on you system ');
                 return;
@@ -96,7 +96,7 @@ class SOGo {
         $this->echoMessage(PHP_EOL . "What Operating system are you using?");
         $this->echoMessage("debian, ubuntu [{$this->os}]: ", "");
         $this->os = strtolower(Installer::readInput("{$this->os}"));
-        if (!in_array($this->os, array('debian', 'ubuntu'))) {
+        if (!in_array($this->os, $this->os_supported)) {
             return false;
         }
         return true;
