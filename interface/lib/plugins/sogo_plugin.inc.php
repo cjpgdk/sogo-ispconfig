@@ -76,10 +76,11 @@ class sogo_plugin {
 
     function create_mail_user_sync_event($domain_name, $server_id) {
         global $app;
-        $app->log('Register remote action [mail_user_sync] for domain ' . $domain_name . ', on server ' . $server_id, LOGLEVEL_DEBUG);
+        $app->log('Register remote action [sogo_mail_user_sync] for domain ' . $domain_name . ', on server ' . $server_id, LOGLEVEL_DEBUG);
         $sql = "INSERT INTO sys_remoteaction (server_id, tstamp, action_type, action_param, action_state, response) " .
-                "VALUES (" . (int) $server_id . ", " . time() . ", 'mail_user_sync', '{$domain_name}', 'pending', '')";
+                "VALUES (" . (int) $server_id . ", " . time() . ", 'sogo_mail_user_sync', '{$domain_name}', 'pending', '')";
         $app->sogo_helper->getDB()->query($sql);
+        $app->log($sql, LOGLEVEL_DEBUG);
     }
 
 }

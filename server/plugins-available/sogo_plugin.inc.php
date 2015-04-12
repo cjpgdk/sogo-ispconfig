@@ -82,13 +82,13 @@ class sogo_plugin {
             $app->plugins->registerEvent('sogo_module_update', $this->plugin_name, 'update_sogo_module_settings');
 
             //* Register for remote actions
-            $app->plugins->registerAction('mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
+            $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
         }
     }
 
     //* #START# remote actions
 
-    public function action_mail_user_sync($domain_name) {
+    public function action_mail_user_sync($action_name, $domain_name) {
         $this->__syncMailUsers($domain_name);
     }
 
