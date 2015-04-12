@@ -64,7 +64,6 @@ class tform_action extends tform_actions {
                 $_REQUEST["id"] = 0;
                 $this->__domain_id = $result['domain_id'];
                 $this->__domain_name = $result['domain'];
-                $this->__server_id = $result['server_id'];
                 $this->__server_name = $result2['server_name'];
             }
         } else if ($dId != 0 && $dConfId != 0 && $app->sogo_helper->configDomainExists($dId)) {
@@ -89,14 +88,15 @@ class tform_action extends tform_actions {
         $dId = (int) (
                 isset($_REQUEST["domain_id"]) ?
                         intval($_REQUEST["domain_id"]) :
-                        (
-                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
+                        (isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
                                 intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
                 );
         $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . $dId);
         //* replace var "{DOMAINNAME}" in query string
         if (isset($result['domain'])) {
-            $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
+            $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace(
+                    '{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']
+            );
         }
         parent::onShow();
     }
@@ -106,7 +106,6 @@ class tform_action extends tform_actions {
         global $app;
         $app->tpl->setVar('domain_id', $this->__domain_id);
         $app->tpl->setVar('domain_name', $this->__domain_name);
-        $app->tpl->setVar('server_id', $this->__server_id);
         $app->tpl->setVar('server_name', $this->__server_name);
         parent::onShowEnd();
     }
@@ -131,41 +130,56 @@ class tform_action extends tform_actions {
         parent::onShowNew();
     }
 
+    public function onBeforeInsert() {
+        $this->onBeforeUpdate(false);
+        parent::onBeforeInsert();
+    }
+
+    public function onBeforeUpdate($callBase = true) {
+        global $app;
+        if (!isset($this->dataRecord['server_id'])) {
+            if ($callBase)
+                parent::onBeforeUpdate();
+            return;
+        }
+        // fix server_name must be sogo server name
+        $result = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($this->dataRecord['server_id']));
+        if (isset($result['server_name']))
+            $this->dataRecord['server_name'] = $result['server_name'];
+        if ($callBase)
+            parent::onBeforeUpdate();
+    }
+
     public function onAfterInsert() {
-        $this->__fixDomainOwner();
+        $this->onAfterUpdate(false);
         parent::onAfterInsert();
     }
 
-    public function onAfterUpdate() {
-        $this->__fixDomainOwner();
-        parent::onAfterUpdate();
-    }
-
-    /** @global app $app */
-    private function __fixDomainOwner() {
+    public function onAfterUpdate($callBase = true) {
         global $app;
-        $dId = (int) (
-                isset($_REQUEST["domain_id"]) ?
-                        intval($_REQUEST["domain_id"]) :
-                        (
-                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
-                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
-                );
-        $result = $app->db->queryOneRecord('SELECT `sys_userid`,`sys_groupid`,`sys_perm_user`,`sys_perm_group`,`sys_perm_other` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
+        if (!isset($this->dataRecord['domain_id'])) {
+            if ($callBase)
+                parent::onAfterUpdate();
+            return;
+        }
+        // fix user permissions.
+        $result = $app->db->queryOneRecord('SELECT `sys_userid`,`sys_groupid`,`sys_perm_user`,`sys_perm_group`,`sys_perm_other` FROM `mail_domain` WHERE `domain_id`=' . intval($this->dataRecord['domain_id']));
         if (isset($result['sys_userid']) &&
                 isset($result['sys_groupid']) &&
                 isset($result['sys_perm_user']) &&
                 isset($result['sys_perm_group']) &&
                 isset($result['sys_perm_other'])) {
-            $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+            $dConfId = (int) $app->sogo_helper->getDomainConfigIndex(intval($this->dataRecord['domain_id']));
             $app->db->query("UPDATE `sogo_domains` SET "
                     . "`sys_userid` = '" . intval($result['sys_userid']) . "', "
                     . "`sys_groupid` = '" . intval($result['sys_groupid']) . "', "
                     . "`sys_perm_user` = '{$result['sys_perm_user']}', "
                     . "`sys_perm_group` = '{$result['sys_perm_group']}', "
                     . "`sys_perm_other` = '{$result['sys_perm_other']}' "
-                    . "WHERE `sogo_id` ='{$dConfId}' AND `domain_id` ='{$dId}';");
+                    . "WHERE `sogo_id` ='{$dConfId}' AND `domain_id` =" . intval($this->dataRecord['domain_id']) . ";");
         }
+        if ($callBase)
+            parent::onAfterUpdate();
     }
 
 }

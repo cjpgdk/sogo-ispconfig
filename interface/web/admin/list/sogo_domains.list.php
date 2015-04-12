@@ -1,4 +1,24 @@
 <?php
+/*
+ * Copyright (C) 2015  Christian M. Jensen
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ */
 
 $liste["name"] = "sogo_domains";
 $liste["table"] = "mail_domain";
@@ -10,7 +30,8 @@ $liste["edit_file"] = "sogo_domains_edit.php";
 $liste["delete_file"] = "sogo_domains_del.php";
 $liste["paging_tpl"] = "templates/paging.tpl.htm";
 $liste["auth"] = "yes";
-
+// see "sogo_domains_list.php" for join statement in use
+//$liste['join_sql'] = "LEFT JOIN `sogo_domains` ON `mail_domain`.`domain_id`=`sogo_domains`.`domain_id`";
 $liste["item"][] = array(
     'field' => "active",
     'datatype' => "VARCHAR",
@@ -53,6 +74,24 @@ $liste["item"][] = array(
     'datasource' => array(
         'type' => 'SQL',
         'querystring' => 'SELECT a.server_id, a.server_name FROM server a, mail_domain b WHERE (a.server_id = b.server_id) AND ({AUTHSQL-B}) ORDER BY a.server_name',
+        'keyfield' => 'server_id',
+        'valuefield' => 'server_name'
+    ),
+    'width' => "",
+    'value' => ""
+);
+
+//* isset using join
+$liste["item"][] = array(
+    'field' => "sogo_server_id",
+    'datatype' => "INTEGER",
+    'formtype' => "SELECT",
+    'op' => "like",
+    'prefix' => "",
+    'suffix' => "",
+    'datasource' => array(
+        'type' => 'SQL',
+        'querystring' => 'SELECT `server_id`,`server_name` FROM `sogo_config` WHERE ({AUTHSQL-B}) ORDER BY server_name',
         'keyfield' => 'server_id',
         'valuefield' => 'server_name'
     ),

@@ -1,7 +1,7 @@
 <?php
 $wb["domain_id_txt"] = 'Domain Id';
 $wb["domain_name_txt"] = 'Domain Name';
-$wb["server_id_txt"] = 'Server Id';
+$wb["server_id_txt"] = 'SOGo Server';
 $wb["server_name_txt"] = 'Server Name';
 $wb["SOGoCustomXML_txt"] = 'Custom XML';
 $wb["SOGoCalendarDefaultReminder_txt"] = 'Calendar Default Reminder';
