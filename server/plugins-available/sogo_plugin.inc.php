@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2014 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 class sogo_plugin {
     /*
@@ -49,7 +49,7 @@ class sogo_plugin {
                 !isset($conf['sogo_su_command']) || !isset($conf['sogo_tool_binary']) || /* !isset($conf['sogo_binary']) || */
                 !isset($conf['sogo_database_name']) || !isset($conf['sogo_database_user']) || !isset($conf['sogo_database_passwd']) || !isset($conf['sogo_database_host']) || !isset($conf['sogo_database_port'])
         ) {
-            $app->sogo_helper->logWarn('SOGo configuration variables is missing in local config');
+            $app->log('SOGo configuration variables is missing in local config', LOGLEVEL_ERROR);
         } else {
             //* TB: sogo_config
             $app->plugins->registerEvent('sogo_config_update', $this->plugin_name, 'update_sogo_config');
@@ -77,12 +77,22 @@ class sogo_plugin {
             $app->plugins->registerEvent('mail_forwarding_update', $this->plugin_name, 'update_sogo_mail_user_alias');
 
             //* TB: sogo_module
-            $app->plugins->registerEvent('sogo_module_insert', $this->plugin_name, 'remove_sogo_module_settings');
-            $app->plugins->registerEvent('sogo_module_update', $this->plugin_name, 'insert_sogo_module_settings');
-            $app->plugins->registerEvent('sogo_module_delete', $this->plugin_name, 'update_sogo_module_settings');
+            $app->plugins->registerEvent('sogo_module_delete', $this->plugin_name, 'remove_sogo_module_settings');
+            $app->plugins->registerEvent('sogo_module_insert', $this->plugin_name, 'insert_sogo_module_settings');
+            $app->plugins->registerEvent('sogo_module_update', $this->plugin_name, 'update_sogo_module_settings');
+
+            //* Register for remote actions
+            $app->plugins->registerAction('mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
         }
     }
 
+    //* #START# remote actions
+
+    public function action_mail_user_sync($domain_name) {
+        $this->__syncMailUsers($domain_name);
+    }
+
+    //* #END# remote actions
     //* #START# SOGO MODULE SETTINGS (TB: sogo_module)
 
     public function update_sogo_module_settings($event_name, $data) {
@@ -91,19 +101,12 @@ class sogo_plugin {
     }
 
     public function insert_sogo_module_settings($event_name, $data) {
-        //* should NEVER be called!
-        /*
-          global $app, $conf;
-          $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
-         */
+        global $app, $conf;
+        $app->sogo_helper->load_module_settings($conf['server_id']); //* just added
     }
 
     public function remove_sogo_module_settings($event_name, $data) {
         //* should NEVER be called!
-        /*
-          global $app, $conf;
-          $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
-         */
     }
 
     //* #END# SOGO MODULE SETTINGS (TB: sogo_config)
@@ -150,7 +153,7 @@ class sogo_plugin {
      */
     public function remove_sogo_domain($event_name, $data) {
         global $app, $conf;
-        if (!isset($data['old']['domain_id']) && (intval($data['old']['domain_id']) <= 0)) {
+        if (!isset($data['old']['domain_id']) || (intval($data['old']['domain_id']) <= 0)) {
             return;
         }
         $domain_name = (isset($data['old']['domain']) ? $data['old']['domain'] : (isset($data['old']['domain_name']) ? $data['old']['domain_name'] : ''));
@@ -617,6 +620,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
             return false; //* do nothing
+
 
 
             

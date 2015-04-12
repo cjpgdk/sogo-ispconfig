@@ -69,7 +69,7 @@ class sogo_helper {
             return FALSE;
     }
 
-    public function load_module_settings($server_id = 0) {
+    public function load_module_settings($server_id = 1) {
         global $app;
         //* $server_id are for the future
         $query = "SELECT * FROM `sogo_module` WHERE smid=1;";
@@ -503,10 +503,15 @@ AND sc.`server_name` = s.`server_name";
         return $str;
     }
 
+    /*********************
+     * are to be removed
+     * never meant as a permanent thing
+     *********************/
     /**
      * log errors
      * @global app $app
      * @param string $str
+     * @deprecated use $app->log
      */
     public function logError($str) {
         global $app;
@@ -517,6 +522,7 @@ AND sc.`server_name` = s.`server_name";
      * log warnings
      * @global app $app
      * @param string $str
+     * @deprecated use $app->log
      */
     public function logWarn($str) {
         global $app;
@@ -527,6 +533,7 @@ AND sc.`server_name` = s.`server_name";
      * log debug
      * @global app $app
      * @param string $str
+     * @deprecated use $app->log
      */
     public function logDebug($str) {
         global $app;
@@ -538,6 +545,7 @@ AND sc.`server_name` = s.`server_name";
      * @param string $arg_0
      * @param string $arg_1
      * @return boolean
+     * @deprecated use if ($arg_0 == $arg_1)
      */
     public function isEqual($arg_0, $arg_1) {
         if ($arg_0 == $arg_1) {

@@ -3,9 +3,9 @@
 $files_copy = array(
     'interface' => array(
         'lib/classes/sogo_helper.inc.php',
+        'lib/plugins/sogo_plugin.inc.php',
         'lib/config.inc.local.sogo-sample.php',
         //* #ADMIN#
-        //* admin
         'web/admin/sogo_conifg_del.php',
         'web/admin/sogo_conifg_edit.php',
         'web/admin/sogo_conifg_list.php',
@@ -51,7 +51,6 @@ $files_copy = array(
         'web/admin/templates/sogo_plugins_list.htm',
         //* /#ADMIN#
         //* #MAIL#
-        //* mail
         'web/mail/sogo_mail_domain_del.php',
         'web/mail/sogo_mail_domain_list.php',
         'web/mail/sogo_mail_domains_edit.php',
@@ -82,7 +81,7 @@ $files_copy = array(
         'web/mail/templates/sogo_plugins_list.htm',
         'web/mail/templates/sogo_plugins_reseller_list.htm',
         'web/mail/templates/sogo_plugins_user_list.htm',
-    //* /#MAIL#
+        //* /#MAIL#
     ),
     'server' => array(
         'conf/sogo_domain.master',
