@@ -4,7 +4,7 @@
 ALTER TABLE `sogo_module` ADD `server_id` INT( 11 ) NOT NULL AFTER `sys_perm_other` ,
 ADD UNIQUE (`server_id`);
 -- Remove 'sql_of_mail_server' form sogo_module
-ALTER TABLE `sogo_module` DROP `sql_of_mail_server`
+ALTER TABLE `sogo_module` DROP `sql_of_mail_server`;
 
 UPDATE 
     `sys_config`
