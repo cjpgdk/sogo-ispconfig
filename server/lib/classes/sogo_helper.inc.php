@@ -72,7 +72,7 @@ class sogo_helper {
     public function load_module_settings($server_id = 1) {
         global $app;
         //* $server_id are for the future
-        $query = "SELECT * FROM `sogo_module` WHERE smid=" . intval($server_id);
+        $query = "SELECT * FROM `sogo_module` WHERE `server_id`=" . intval($server_id);
         $settings = $this->getDB()->queryOneRecord($query);
 
         $this->module_settings = new sogo_module_settings();

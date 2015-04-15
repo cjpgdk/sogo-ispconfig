@@ -23,7 +23,7 @@
 class sogo_helper {
 
     public function getSOGoModuleConf($server_id = 1, $field = "all") {
-        $result = $this->getDB()->queryOneRecord('SELECT * FROM `sogo_module` WHERE `smid`=' . intval($server_id));
+        $result = $this->getDB()->queryOneRecord('SELECT * FROM `sogo_module` WHERE `server_id`=' . intval($server_id));
         if (strtolower($field) == 'all')
             return $result;
         else {

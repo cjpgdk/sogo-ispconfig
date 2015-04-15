@@ -45,7 +45,7 @@ $app->uses('sogo_helper');
 
 if (sogo_helper::isExtendedDebug()) {
     $app->log("_GET[dids]: {$_GET['dids']}", LOGLEVEL_DEBUG);
-    $app->log("prin_r(GET[dids]): " . print_r($_domainIds, true), LOGLEVEL_DEBUG);
+    $app->log("prin_r({$_domainIds}): " . print_r($_domainIds, true), LOGLEVEL_DEBUG);
 }
 
 //* check if post for server change
