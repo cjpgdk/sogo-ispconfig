@@ -21,9 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 class sogo_helper {
-    
+
     public function getSOGoModuleConf($server_id = 1, $field = "all") {
-        $result = $this->getDB()->queryOneRecord('SELECT * FROM `sogo_module` WHERE `smid`=1'/* . intval($server_id)*/);
+        $result = $this->getDB()->queryOneRecord('SELECT * FROM `sogo_module` WHERE `smid`=' . intval($server_id));
         if (strtolower($field) == 'all')
             return $result;
         else {
@@ -34,6 +34,16 @@ class sogo_helper {
         }
         return array();
     }
+
+
+    /**
+     * check if extended debug is enabled
+     * @return boolean
+     */
+    public static function isExtendedDebug() {
+        return defined('SOGO_EXT_DEBUG_INFO') ? SOGO_EXT_DEBUG_INFO : false;
+    }
+    
     /**
      * get ISPConfig database connection
      * @global app $app

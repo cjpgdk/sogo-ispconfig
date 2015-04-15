@@ -1,0 +1,5 @@
+<?php
+$wb["list_head_txt"] = 'SOGo configuration settings';
+$wb["list_desc_txt"] = 'Change the way the server plugin builds the configuration';
+$wb["server_id_txt"] = 'SOGo Server';
+?>

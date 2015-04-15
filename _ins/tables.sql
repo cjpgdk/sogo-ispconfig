@@ -188,14 +188,14 @@ CREATE TABLE IF NOT EXISTS `sogo_module` (
   `sys_perm_user` varchar(5) DEFAULT NULL,
   `sys_perm_group` varchar(5) DEFAULT NULL,
   `sys_perm_other` varchar(5) DEFAULT NULL,
+  `server_id` int(11) NOT NULL,
   `all_domains` enum('y','n') NOT NULL DEFAULT 'y',
   `allow_same_instance` enum('y','n') NOT NULL DEFAULT 'y',
-  `sql_of_mail_server` enum('y','n') NOT NULL DEFAULT 'n',
   `config_rebuild_on_mail_user_insert` enum('n','y') NOT NULL DEFAULT 'n',
-  PRIMARY KEY (`smid`)
+  PRIMARY KEY (`smid`),
+  UNIQUE KEY `server_id` (`server_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
-INSERT INTO `sogo_module` (`smid`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `all_domains`, `allow_same_instance`, `sql_of_mail_server`, `config_rebuild_on_mail_user_insert`) VALUES
-(1, 1, 0, 'riu', 'riu', NULL, 'y', 'y', 'n', 'n');
+
 
 CREATE TABLE IF NOT EXISTS `sogo_plugins` (
   `spid` bigint(20) NOT NULL AUTO_INCREMENT,

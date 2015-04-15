@@ -40,7 +40,7 @@ $module['nav'][] = array(
         array(
             'title' => 'Settings',
             'target' => 'content',
-            'link' => 'admin/sogo_module_settings.php',
+            'link' => 'admin/sogo_module_settings_list.php',
             'html_id' => 'sogo_module_settings'
         ),
         array(

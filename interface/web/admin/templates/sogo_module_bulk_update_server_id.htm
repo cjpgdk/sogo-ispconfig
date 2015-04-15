@@ -1,0 +1,51 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_module">
+    <div class="pnl_toolsarea">
+        <fieldset class="inlineLabels"><legend>{tmpl_var name="list_head_txt"}</legend>
+            <div class="ctrlHolder">
+                <label for="server_id">{tmpl_var name='server_id_txt'}</label>
+                <select name="server_id" id="server_id" class="selectInput">
+                    <option value="0">{tmpl_var name='server_select_txt'}</option>
+                {tmpl_loop name="sogo_servers"}
+                    <option value="{tmpl_var name='server_id'}">{tmpl_var name='server_name'}</option>
+                {/tmpl_loop}
+                </select>
+            </div>
+            <input type="hidden" name="dids" id="dids" value="{tmpl_var name='dids'}"/>
+        <div class="buttonHolder buttons">
+            <a href="#" class="button iconstxt icoPositive" style="height: 18px; padding-top: 7px;" value="{tmpl_var name='btn_save_txt'}" onclick="return submitSOGoServerChange();"><span>{tmpl_var name='btn_save_txt'}</span></a>
+            <a href="#" class="button iconstxt icoNegative" style="height: 18px; padding-top: 7px;" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_module_settings_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></a>
+        </div>
+        </fieldset>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function() {});
+    
+    function submitSOGoServerChange(){
+        if(jQuery('select#server_id').val() == 0 || jQuery('select#server_id').val() == '0'){
+            alert("{tmpl_var name='server_select_alert_txt'}");
+            return false;
+        }
+        jQuery.ajax({
+            type: "POST",
+            url: 'admin/sogo_module_bulk_update_server_id.php?dids='+jQuery('input#dids').val(),
+            data: {'server_id':jQuery('select#server_id').val(), 'dochange':'true'},
+            dataType: "html",
+            beforeSend: function () {
+                showLoadIndicator();
+            },
+            success: function (data, textStatus, jqXHR) {
+                hideLoadIndicator();
+                loadContent('admin/sogo_module_settings_list.php');
+            },
+            error: function () {
+                hideLoadIndicator();
+                alert("{tmpl_var name='save_server_change_error_txt'}");
+            }
+        });
+        return false;
+    }
+</script>

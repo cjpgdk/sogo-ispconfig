@@ -7,7 +7,7 @@
   cd sogo-ispconfig-master
   php update.php
  */
-$sogo_interface_version_latest = "6";
+$sogo_interface_version_latest = "7";
 
 require '_ins/Installer.php';
 $ispchome = Installer::getISPConfigHomeDir();
@@ -49,6 +49,7 @@ if (strtolower(Installer::readInput('y')) == 'y') {
 }
 echo PHP_EOL;
 
+$sogo_interface_version_php = $sogo_interface_version; //* needed for php file update
 //* db update
 echo "Starting database update" . PHP_EOL;
 echo "Current version: {$sogo_interface_version}" . PHP_EOL;
@@ -65,11 +66,33 @@ if ($sogo_interface_version < $sogo_interface_version_latest) {
             }
             echo 'Loading SQL file: ' . $patch_filename . PHP_EOL;
             $sogo_interface_version = $next_db_version;
-        } else {
+        } else
             $dbupd_run = false;
-        }
     }
 } else {
     echo "No database update neded" . PHP_EOL;
+}
+
+//* run php ipdate file
+echo "Starting file based update" . PHP_EOL;
+require_once "_ins/PHPUpdateBaseClass.php";
+$phpupd_run = true;
+while ($phpupd_run == true) {
+    $next_php_version = intval($sogo_interface_version_php + 1);
+    if ($next_php_version <= 6)
+        continue; /* no php upgrade before v7 */
+
+    $patch_filename = "_ins/php/{$next_php_version}.php";
+    if (is_file($patch_filename)) {
+        echo 'Loading PHP update file: ' . $patch_filename . PHP_EOL;
+        require_once $patch_filename;
+        if (isset($updateClass))
+            $updateClass->run();
+        else
+            echo 'Failed to run update file: ' . $patch_filename . PHP_EOL;
+        unset($updateClass);
+        $sogo_interface_version_php = $next_php_version;
+    } else
+        $phpupd_run = false;
 }
 echo PHP_EOL . "all done i hope!" . PHP_EOL;

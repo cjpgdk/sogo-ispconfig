@@ -1,0 +1,96 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_sogo_module">
+    <div class="pnl_toolsarea">
+        <fieldset><legend>{tmpl_var name="toolsarea_head_txt"}</legend>
+            <div class="buttons">
+                <a href="#" class="button iconstxt icoAdd" onclick="return changeSOGoServer();" title="Set SOGo server for selected domains" style="height: 18px; padding-top: 7px;">
+                    <span>Set SOGo server</span>
+                </a>
+                <a href="#" class="button iconstxt icoAdd" onclick="loadContent('admin/asdfgth.php');" title="Change SOGo configuration on all selected domains" style="height: 18px; padding-top: 7px;">
+                    <span>Change SOGo configuration</span>
+                </a>
+                <p><br></p>
+                <a class="button" href="#" onclick="return selectSOGoServerDomains('');">
+                    <span>{tmpl_var name="select_domains_missing_sogo_server_txt"}</span>
+                </a><br><br>
+                <strong>{tmpl_var name="sogo_servers_select_domains_txt"}</strong><br><br>
+                {tmpl_loop name="sogo_servers"}
+                <a class="button" href="#" onclick="return selectSOGoServerDomains({tmpl_var name="server_id"});">
+                   <span>{tmpl_var name="server_name"}</span>
+                </a>
+                {/tmpl_loop}
+            </div>
+        </fieldset>
+    </div>
+    <p><br></p>
+    <div class="pnl_formsarea">
+        <fieldset class="inlineLabels"><legend>SOGo Config</legend>
+            <div class="multiField">
+                {tmpl_loop name="mail_domains"}
+                <label for='did{tmpl_var name="domain_id"}' class="inlineLabel">
+                    {tmpl_var name="domain"}<input class="jqSelectorClass" type="checkbox" data-domainid='{tmpl_var name="domain_id"}'  data-sogoserverid='{tmpl_var name="sogo_server_id"}' name='did{tmpl_var name="domain_id"}' id='did{tmpl_var name="domain_id"}' value='{tmpl_var name="domain_id"}' />
+                </label>
+                {/tmpl_loop}
+            </div>
+        </fieldset>
+        <input type="hidden" name="id" value="{tmpl_var name='id'}">
+    </div>
+</div>
+<script type="text/javascript">
+    var dids = [];
+    jQuery(document).ready(function() {
+        $('input[type=checkbox].jqSelectorClass').change(function() {
+            dids = [];
+            $('input[type=checkbox].jqSelectorClass').each(function(index) {
+                if (document.getElementById($(this).attr('id')).checked /*|| $(this).is(':checked') || $(this).attr("checked") === true || $(this).attr("checked") === 'checked'*/)
+                    dids.push($(this).data('domainid'));
+            });
+            /*alert(dids.join("|"));*/
+        });
+    });
+    
+    function changeSOGoServer(){
+        if(dids.join("|") === "")
+            alert('{tmpl_var name="select_domains"}');
+        else {
+            loadContent('admin/sogo_module_bulk_update_server_id.php?dids='+dids.join("|")); 
+            /*
+            jQuery.ajax({
+                type: "GET",
+                url: 'admin/sogo_module_bulk_update_server_id.php',
+                data: {'dids':dids.join("|")},
+                dataType: "html",
+                beforeSend: function () {
+                    showLoadIndicator();
+                },
+                success: function (data, textStatus, jqXHR) {
+                    jQuery('#pageContent').html(jqXHR.responseText);
+                    hideLoadIndicator();
+                },
+                error: function () {
+                    hideLoadIndicator();
+                    reportError('Ajax Request was not successful. 113');
+                }
+            });
+             */
+        }
+        return false;
+    }
+    
+    function selectSOGoServerDomains(ssid){
+        /*$('.jqSelectorClass').attr("checked", false);*/
+        dids = [];
+        $('.jqSelectorClass').each(function(index) {
+            /* checked set to false then check. */
+            document.getElementById($(this).attr('id')).checked = false;
+            if ($(this).data('sogoserverid') == ssid) {
+                dids.push($(this).data('domainid'));
+                document.getElementById($(this).attr('id')).checked = true; /*$(this).attr("checked", true);*/
+            }
+        });
+        /*alert(dids.join("|"));*/
+        return false;
+    }
+</script>

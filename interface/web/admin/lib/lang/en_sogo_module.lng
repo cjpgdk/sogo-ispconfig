@@ -5,6 +5,9 @@ $wb["all_domains_ex_txt"] = 'if set to yes this will allow all mail domains with
 $wb["allow_same_instance_txt"] = 'Allow Same Instance';
 $wb["allow_same_instance_ttip_txt"] = 'Allow all mail domains to use the same  SOGo instance';
 $wb["allow_same_instance_ex_txt"] = 'if set to yes this allow all mail domains with access to SOGo to use the same instance of SOGo, if you are planning on using multiple SOGo servers i recommend setting this to NO';
-$wb["sql_of_mail_server_txt"] = 'Use SQL of mail server';
-$wb["sql_of_mail_server_ttip_txt"] = 'Tell SOGo to use the domain table configurated on the mail server';
-$wb["sql_of_mail_server_ex_txt"] = "Recommended settings is NO (its best to keep SQL connections local), if set to YES the SOGo server will need to contact the SQL server located on the mail server of the domain, causing connection delays and possibly a lot of failed login tries";
+$wb["config_rebuild_on_mail_user_insert_txt"] = 'New mail users rebuild config';
+$wb["config_rebuild_on_mail_user_insert_ex_txt"] = "setting this to 'Yes' will force the SOGo configuration to be recreated EVERY time a new mail user is added (this is a fix, and should only be used if you encounter troubles with users not being synced to SOGo server)";
+$wb["sogo_servers_select_domains_txt"] = 'Select all domains dedicated to server:';
+$wb["select_domains_missing_sogo_server_txt"] = 'Select all none SOGo domains';
+$wb["select_domains"] = 'Select some domains, first';
+

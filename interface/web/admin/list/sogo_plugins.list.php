@@ -66,9 +66,9 @@ $liste['item'][] = array(
 $liste['item'][] = array(
     'field' => 'name',
     'datatype' => 'VARCHAR',
-    'op' => '=',
-    'prefix' => '',
-    'suffix' => '',
+    'op' => 'like',
+    'prefix' => '%',
+    'suffix' => '%',
     'width' => ''
 );
 $liste['item'][] = array(

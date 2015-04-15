@@ -72,18 +72,22 @@ class sogo_helper {
     public function load_module_settings($server_id = 1) {
         global $app;
         //* $server_id are for the future
-        $query = "SELECT * FROM `sogo_module` WHERE smid=1;";
+        $query = "SELECT * FROM `sogo_module` WHERE smid=" . intval($server_id);
         $settings = $this->getDB()->queryOneRecord($query);
-        
+
         $this->module_settings = new sogo_module_settings();
         if ($settings !== FALSE) {
             foreach ($settings as $key => $value) {
                 if (in_array($key, array('smid', 'sys_userid', 'sys_groupid', 'sys_perm_user', 'sys_perm_group', 'sys_perm_other')))
                     continue;
-                $this->module_settings->{$key} = ($value == 'y' ? TRUE : FALSE);
+                if ($key == "server_id")
+                    $this->module_settings->{$key} = (int) $value;
+                else
+                    $this->module_settings->{$key} = ($value == 'y' ? TRUE : FALSE);
             }
         } else {
-            $this->logWarn("Unable to fetch SOGo module settings using default");
+            $this->module_settings->{$key} = intval($server_id);
+            $app->log("Unable to fetch SOGo module settings using defaults", LOGLEVEL_WARN);
         }
     }
 
@@ -197,7 +201,6 @@ class sogo_helper {
         if (!isset(self::$dnCache[$domain_name]) && $this->is_domain_active($domain_name)) {
             global $app;
             //* get server default config (BASED on domain name)
-            
             //$server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
             //* better for multi server but not sure if multi SOGo server? (@todo propper testing)
             $server_default_sql = "SELECT sc.*, 
@@ -486,6 +489,7 @@ AND sc.`server_name` = s.`server_name";
                 if (in_array($key, $useless_values) && !in_array($key, $keep))
                     unset($param[$key]);
     }
+
     /**
      * Escape string for mysql query use
      * @param mixed $str
@@ -503,10 +507,11 @@ AND sc.`server_name` = s.`server_name";
         return $str;
     }
 
-    /*********************
+    /*     * *******************
      * are to be removed
      * never meant as a permanent thing
-     *********************/
+     * ******************* */
+
     /**
      * log errors
      * @global app $app
@@ -559,6 +564,12 @@ AND sc.`server_name` = s.`server_name";
 class sogo_module_settings {
 
     /**
+     * this server id
+     * @var integer
+     */
+    public $server_id = -1;
+
+    /**
      * configure domains with and without config
      * @var boolean
      */
@@ -569,12 +580,6 @@ class sogo_module_settings {
      * @var boolean
      */
     public $allow_same_instance = TRUE;
-
-    /**
-     * use mail server database in SQL view
-     * @var boolean
-     */
-    public $sql_of_mail_server = FALSE;
 
     /**
      * always rebuild SOGo configuration when a mail user is inserted

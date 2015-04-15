@@ -1,0 +1,7 @@
+<?php
+$wb["list_head_txt"] = 'Set SOGo server';
+$wb["list_desc_txt"] = 'update SOGo server on the selected domains.!';
+$wb["server_select_txt"] = 'Select Server';
+$wb["server_id_txt"] = 'SOGo Server';
+$wb["save_server_change_error_txt"] = 'Error while saveing server change, try again';
+$wb["server_select_alert_txt"] = 'Please select a server';
