@@ -22,7 +22,10 @@ class UpdateClass extends PHPUpdateBaseClass {
                 $conf['dbmaster_database'] != $conf['db_database']))) {
             /* not db master, so empty out table 'sogo_module', we start using 
               server based configs from update 7. */
-            $db->query("TRUNCATE sogo_module;");
+            //$db->query("TRUNCATE sogo_module;"); //* not allowed with default user
+            $sm = $db->queryAllRecords("SELECT * FROM `sogo_module`");
+            foreach ($sm as $row)
+                $db->query("DELETE FROM `sogo_module` WHERE `smid`={$row['smid']}");
         } else {
             $servers = array();
             //* db master, locate all sogo servers and set default module config
@@ -33,7 +36,10 @@ class UpdateClass extends PHPUpdateBaseClass {
             unset($sogo_config, $value);
 
             $sogo_module = $db->queryOneRecord("SELECT * FROM `sogo_module` WHERE `smid`=1");
-            $db->query("TRUNCATE sogo_module;");
+            //$db->query("TRUNCATE sogo_module;"); //* not allowed with default user
+            $sm = $db->queryAllRecords("SELECT * FROM `sogo_module`");
+            foreach ($sm as $row)
+                $db->query("DELETE FROM `sogo_module` WHERE `smid`={$row['smid']}");
             foreach ($servers as $value) {
                 $sql = "INSERT INTO `dbispconfig`.`sogo_module` "
                         . "(`smid`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, "
