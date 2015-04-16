@@ -86,7 +86,7 @@ class sogo_helper {
                     $this->module_settings->{$key} = ($value == 'y' ? TRUE : FALSE);
             }
         } else {
-            $this->module_settings->{$key} = intval($server_id);
+            $this->module_settings->server_id = intval($server_id);
             $app->log("Unable to fetch SOGo module settings using defaults", LOGLEVEL_WARN);
         }
     }
