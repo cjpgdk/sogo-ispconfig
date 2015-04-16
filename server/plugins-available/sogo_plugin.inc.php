@@ -98,11 +98,13 @@ class sogo_plugin {
     public function update_sogo_module_settings($event_name, $data) {
         global $app, $conf;
         $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
+        $this->__buildSOGoConfig("sogo_plugin::update_sogo_module_settings():");
     }
 
     public function insert_sogo_module_settings($event_name, $data) {
         global $app, $conf;
         $app->sogo_helper->load_module_settings($conf['server_id']); //* just added
+        $this->__buildSOGoConfig("sogo_plugin::insert_sogo_module_settings():");
     }
 
     public function remove_sogo_module_settings($event_name, $data) {

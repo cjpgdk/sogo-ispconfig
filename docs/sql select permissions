@@ -1,0 +1,30 @@
+needed on multi server setups where SOGo server is not on master
+all queries are to be run on master database
+
+** This is not all the required permissions, i'll add them when i get to them **
+
+replace in queries before use
+
+dbispconfig         =   ispconfig database on the master database host
+ispcsrv3            =   the username used by server to connect to master database host
+192.168.1.12        =   ip address of the server
+SERVER.EXAMPLE.COM  =   domain of the server
+
+
+
+//* REVOKE only if previous created
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_domain` FROM 'ispcsrv3'@'192.168.1.12';
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_domain` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
+GRANT SELECT (`server_id` , `domain` , `active`) ON `dbispconfig`.`mail_domain` TO 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT (`server_id` , `domain` , `active`) ON `dbispconfig`.`mail_domain` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
+//* REVOKE only if previous created
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`sogo_domains` FROM 'ispcsrv3'@'192.168.1.12';
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`sogo_domains` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
+GRANT SELECT (`server_id` , `domain_id`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT (`server_id` , `domain_id`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
+
+

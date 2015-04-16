@@ -73,7 +73,7 @@ class sogo_helper {
         global $app;
         //* $server_id are for the future
         $query = "SELECT * FROM `sogo_module` WHERE `server_id`=" . intval($server_id);
-        $settings = $this->getDB()->queryOneRecord($query);
+        $settings = $this->getDB(false)->queryOneRecord($query);
 
         $this->module_settings = new sogo_module_settings();
         if ($settings !== FALSE) {
@@ -163,7 +163,7 @@ class sogo_helper {
                 $server_id = $conf['server_id'];
 
             $sql = "SELECT * FROM `sogo_config` WHERE `server_id`=" . intval($server_id);
-            $server_default = $this->getDB()->queryOneRecord($sql);
+            $server_default = $this->getDB(false)->queryOneRecord($sql);
 
             if (!$server_default) {
                 $this->logError("SOGo get server config failed.");
