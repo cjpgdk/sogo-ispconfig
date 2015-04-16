@@ -44,10 +44,9 @@
         $('input[type=checkbox].jqSelectorClass').change(function() {
             dids = [];
             $('input[type=checkbox].jqSelectorClass').each(function(index) {
-                if (document.getElementById($(this).attr('id')).checked /*|| $(this).is(':checked') || $(this).attr("checked") === true || $(this).attr("checked") === 'checked'*/)
+                if (document.getElementById($(this).attr('id')).checked)
                     dids.push($(this).data('domainid'));
             });
-            /*alert(dids.join("|"));*/
         });
     });
     
@@ -56,41 +55,19 @@
             alert('{tmpl_var name="select_domains"}');
         else {
             loadContent('admin/sogo_module_bulk_update_server_id.php?dids='+dids.join("|")); 
-            /*
-            jQuery.ajax({
-                type: "GET",
-                url: 'admin/sogo_module_bulk_update_server_id.php',
-                data: {'dids':dids.join("|")},
-                dataType: "html",
-                beforeSend: function () {
-                    showLoadIndicator();
-                },
-                success: function (data, textStatus, jqXHR) {
-                    jQuery('#pageContent').html(jqXHR.responseText);
-                    hideLoadIndicator();
-                },
-                error: function () {
-                    hideLoadIndicator();
-                    reportError('Ajax Request was not successful. 113');
-                }
-            });
-             */
         }
         return false;
     }
     
     function selectSOGoServerDomains(ssid){
-        /*$('.jqSelectorClass').attr("checked", false);*/
         dids = [];
         $('.jqSelectorClass').each(function(index) {
-            /* checked set to false then check. */
             document.getElementById($(this).attr('id')).checked = false;
             if ($(this).data('sogoserverid') == ssid) {
                 dids.push($(this).data('domainid'));
-                document.getElementById($(this).attr('id')).checked = true; /*$(this).attr("checked", true);*/
+                document.getElementById($(this).attr('id')).checked = true;
             }
         });
-        /*alert(dids.join("|"));*/
         return false;
     }
 </script>

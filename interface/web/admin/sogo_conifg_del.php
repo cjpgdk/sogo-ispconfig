@@ -38,6 +38,20 @@ if (method_exists($app->auth, 'check_security_permissions')) {
 if ($conf['demo_mode'] == true)
     $app->error('This function is disabled in demo mode.');
 
-$app->uses("tform_actions");
+$app->load("tform_actions");
 
-$app->tform_actions->onDelete();
+class tform_action extends tform_actions {
+
+    /** @global app $app */
+    public function onAfterDelete() {
+        global $app;
+        //* remove module config
+        $tmp = $app->db->queryOneRecord("SELECT * FROM `sogo_module` WHERE `server_id`=" . intval($this->dataRecord['server_id']));
+        if (isset($tmp['smid']) && method_exists($app->db, 'datalogDelete'))
+            $app->db->datalogDelete('sogo_module', 'smid', $tmp['smid']);
+        parent::onAfterDelete();
+    }
+
+}
+$app->tform_action= new tform_action();
+$app->tform_action->onDelete();

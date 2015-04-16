@@ -68,6 +68,32 @@ class tform_action extends tform_actions {
         }
         parent::onShowEnd();
     }
+    
+    public function onAfterUpdate() {
+        $this->createModuleConf();
+        parent::onAfterUpdate();
+    }
+    public function onAfterInsert() {
+        $this->createModuleConf();
+        parent::onAfterInsert();
+    }
+    /** @global app $app */
+    private function createModuleConf() {
+        global $app;
+        if($this->id <= 0)
+            return;
+        $tmp = $app->db->queryOneRecord("SELECT * FROM `sogo_module` WHERE `server_id`=".intval($this->dataRecord['server_id']));
+        $insert_data = array();
+        $insert_data['server_id']=$this->dataRecord['server_id'];
+        $insert_data['sys_userid']=1;
+        $insert_data['sys_groupid']=0;
+        $insert_data['sys_perm_user']="ru";
+        $insert_data['sys_perm_group']="ru";
+        $insert_data['sys_perm_other']="";
+        if(!isset($tmp['smid']) && method_exists($app->db, 'datalogInsert'))
+            $app->db->datalogInsert('sogo_module', $insert_data, 'smid');
+        unset($tmp);
+    }
 
 }
 
