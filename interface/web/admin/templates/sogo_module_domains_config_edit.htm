@@ -8,7 +8,7 @@
                 <a href="#" class="button iconstxt icoAdd" onclick="return changeSOGoServer();" title="Set SOGo server for selected domains" style="height: 18px; padding-top: 7px;">
                     <span>Set SOGo server</span>
                 </a>
-                <a href="#" class="button iconstxt icoAdd" onclick="loadContent('admin/asdfgth.php');" title="Change SOGo configuration on all selected domains" style="height: 18px; padding-top: 7px;">
+                <a href="#" class="button iconstxt icoAdd" onclick="return changeSOGoConfig();" title="Change SOGo configuration on all selected domains" style="height: 18px; padding-top: 7px;">
                     <span>Change SOGo configuration</span>
                 </a>
                 <p><br></p>
@@ -49,6 +49,15 @@
             });
         });
     });
+    
+    function changeSOGoConfig(){
+        if(dids.join("|") === "")
+            alert('{tmpl_var name="select_domains"}');
+        else {
+            loadContent('admin/sogo_module_bulk_update_config.php?dids='+dids.join("|")); 
+        }
+        return false;
+    }
     
     function changeSOGoServer(){
         if(dids.join("|") === "")

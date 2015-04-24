@@ -35,7 +35,6 @@ class sogo_helper {
         return array();
     }
 
-
     /**
      * check if extended debug is enabled
      * @return boolean
@@ -43,7 +42,7 @@ class sogo_helper {
     public static function isExtendedDebug() {
         return defined('SOGO_EXT_DEBUG_INFO') ? SOGO_EXT_DEBUG_INFO : false;
     }
-    
+
     /**
      * get ISPConfig database connection
      * @global app $app
@@ -81,9 +80,18 @@ class sogo_helper {
      * @param integer $domain_id
      * @return boolean
      */
-    public function configDomainExists($domain_id) {
+    public function domainSOGoConfigExists($domain_id) {
         $result = $this->getDB()->queryOneRecord('SELECT `domain_id` FROM `sogo_domains` WHERE `domain_id`=' . intval($domain_id));
         return (boolean) ($result['domain_id'] == $domain_id);
+    }
+
+    /**
+     * alias of domainSOGoConfigExists
+     * @see sogo_helper::domainSOGoConfigExists($domain_id)
+     * @deprecated since version pre.u10
+     */
+    public function configDomainExists($domain_id) {
+        return $this->domainSOGoConfigExists($domain_id);
     }
 
     /**
@@ -142,7 +150,7 @@ class sogo_helper {
     }
 
     /**
-     * gets the domain config fileds from the database<br>
+     * gets the domain config fields from the database<br>
      * <pre><code>
      * array(
      *     COLUMN-NAME => array(
@@ -157,7 +165,11 @@ class sogo_helper {
         $domains_columns = $this->getDB()->queryAllRecords("SHOW COLUMNS FROM `sogo_domains`");
         $ret = array();
         foreach ($domains_columns as $value) {
-            if ($value['Field'] == "domain_id" || $value['Field'] == "domain_name" || $value['Field'] == "server_id" || $value['Field'] == "server_name" || $value['Field'] == "sogo_id" || $value['Field'] == "sys_userid" || $value['Field'] == "sys_groupid" || $value['Field'] == "sys_perm_user" || $value['Field'] == "sys_perm_group" || $value['Field'] == "sys_perm_other") {
+            if ($value['Field'] == "domain_id" || $value['Field'] == "domain_name" ||
+                    $value['Field'] == "server_id" || $value['Field'] == "server_name" ||
+                    $value['Field'] == "sogo_id" || $value['Field'] == "sys_userid" ||
+                    $value['Field'] == "sys_groupid" || $value['Field'] == "sys_perm_user" ||
+                    $value['Field'] == "sys_perm_group" || $value['Field'] == "sys_perm_other") {
                 continue;
             }
             $ret[$value['Field']] = array('name' => $value['Field'], 'default' => $value['Default']);

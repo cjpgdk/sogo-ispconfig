@@ -54,28 +54,28 @@ $wb["SOGoDraftsFolderName_txt"] = 'Drafts Folder Name';
 $wb["SOGoDraftsFolderName_ttip_txt"] = 'Parameter used to set the IMAP folder name used to store drafts messages.'
         . '<br />Defaults to \'Drafts\' when unset.'
         . '<br />Use a \'.\' as a hierarchy separator if referring to an IMAP subfolder.'
-        . '<br />For example :INBOX.Drafts';
+        . '<br />For example: INBOX.Drafts';
 $wb["SOGoSentFolderName_txt"] = 'Sent Folder Name';
 $wb["SOGoSentFolderName_ttip_txt"] = 'Parameter used to set the IMAP folder name used to store sent messages.'
         . '<br />Defaults to \'Sent\' when unset.'
         . '<br />Use a \'.\' as a hierarchy separator if referring to an IMAP subfolder.'
-        . '<br />For example :INBOX.Sent';
+        . '<br />For example: INBOX.Sent';
 $wb["SOGoTrashFolderName_txt"] = 'Trash Folder Name';
 $wb["SOGoTrashFolderName_ttip_txt"] = 'Parameter used to set the IMAP folder name used to store deleted messages.'
         . '<br />Defaults to \'Trash\' when unset.'
         . '<br />Use a \'.\' as a hierarchy separator if referring to an IMAP subfolder.'
-        . '<br />For example :INBOX.Trash';
+        . '<br />For example: INBOX.Trash';
 $wb["SOGoIMAPServer_txt"] = 'IMAP Server';
 $wb["SOGoIMAPServer_ttip_txt"] = 'Parameter used to set the DNS name or IP address of the IMAP server used by SOGo.'
-        . '<br />You can als ouse SSL or TLS by providing a value using an URL, such as:'
+        . '<br />You can also use SSL or TLS by providing a value using an URL, such as:'
         . '<br />imaps://localhost:993'
         . '<br />imaps://localhost:143/?tls=YES';
 $wb["SOGoSMTPServer_txt"] = 'SMTP Server';
 $wb["SOGoSMTPServer_ttip_txt"] = 'The DNS name or IP address of the SMTP server used when SOGoMailingMechanism is set to smtp.';
 $wb["SOGoMailingMechanism_txt"] = 'Mailing Mechanism';
 $wb["SOGoMailingMechanism_ttip_txt"] = 'Parameter used to set how SOGo sends mail messages'
-        . '<br />sendmail – to use the sendmail binary'
-        . '<br />smtp – to use the SMTP protocol';
+        . '<br />sendmail | to use the sendmail binary'
+        . '<br />smtp | to use the SMTP protocol';
 $wb["SOGoMailSpoolPath_txt"] = 'Mail Spool Path';
 $wb["SOGoMailSpoolPath_ttip_txt"] = 'Parameter used to set the path where temporary email drafts are written. If you change this value, you must also modify the daily cronjob sogo-tmpwatch.';
 $wb["SOGoSearchMinimumWordLength_txt"] = 'Search Minimum Word Length';
@@ -99,29 +99,29 @@ $wb["SOGoTimeZone_ttip_txt"] = 'Parameter used to set a default time zone for us
         . '<br />Asia/Tokyo or Africa/Lubumbashi.';
 $wb["SOGoACLsSendEMailNotifications_txt"] = 'ACLs Send EMail Notifications';
 $wb["SOGoACLsSendEMailNotifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email notifications are sent to the involved users of a calendar or address book\'s ACLs.'
-        . '<br />YES – to send notifications'
-        . '<br />NO – to not send notifications'
+        . '<br />YES | to send notifications'
+        . '<br />NO | to not send notifications'
         . '<br />Default is NO';
 $wb["SOGoAppointmentSendEMailNotifications_txt"] = 'Appointment Send EMail Notifications';
 $wb["SOGoAppointmentSendEMailNotifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email notifications to meeting participants.'
-        . '<br />YES – to send notifications'
-        . '<br />NO – to not send notifications'
+        . '<br />YES | to send notifications'
+        . '<br />NO | to not send notifications'
         . '<br />Default is NO';
 $wb["SOGoFoldersSendEMailNotifications_txt"] = 'Folders Send EMail Notifications';
 $wb["SOGoFoldersSendEMailNotifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email notifications are triggered on the creation of a calendar or an address book.'
-        . '<br />YES – to send notifications'
-        . '<br />NO – to not send notifications'
+        . '<br />YES | to send notifications'
+        . '<br />NO | to not send notifications'
         . '<br />Default is NO';
 $wb["SOGoNotifyOnPersonalModifications_txt"] = 'Notify On Personal Modifications';
 $wb["SOGoNotifyOnPersonalModifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email receipts when someone changes his/her own calendar. Possible values are :'
-        . '<br />YES – to send notifications'
-        . '<br />NO – to not send notifications'
+        . '<br />YES | to send notifications'
+        . '<br />NO | to not send notifications'
         . '<br />Default is NO.'
         . '<br />User can overwrite this from the calendar properties window.';
 $wb["SOGoNotifyOnExternalModifications_txt"] = 'Notify On External Modifications';
 $wb["SOGoNotifyOnExternalModifications_ttip_txt"] = 'Parameter used to set whether SOGo sends or not email receipts when a modifcation is being done to his/her own calendar by someone else. Possible values are :'
-        . '<br />YES – to send notifications'
-        . '<br />NO – to not send notifications'
+        . '<br />YES | to send notifications'
+        . '<br />NO | to not send notifications'
         . '<br />Default is NO.'
         . '<br />User can overwrite this from the calendar properties window.';
 $wb["SOGoForceExternalLoginWithEmail_txt"] = 'Force Login With Email';
@@ -133,39 +133,18 @@ $wb["SOGoMailAuxiliaryUserAccountsEnabled_txt"] = 'Auxiliary User Accounts Enabl
 $wb["SOGoMailAuxiliaryUserAccountsEnabled_ttip_txt"] = 'Parameter used to activate the auxiliary IMAP accounts in SOGo. When set to YES, users can add other IMAP accounts that will be visible from the SOGo Webmail interface. Defaults is NO'
         . '<br><br>'
         . 'My advice is to keep this set to no by default and ONLY allow highly trusted user domains to use this'
-        . 'reason being that all the extra mail account added will use your smtp server to send out emails and make it easy to do a lot of spamming';
+        . ' reason being that all the extra mail accounts added will use your smtp server to send out emails and make it easy to do a lot of spamming';
 $wb["SOGoMailCustomFromEnabled_txt"] = 'Mail Custom From Enabled';
 $wb["SOGoMailCustomFromEnabled_ttip_txt"] = 'Parameter used to allow or not users to specify custom \'From\' addresses from SOGo\'s preferences panel. Defaults is NO';
 $wb["SOGoCalendarDefaultRoles_txt"] = 'Calendar Default Roles';
 $wb["SOGoCalendarDefaultRoles_ttip_txt"] = 'Parameter used to defne the default roles when giving permissions to a user to access a'
-        . ' calendar. Defaults roles are ignored for public accesses. Must be an array of up to fve strings.'
-        . ' Each string defning a role for an event category must begin with one of those values:'
-        . '<br />Public'
-        . '<br />Confdential'
-        . '<br />Private'
-        . '<br />And each string must end with one of those values:'
-        . '<br />Viewer'
-        . '<br />DAndTViewer'
-        . '<br />Modifer'
-        . '<br />Responder'
-        . '<br />The array can also contain one or many of the following strings:'
-        . '<br />ObjectCreator'
-        . '<br />ObjectEraser'
-        . '<br />Example:'
-        . '<br />SOGoCalendarDefaultRoles = (\'ObjectCreator\', \'PublicViewer\');'
+        . ' calendar. Defaults roles are ignored for public accesses. Must be an array of up to five strings.'
         . '<br />Default is PublicViewer and ConfidentialDAndTViewer.';
 $wb["SOGoContactsDefaultRoles_txt"] = 'Contacts Default Roles';
 $wb["SOGoContactsDefaultRoles_ttip_txt"] = 'Parameter used to defne the default roles when'
         . ' giving permissions to a user to access an'
         . ' address book. Defaults roles are ignored for'
         . ' public accesses.'
-        . '<br />Must be an array of one or many of the following strings:'
-        . '<br />ObjectViewer'
-        . '<br />ObjectEditor'
-        . '<br />ObjectCreator'
-        . '<br />ObjectEraser'
-        . '<br />Example:'
-        . '<br />SOGoContactsDefaultRoles = (\'ObjectEditor\');'
         . '<br />Defaults is ObjectEditor';
 $wb["SOGoForwardEnabled_txt"] = 'Forward Enabled';
 $wb["SOGoForwardEnabled_ttip_txt"] = 'Parameter used to activate the edition from the preferences window of a forwarding email address. Requires Sieve script support on the IMAP host.';
@@ -223,8 +202,8 @@ $wb["SOGoAuthenticationMethod_txt"] = 'Authentication Method';
 $wb["SOGoPasswordChangeEnabled_txt"] = 'Password Change Enabled';
 $wb["SOGoPasswordChangeEnabled_ttip_txt"] = 'Parameter used to allow or not users to change their passwords from SOGo.'
         . '<br />Possible values are :'
-        . '<br />YES – to allow them'
-        . '<br />NO – to prevent them from doing so'
+        . '<br />YES | to allow them'
+        . '<br />NO | to prevent them from doing so'
         . '<br />Default is NO'
         . '<br />For this feature to work properly'
         . ' you must sync the passwords in sogo users table with ispconfig'
@@ -294,7 +273,7 @@ $wb["SOGoMaximumSyncInterval_txt"] = 'SOGoMaximumSyncInterval';
 $wb["SOGoInternalSyncInterval_txt"] = 'SOGoInternalSyncInterval';
 $wb["sogo_debug_settings_txt"] = 'A few debug settings';
 $wb["SOGoSMTPAuthenticationType_txt"] = 'SMTP Authentication Type';
-$wb["SOGoSMTPAuthenticationType_ttip_txt"] = 'Activate SMTP authentication and specifies which type is in use. Current, only PLAIN is sup-ported and other values will be ignored.<br>Set to NO to disable';
+$wb["SOGoSMTPAuthenticationType_ttip_txt"] = 'Activate SMTP authentication and specifies which type is in use. Current, only PLAIN is supported and other values will be ignored.<br>Set to NO to disable';
 
 
 

@@ -41,7 +41,7 @@ class UpdateClass extends PHPUpdateBaseClass {
             foreach ($sm as $row)
                 $db->query("DELETE FROM `sogo_module` WHERE `smid`={$row['smid']}");
             foreach ($servers as $value) {
-                $sql = "INSERT INTO `dbispconfig`.`sogo_module` "
+                $sql = "INSERT INTO `sogo_module` "
                         . "(`smid`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, "
                         . "`sys_perm_other`, `server_id`, `all_domains`, `allow_same_instance`, "
                         . "`config_rebuild_on_mail_user_insert`) VALUES "

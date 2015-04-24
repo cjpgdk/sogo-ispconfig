@@ -1,0 +1,255 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+<div class="panel panel_sogo_domains">
+    <div class="pnl_toolsarea">
+        <fieldset class="inlineLabels"><legend>{tmpl_var name="list_head_txt"}</legend>
+            <div class="ctrlHolder">
+                <label for="SOGoDraftsFolderName">{tmpl_var name='SOGoDraftsFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoDraftsFolderName_ttip_txt'}"></span></label>
+                <input name="SOGoDraftsFolderName" id="SOGoDraftsFolderName" value="{tmpl_var name='SOGoDraftsFolderName'}" size="100" maxlength="" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_courier_title_txt'}">{tmpl_var name='SOGoDraftsFolderName_courier_txt'}</a>&nbsp;|&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoDraftsFolderName_dovecot_title_txt'}">{tmpl_var name='SOGoDraftsFolderName_dovecot_txt'}</a>
+                {tmpl_if name="SOGoDraftsFolderNameDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSentFolderName">{tmpl_var name='SOGoSentFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoSentFolderName_ttip_txt'}"></span></label>
+                <input name="SOGoSentFolderName" id="SOGoSentFolderName" value="{tmpl_var name='SOGoSentFolderName'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoSentFolderName_courier_title_txt'}">{tmpl_var name='SOGoSentFolderName_courier_txt'}</a>&nbsp;|&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoSentFolderName_dovecot_title_txt'}">{tmpl_var name='SOGoSentFolderName_dovecot_txt'}</a>
+                {tmpl_if name="SOGoSentFolderNameDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoTrashFolderName">{tmpl_var name='SOGoTrashFolderName_txt'} <span class="ttip" title="{tmpl_var name='SOGoTrashFolderName_ttip_txt'}"></span></label>
+                <input name="SOGoTrashFolderName" id="SOGoTrashFolderName" value="{tmpl_var name='SOGoTrashFolderName'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoTrashFolderName_courier_title_txt'}">{tmpl_var name='SOGoTrashFolderName_courier_txt'}</a>&nbsp;|&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder" title="{tmpl_var name='SOGoTrashFolderName_dovecot_title_txt'}">{tmpl_var name='SOGoTrashFolderName_dovecot_txt'}</a>
+                {tmpl_if name="SOGoTrashFolderNameDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSubscriptionFolderFormat">{tmpl_var name='SOGoSubscriptionFolderFormat_txt'} <span class="ttip" title="{tmpl_var name='SOGoSubscriptionFolderFormat_ttip_txt'}"></span></label>
+                <input name="SOGoSubscriptionFolderFormat" id="SOGoSubscriptionFolderFormat" value="{tmpl_var name='SOGoSubscriptionFolderFormat'}" size="100" type="text" class="textInput" />
+                {tmpl_if name="SOGoSubscriptionFolderFormatDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-styleSOGoSMTPServer: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPServer">{tmpl_var name='SOGoIMAPServer_txt'} <span class="ttip" title="{tmpl_var name='SOGoIMAPServer_ttip_txt'}"></span></label>
+                <input name="SOGoIMAPServer" id="SOGoIMAPServer" value="{tmpl_var name='SOGoIMAPServer'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
+                {tmpl_if name="SOGoIMAPServerDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSMTPServer">{tmpl_var name='SOGoSMTPServer_txt'} <span class="ttip" title="{tmpl_var name='SOGoSMTPServer_ttip_txt'}"></span></label>
+                <input name="SOGoSMTPServer" id="SOGoSMTPServer" value="{tmpl_var name='SOGoSMTPServer'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
+                {tmpl_if name="SOGoSMTPServerDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveScriptsEnabled">{tmpl_var name='SOGoSieveScriptsEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoSieveScriptsEnabled_ttip_txt'}"></span></label>
+                <select name="SOGoSieveScriptsEnabled" id="SOGoSieveScriptsEnabled" class="selectInput">
+                    {tmpl_var name='SOGoSieveScriptsEnabled'}
+                </select>
+                {tmpl_if name="SOGoSieveScriptsEnabledDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveServer">{tmpl_var name='SOGoSieveServer_txt'} <span class="ttip" title="{tmpl_var name='SOGoSieveServer_ttip_txt'}"></span></label>
+                <input name="SOGoSieveServer" id="SOGoSieveServer" value="{tmpl_var name='SOGoSieveServer'}" size="100" type="text" class="textInput" />&nbsp;
+                <a href="javascript:void(0);" class="addPlaceholder">{SERVERNAME}</a>
+                {tmpl_if name="SOGoSieveServerDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoVacationEnabled">{tmpl_var name='SOGoVacationEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoVacationEnabled_ttip_txt'}"></span></label>
+                <select name="SOGoVacationEnabled" id="SOGoVacationEnabled" class="selectInput">
+                    {tmpl_var name='SOGoVacationEnabled'}
+                </select>
+                {tmpl_if name="SOGoVacationEnabledDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSieveFolderEncoding">{tmpl_var name='SOGoSieveFolderEncoding_txt'} <span class="ttip" title="{tmpl_var name='SOGoSieveFolderEncoding_ttip_txt'}"></span></label>
+                <select name="SOGoSieveFolderEncoding" id="SOGoSieveFolderEncoding" class="selectInput">
+                    {tmpl_var name='SOGoSieveFolderEncoding'}
+                </select>
+                {tmpl_if name="SOGoSieveFolderEncodingDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoForwardEnabled">{tmpl_var name='SOGoForwardEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoForwardEnabled_ttip_txt'}"></span></label>
+                <select name="SOGoForwardEnabled" id="SOGoForwardEnabled" class="selectInput">
+                    {tmpl_var name='SOGoForwardEnabled'}
+                </select>
+                {tmpl_if name="SOGoForwardEnabledDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailingMechanism">{tmpl_var name='SOGoMailingMechanism_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailingMechanism_ttip_txt'}"></span></label>
+                <select name="SOGoMailingMechanism" id="SOGoMailingMechanism" class="selectInput">
+                    {tmpl_var name='SOGoMailingMechanism'}
+                </select>
+                {tmpl_if name="SOGoMailingMechanismDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailSpoolPath">{tmpl_var name='SOGoMailSpoolPath_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailSpoolPath_ttip_txt'}"></span></label>
+                <input name="SOGoMailSpoolPath" id="SOGoMailSpoolPath" value="{tmpl_var name='SOGoMailSpoolPath'}" size="100" type="text" class="textInput" />
+                {tmpl_if name="SOGoMailSpoolPathDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSearchMinimumWordLength">{tmpl_var name='SOGoSearchMinimumWordLength_txt'} <span class="ttip" title="{tmpl_var name='SOGoSearchMinimumWordLength_ttip_txt'}"></span></label>
+                <input name="SOGoSearchMinimumWordLength" id="SOGoSearchMinimumWordLength" value="{tmpl_var name='SOGoSearchMinimumWordLength'}" size="100" type="text" class="textInput" />
+                {tmpl_if name="SOGoSearchMinimumWordLengthDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoTimeZone">{tmpl_var name='SOGoTimeZone_txt'} <span class="ttip" title="{tmpl_var name='SOGoTimeZone_ttip_txt'}"></span></label>
+                <input name="SOGoTimeZone" id="SOGoTimeZone" value="{tmpl_var name='SOGoTimeZone'}" size="100" type="text" class="textInput" />
+                {tmpl_if name="SOGoTimeZoneDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoACLsSendEMailNotifications">{tmpl_var name='SOGoACLsSendEMailNotifications_txt'}<span class="ttip" title="{tmpl_var name='SOGoACLsSendEMailNotifications_ttip_txt'}"></span></label>
+                <select name="SOGoACLsSendEMailNotifications" id="SOGoACLsSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoACLsSendEMailNotifications'}
+                </select>
+                {tmpl_if name="SOGoACLsSendEMailNotificationsDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoAppointmentSendEMailNotifications">{tmpl_var name='SOGoAppointmentSendEMailNotifications_txt'} <span class="ttip" title="{tmpl_var name='SOGoAppointmentSendEMailNotifications_ttip_txt'}"></span></label>
+                <select name="SOGoAppointmentSendEMailNotifications" id="SOGoAppointmentSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoAppointmentSendEMailNotifications'}
+                </select>
+                {tmpl_if name="SOGoAppointmentSendEMailNotificationsDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoFoldersSendEMailNotifications">{tmpl_var name='SOGoFoldersSendEMailNotifications_txt'} <span class="ttip" title="{tmpl_var name='SOGoFoldersSendEMailNotifications_ttip_txt'}"></span></label>
+                <select name="SOGoFoldersSendEMailNotifications" id="SOGoFoldersSendEMailNotifications" class="selectInput">
+                    {tmpl_var name='SOGoFoldersSendEMailNotifications'}
+                </select>
+                {tmpl_if name="SOGoFoldersSendEMailNotificationsDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoNotifyOnPersonalModifications">{tmpl_var name='SOGoNotifyOnPersonalModifications_txt'} <span class="ttip" title="{tmpl_var name='SOGoNotifyOnPersonalModifications_ttip_txt'}"></span></label>
+                <select name="SOGoNotifyOnPersonalModifications" id="SOGoNotifyOnPersonalModifications" class="selectInput">
+                    {tmpl_var name='SOGoNotifyOnPersonalModifications'}
+                </select>
+                {tmpl_if name="SOGoNotifyOnPersonalModificationsDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoNotifyOnExternalModifications">{tmpl_var name='SOGoNotifyOnExternalModifications_txt'} <span class="ttip" title="{tmpl_var name='SOGoNotifyOnExternalModifications_ttip_txt'}"></span></label>
+                <select name="SOGoNotifyOnExternalModifications" id="SOGoNotifyOnExternalModifications" class="selectInput">
+                    {tmpl_var name='SOGoNotifyOnExternalModifications'}
+                </select>
+                {tmpl_if name="SOGoNotifyOnExternalModificationsDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoForceExternalLoginWithEmail">{tmpl_var name='SOGoForceExternalLoginWithEmail_txt'} <span class="ttip" title="{tmpl_var name='SOGoForceExternalLoginWithEmail_ttip_txt'}"></span></label>
+                <select name="SOGoForceExternalLoginWithEmail" id="SOGoForceExternalLoginWithEmail" class="selectInput">
+                    {tmpl_var name='SOGoForceExternalLoginWithEmail'}
+                </select>
+                {tmpl_if name="SOGoForceExternalLoginWithEmailDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailAuxiliaryUserAccountsEnabled">{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled_ttip_txt'}"></span></label>
+                <select name="SOGoMailAuxiliaryUserAccountsEnabled" id="SOGoMailAuxiliaryUserAccountsEnabled" class="selectInput">
+                    {tmpl_var name='SOGoMailAuxiliaryUserAccountsEnabled'}
+                </select>
+                {tmpl_if name="SOGoMailAuxiliaryUserAccountsEnabledDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoMailCustomFromEnabled">{tmpl_var name='SOGoMailCustomFromEnabled_txt'} <span class="ttip" title="{tmpl_var name='SOGoMailCustomFromEnabled_ttip_txt'}"></span></label>
+                <select name="SOGoMailCustomFromEnabled" id="SOGoMailCustomFromEnabled" class="selectInput">
+                    {tmpl_var name='SOGoMailCustomFromEnabled'}
+                </select>
+                {tmpl_if name="SOGoMailCustomFromEnabledDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoCalendarDefaultRoles_txt'} <span class="ttip" title="{tmpl_var name='SOGoCalendarDefaultRoles_ttip_txt'}"></span></p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoCalendarDefaultRoles'}
+                </div>
+                {tmpl_if name="SOGoCalendarDefaultRolesDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <p class="label">{tmpl_var name='SOGoContactsDefaultRoles_txt'} <span class="ttip" title="{tmpl_var name='SOGoContactsDefaultRoles_ttip_txt'}"></span></p>
+                <div class="multiField">
+                    {tmpl_var name='SOGoContactsDefaultRoles'}
+                </div>
+                {tmpl_if name="SOGoContactsDefaultRolesDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 12px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPAclStyle">{tmpl_var name='SOGoIMAPAclStyle_txt'} <span class="ttip" title="{tmpl_var name='SOGoIMAPAclStyle_ttip_txt'}"></span></label>
+                <select name="SOGoIMAPAclStyle" id="SOGoIMAPAclStyle" class="selectInput">
+                    {tmpl_var name='SOGoIMAPAclStyle'}
+                </select>
+                {tmpl_if name="SOGoIMAPAclStyleDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoIMAPAclConformsToIMAPExt">{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_txt'} <span class="ttip" title="{tmpl_var name='SOGoIMAPAclConformsToIMAPExt_ttip_txt'}"></span></label>
+                <select name="SOGoIMAPAclConformsToIMAPExt" id="SOGoIMAPAclConformsToIMAPExt" class="selectInput">
+                    {tmpl_var name='SOGoIMAPAclConformsToIMAPExt'}
+                </select>
+                {tmpl_if name="SOGoIMAPAclConformsToIMAPExtDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+            <div class="ctrlHolder">
+                <label for="SOGoSMTPAuthenticationType">{tmpl_var name='SOGoSMTPAuthenticationType_txt'} <span class="ttip" title="{tmpl_var name='SOGoSMTPAuthenticationType_ttip_txt'}"></span></label>
+                <select name="SOGoSMTPAuthenticationType" id="SOGoSMTPAuthenticationType" class="selectInput">
+                    {tmpl_var name='SOGoSMTPAuthenticationType'}
+                </select>
+                {tmpl_if name="SOGoSMTPAuthenticationTypeDBValue" op="==" value="NOCHANGE"}
+                <p style="margin-top: 25px; font-style: italic; color: red;">{tmpl_var name='config_value_not_the_same'}</p>
+                {/tmpl_if}
+            </div>
+        </fieldset>
+        <input name="dochange" id="dochange" value="MUHH, Cow power [en.wikipedia.org/wiki/Cow_and_Chicken]" type="hidden"/>
+        <input name="dids" id="dids" value="{tmpl_var name='dids'}" type="hidden"/>
+        <div class="buttonHolder buttons">
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_module_bulk_update_config.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_module_settings_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
+        </div>
+    </div>
+</div>

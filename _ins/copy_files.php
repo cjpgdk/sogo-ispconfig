@@ -16,12 +16,14 @@ $files_copy = array(
         'web/admin/sogo_module_settings.php',
         'web/admin/sogo_module_settings_list.php',
         'web/admin/sogo_module_bulk_update_server_id.php',
+        'web/admin/sogo_module_bulk_update_config.php',
         'web/admin/sogo_plugins_del.php',
         'web/admin/sogo_plugins_edit.php',
         'web/admin/sogo_plugins_list.php',
         //* form
         'web/admin/form/sogo_config.tform.php',
         'web/admin/form/sogo_domains.tform.php',
+        'web/admin/form/sogo_domains_bulk.tform.php',
         'web/admin/form/sogo_module.tform.php',
         'web/admin/form/sogo_plugins.tform.php',
         //* lng
@@ -32,6 +34,7 @@ $files_copy = array(
         'web/admin/lib/lang/en_sogo_module.lng',
         'web/admin/lib/lang/en_sogo_module_list.lng',
         'web/admin/lib/lang/en_sogo_module_bulk_update_server_id.lng',
+        'web/admin/lib/lang/en_sogo_module_bulk_update_config.lng',
         'web/admin/lib/lang/en_sogo_plugins.lng',
         'web/admin/lib/lang/en_sogo_plugins_list.lng',
         //* menu
@@ -47,6 +50,7 @@ $files_copy = array(
         'web/admin/templates/sogo_config_edit.htm',
         'web/admin/templates/sogo_config_user_edit.htm',
         'web/admin/templates/sogo_conifg_list.htm',
+        'web/admin/templates/sogo_domains_bulk_edit.htm',
         'web/admin/templates/sogo_domains_custom_edit.htm',
         'web/admin/templates/sogo_domains_domain_edit.htm',
         'web/admin/templates/sogo_domains_list.htm',

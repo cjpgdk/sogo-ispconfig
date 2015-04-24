@@ -45,7 +45,7 @@ $app->uses('sogo_helper');
 
 if (sogo_helper::isExtendedDebug()) {
     $app->log("_GET[dids]: {$_GET['dids']}", LOGLEVEL_DEBUG);
-    $app->log("prin_r({$_domainIds}): " . print_r($_domainIds, true), LOGLEVEL_DEBUG);
+    $app->log("prin_r(\$_domainIds): " . print_r($_domainIds, true), LOGLEVEL_DEBUG);
 }
 
 //* check if post for server change
@@ -104,7 +104,7 @@ if (isset($_POST['dochange']) && isset($_POST['server_id'])) {
             } else {
                 //* update domain
                 if ($sogo_domain['server_id'] != $new_server['server_id'] || $new_server['server_name'] != $new_server['server_name']) {
-                    $app->log("Update requred on domain: {$sogo_domain['domain_name']}", LOGLEVEL_DEBUG);
+                    $app->log("Update required on domain: {$sogo_domain['domain_name']}", LOGLEVEL_DEBUG);
                     $index = $app->functions->intval($sogo_domain["sogo_id"]);
                     if (method_exists($app->db, 'datalogUpdate')) {
                         //* update the record and add it to jobqueue
@@ -160,7 +160,8 @@ unset($wb);
 
 $domainIds = '';
 foreach ($_domainIds as $value)
-    $domainIds .= $value . '|';
+    if (((string) intval($value) == $value )&& $app->sogo_helper->domainSOGoConfigExists($value))
+        $domainIds .= intval($value) . '|';
 $app->tpl->setVar("dids", trim($domainIds, '|'));
 
 $result = $app->db->queryAllRecords("SELECT `server_id`,`server_name` FROM `sogo_config` ORDER BY server_name");
