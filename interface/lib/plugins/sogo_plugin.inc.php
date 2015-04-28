@@ -77,7 +77,17 @@ class sogo_plugin {
             }
         }
         //* get vars for mail domain events
-        if (strpos($event_name, 'mail_domain') !== false) {}
+        if (strpos($event_name, 'mail_domain') !== false) {
+            $domain = (isset($page_form->dataRecord['dataRecord']['domain']) ? $page_form->dataRecord['dataRecord']['domain'] :
+                            (isset($page_form->dataRecord['oldDataRecord']['domain']) ? $page_form->dataRecord['oldDataRecord']['domain'] : ''));
+            //* check if SOGo i handled by this server, or if we create a new event for other server
+            $sql = "SELECT * FROM sogo_domains WHERE domain_name = '{$app->sogo_helper->getDB()->quote($domain)}'";
+            $data = $app->sogo_helper->getDB()->queryOneRecord($sql);
+            if ($data['server_id'] == $conf['server_id']) {
+                $app->log('Data server is the same as this server.!', LOGLEVEL_DEBUG);
+                return;
+            }
+        }
 
         //* handle events on remote SOGo server
         switch (strtolower($event_name)) {
@@ -85,7 +95,7 @@ class sogo_plugin {
             case "mail:mail_domain:on_after_delete":
             case "mail:mail_domain:on_after_insert":
                 $this->create_mail_domain_event(array(
-                    'event'=>$event_name,
+                    'event' => $event_name,
                     'dataRecord' => $page_form->dataRecord['dataRecord'],
                     'oldDataRecord' => $page_form->dataRecord['oldDataRecord'],
                         ), $data['server_id']);
