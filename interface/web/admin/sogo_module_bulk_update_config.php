@@ -61,8 +61,8 @@ if (getValue('dochange', false)) {
     unset($_POST['dochange'],$_POST['dids']);
     foreach ($_POST as $key => $value) {
         if (is_array($value)){
-            $_POST[$key] = implode(',', $value);
             $value = implode(',', $value);
+            $_POST[$key] = $value;
         }
         if ($value == 'NOCHANGE' || strpos($value, 'NOCHANGE') !== false)
             unset($_POST[$key]);
@@ -100,7 +100,11 @@ if (getValue('dochange', false)) {
                         $app->log("{$sogo_domain['domain_name']} were not updated, error while saving data", LOGLEVEL_WARN);
                 }
             } else {
-                //* new config so no update
+                /*
+                 * new config so no update
+                 * server is not set from bulk config update
+                 * and therefore we do not create new configurations here
+                 */
             }
         } else
             $app->log("mail domain with id {$value}, do not exists in database", LOGLEVEL_WARN);

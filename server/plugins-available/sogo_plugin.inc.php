@@ -83,10 +83,111 @@ class sogo_plugin {
 
             //* Register for remote actions
             $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
+            $app->plugins->registerAction('sogo_mail_domain_uid', $this->plugin_name, 'action_mail_domain_uid');
         }
     }
 
     //* #START# remote actions
+    
+    //* remote action mail domain update/insert/delete
+    public function action_mail_domain_uid($action_name, $data) {
+        global $app;
+        if (!is_array($data)) {
+            try {
+                $data = unserialize($data);
+            } catch (Exception $ex) {
+                $app->log("action_mail_domain_uid('', DATA_ARRAY): DATA_ARRAY is not a valid serialized string", LOGLEVEL_DEBUG);
+                return;
+            }
+        }
+        if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
+            $app->log("action_mail_domain_uid('', DATA_ARRAY): DATA_ARRAY is not a valid", LOGLEVEL_DEBUG);
+            return;
+        }
+        if ($data['event'] == "mail:mail_domain:on_after_insert") {
+            /* insert
+             * ** $data['dataRecord']
+             * [server_id] => 1
+             * [client_group_id] => 2
+             * [domain] => jhkll.gh
+             * [policy] => 0
+             * [active] => y
+             * [id] => 
+             * [type] => local
+             * [next_tab] => 
+             * [phpsessid] => .....
+             */
+            $this->insert_sogo_mail_domain('mail_domain_insert', array(
+                'new' => $data['dataRecord'],
+                'old' => $data['oldDataRecord'],
+            ));
+        } else if ($data['event'] == "mail:mail_domain:on_after_update") {
+            if (!isset($data['dataRecord']['domain_id']) && isset($data['id']))
+                $data['dataRecord']['domain_id'] = $data['id'];
+            else if (!isset($data['dataRecord']['domain_id']) && isset($data['dataRecord']['id']))
+                $data['dataRecord']['domain_id'] = $data['dataRecord']['id'];
+            else if (!isset($data['dataRecord']['domain_id']) && isset($data['oldDataRecord']['domain_id']))
+                $data['dataRecord']['domain_id'] = $data['oldDataRecord']['domain_id'];
+            /* update
+             * ** $data['dataRecord']
+             * 
+             * [domain_id] => 10
+             * [server_id] => 1
+             * [client_group_id] => 0
+             * [domain] => sdfsgh.dk
+             * [policy] => 0
+             * [active] => y
+             * [id] => 10
+             * [type] => local
+             * [next_tab] =>
+             * [phpsessid] =>  ...
+             * 
+             * ** $data['oldDataRecord']
+             * 
+             * [domain_id] => 10
+             * [server_id] => 1
+             * [domain] => sdfsgh.dk
+             * [active] => y
+             * ** NO NEED, users can access this database
+             * ** [sys_userid] => 1
+             * ** [sys_groupid] => 2
+             * ** [sys_perm_user] => riud
+             * ** [sys_perm_group] => ru
+             * ** [sys_perm_other] =>
+             * ** /NO NEED, users can access this database
+             * [dkim] => n
+             * [dkim_selector] => default
+             * [dkim_private] =>
+             * [dkim_public] =>
+             */
+            $this->update_sogo_mail_domain('mail_domain_update', array(
+                'new' => $data['dataRecord'],
+                'old' => $data['oldDataRecord'],
+            ));
+        } else if ($data['event'] == "mail:mail_domain:on_after_delete") {
+            /* delete
+             * ** $data['oldDataRecord']
+             * 
+             * [domain_id] => 10
+             * [sys_userid] => 1
+             * [sys_groupid] => 0
+             * [sys_perm_user] => riud
+             * [sys_perm_group] => ru
+             * [sys_perm_other] => 
+             * [server_id] => 1
+             * [domain] => sdfsgh.dk
+             * [dkim] => n
+             * [dkim_selector] => default
+             * [dkim_private] => 
+             * [dkim_public] => 
+             * [active] => y
+             */
+            $this->remove_sogo_mail_domain('mail_domain_delete', array(
+                'new' => $data['dataRecord'],
+                'old' => $data['oldDataRecord'],
+            ));
+        }
+    }
 
     public function action_mail_user_sync($action_name, $domain_name) {
         $this->__syncMailUsers($domain_name);
@@ -421,7 +522,6 @@ class sogo_plugin {
             return;
 
         if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
-            $app->sogo_helper->logDebug("CALL FROM HERE");
             $this->__create_sogo_table($data['new']['domain']);
             $method = "sogo_plugin::insert_sogo_mail_domain():";
             $this->__buildSOGoConfig($method);
@@ -503,7 +603,7 @@ class sogo_plugin {
             }
             if ($change_domain) {
                 /*
-                 * if domain is changed as is see it ISPConfig raises the deleted functions and inserted functions
+                 * if domain is changed as i see it ISPConfig raises the deleted functions and inserted functions
                  * so don't think this is necessary
                  * $data['old']['domain']
                  * $data['new']['domain']
@@ -512,7 +612,7 @@ class sogo_plugin {
 
             if ($change_server) {
                 /*
-                 * if server is changed as is see it ISPConfig raises the deleted functions and inserted functions
+                 * if server is changed as i see it ISPConfig raises the deleted functions and inserted functions
                  * so don't think this is necessary
                  * $data['old']['server_id']
                  * $data['new']['server_id']
@@ -622,6 +722,9 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
             return false; //* do nothing
+
+
+
 
 
 

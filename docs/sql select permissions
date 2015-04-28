@@ -27,4 +27,9 @@ GRANT SELECT (`server_id` , `domain_id`) ON `dbispconfig`.`sogo_domains` TO 'isp
 GRANT SELECT (`server_id` , `domain_id`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
 
 
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`sys_datalog` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`sys_datalog` FROM 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT ,INSERT ,UPDATE (`status` ,`error`) ON `dbispconfig`.`sys_datalog` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+GRANT SELECT ,INSERT ,UPDATE (`status` ,`error`) ON `dbispconfig`.`sys_datalog` TO 'ispcsrv3'@'192.168.1.12';
+
 
