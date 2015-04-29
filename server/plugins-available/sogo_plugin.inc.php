@@ -88,7 +88,6 @@ class sogo_plugin {
     }
 
     //* #START# remote actions
-    
     //* remote action mail domain update/insert/delete
     public function action_mail_domain_uid($action_name, $data) {
         global $app;
@@ -101,7 +100,7 @@ class sogo_plugin {
             }
         }
         if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
-            $app->log("action_mail_domain_uid('', DATA_ARRAY): DATA_ARRAY is not a valid", LOGLEVEL_DEBUG);
+            $app->log("action_mail_domain_uid('', DATA_ARRAY): DATA_ARRAY is not valid", LOGLEVEL_DEBUG);
             return;
         }
         if ($data['event'] == "mail:mail_domain:on_after_insert") {
@@ -721,15 +720,9 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
     private function __syncMailUsers($domain_name, $imap_enabled = true) {
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
-            return false; //* do nothing
-
-
-
-
-
-
-            
-//* create domain table if it do not exists
+            return false;
+           
+        //* create domain table if it do not exists
         if (!$app->sogo_helper->sogoTableExists($domain_name)) {
             $this->__create_sogo_table($domain_name);
         }

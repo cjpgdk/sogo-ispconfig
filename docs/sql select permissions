@@ -19,17 +19,22 @@ REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_domain` FROM 'ispcsrv3'@'SERVER.EXA
 GRANT SELECT (`server_id` , `domain` , `active`) ON `dbispconfig`.`mail_domain` TO 'ispcsrv3'@'192.168.1.12';
 GRANT SELECT (`server_id` , `domain` , `active`) ON `dbispconfig`.`mail_domain` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
 
+
 //* REVOKE only if previous created
 REVOKE ALL PRIVILEGES ON `dbispconfig`.`sogo_domains` FROM 'ispcsrv3'@'192.168.1.12';
 REVOKE ALL PRIVILEGES ON `dbispconfig`.`sogo_domains` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
 
-GRANT SELECT (`server_id` , `domain_id`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'192.168.1.12';
-GRANT SELECT (`server_id` , `domain_id`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+GRANT SELECT ,UPDATE (`sys_userid` ,`sys_groupid` ,`sys_perm_user` ,`sys_perm_group` ,`sys_perm_other` ,`domain_name` ,`server_id` ,`server_name`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT ,UPDATE (`sys_userid` ,`sys_groupid` ,`sys_perm_user` ,`sys_perm_group` ,`sys_perm_other` ,`domain_name` ,`server_id` ,`server_name`) ON `dbispconfig`.`sogo_domains` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
 
 
+//* REVOKE only if previous created
 REVOKE ALL PRIVILEGES ON `dbispconfig`.`sys_datalog` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
 REVOKE ALL PRIVILEGES ON `dbispconfig`.`sys_datalog` FROM 'ispcsrv3'@'192.168.1.12';
+
 GRANT SELECT ,INSERT ,UPDATE (`status` ,`error`) ON `dbispconfig`.`sys_datalog` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
 GRANT SELECT ,INSERT ,UPDATE (`status` ,`error`) ON `dbispconfig`.`sys_datalog` TO 'ispcsrv3'@'192.168.1.12';
+
+
 
 
