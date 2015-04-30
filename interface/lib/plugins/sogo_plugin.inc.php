@@ -93,7 +93,8 @@ class sogo_plugin {
             if ($source === false || empty($source))
                 return $app->log("Missing source for alias ID#" . (isset($page_form->dataRecord['id']) ? $page_form->dataRecord['id'] : -1), LOGLEVEL_DEBUG);
             list($destination_user, $destination_domain) = explode('@', $destination);
-            $sql = "SELECT * FROM mail_domain WHERE domain = '{$app->sogo_helper->getDB()->quote($destination_domain)}'";
+            //$sql = "SELECT * FROM mail_domain WHERE domain = '{$app->sogo_helper->getDB()->quote($destination_domain)}'";
+            $sql = "SELECT * FROM sogo_domains WHERE domain_name = '{$app->sogo_helper->getDB()->quote($destination_domain)}'";
             $data = $app->sogo_helper->getDB()->queryOneRecord($sql);
         }
 

@@ -116,7 +116,7 @@ class sogo_plugin {
         } else if ($data['event'] == "mail:mail_alias:on_after_delete") {
             $this->remove_sogo_mail_user_alias('mail_forwarding_delete', array(
                 'new' => $data['dataRecord'],
-                'old' => $data['oldDataRecord'],
+                'old' => (!empty($data['oldDataRecord']) ? $data['oldDataRecord']: $data['dataRecord']),
             ));
         }
     }
@@ -911,7 +911,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
      */
     private function __buildSOGoConfig($method) {
         global $app, $conf;
-        $app->sogo_helper->logDebug("buildSOGoConfig: called by [{$method}]");
+        $app->log("buildSOGoConfig: called by [{$method}]", LOGLEVEL_DEBUG);
         //* get server config (CURRENT RUNNING server config)
         if ($sconf = $app->sogo_helper->getServerConfig()) {
             $sconf['SOGoMailListViewColumnsOrder'] = explode(',', $sconf['SOGoMailListViewColumnsOrder']);

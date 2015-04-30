@@ -204,7 +204,7 @@ class sogo_helper {
             //$server_default_sql = "SELECT sc.* FROM `server` s, `mail_domain` md, `sogo_config` sc  WHERE s.`server_id`=md.`server_id` AND md.`domain`='{$domain_name}' AND sc.`server_id`=md.`server_id`  AND sc.`server_name`=s.`server_name`";
             //* better for multi server but not sure if multi SOGo server? (@todo propper testing)
             $server_default_sql = "SELECT sc.*, 
-(SELECT `server_name` FROM `mail_domain` md, `server` s WHERE md.`domain`='cmjscripter.lan' AND md.`server_id`=s.`server_id`) as server_name_real 
+(SELECT `server_name` FROM `mail_domain` md, `server` s WHERE md.`domain`='{$domain_name}' AND md.`server_id`=s.`server_id`) as server_name_real 
 FROM `server` s, `mail_domain` md, `sogo_config` sc 
 WHERE md.`domain` = '{$domain_name}' 
 AND sc.`server_name` = s.`server_name";
@@ -243,7 +243,8 @@ AND sc.`server_name` = s.`server_name";
                     }
                 }
                 //* return server config if domain config do not exists!
-                $this->removeUselessValues($ret_srv, array('server_name'));
+                $ret_srv['server_name_real'] = $server_default['server_name_real'];
+                $this->removeUselessValues($ret_srv, array('server_name', 'server_name_real'));
                 self::$dnCache[$domain_name] = $ret_srv;
                 return self::$dnCache[$domain_name];
             }
