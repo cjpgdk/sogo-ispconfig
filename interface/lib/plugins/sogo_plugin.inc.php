@@ -86,7 +86,15 @@ class sogo_plugin {
 
         //* get vars for mail alias events
         if (strpos($event_name, 'mail_alias') !== false) {
-            
+            $destination = @$page_form->dataRecord['destination'];
+            if ($destination === false || empty($destination))
+                return $app->log("Missing destination for alias ID#" . (isset($page_form->dataRecord['id']) ? $page_form->dataRecord['id'] : -1), LOGLEVEL_DEBUG);
+            $source = @$page_form->dataRecord['source'];
+            if ($source === false || empty($source))
+                return $app->log("Missing source for alias ID#" . (isset($page_form->dataRecord['id']) ? $page_form->dataRecord['id'] : -1), LOGLEVEL_DEBUG);
+            list($destination_user, $destination_domain) = explode('@', $destination);
+            $sql = "SELECT * FROM mail_domain WHERE domain = '{$app->sogo_helper->getDB()->quote($destination_domain)}'";
+            $data = $app->sogo_helper->getDB()->queryOneRecord($sql);
         }
 
         //* check if SOGo is handled by this server, or if we create a new event for other server
@@ -109,80 +117,24 @@ class sogo_plugin {
         switch (strtolower($event_name)) {
             //* mail_domain insert / update / delete
             case "mail:mail_alias:on_after_update":
-            /*
-              [INTERFACE]: page_action Object
-              (
-              [id] => 3
-              [activeTab] =>
-              [dataRecord] => Array
-              (
-              [destination] => sadf@sadsddg.ld
-              [active] => y
-              [id] => 3
-              [type] => alias
-              [next_tab] =>
-              [phpsessid] => 8qdeqragqj8f2alrh9k0l9ih06
-              [source] => dsfgff@sadsddg.ld
-              [server_id] => 1
-              )
-             * 
-              [oldDataRecord] => Array
-              (
-              [forwarding_id] => 3
-              [sys_userid] => 1
-              [sys_groupid] => 0
-              [sys_perm_user] => riud
-              [sys_perm_group] => riud
-              [sys_perm_other] =>
-              [server_id] => 1
-              [source] => dsfg@sadsddg.ld
-              [destination] => sadf@sadsddg.ld
-              [type] => alias
-              [active] => y
-              )
-
-              )
-            */
             case "mail:mail_alias:on_after_delete":
-                /*
-                 [id] => 3
-    [activeTab] => 
-    [dataRecord] => Array
-        (
-            [forwarding_id] => 3
-            [sys_userid] => 1
-            [sys_groupid] => 0
-            [sys_perm_user] => riud
-            [sys_perm_group] => riud
-            [sys_perm_other] => 
-            [server_id] => 1
-            [source] => dsfgff@sadsddg.ld
-            [destination] => sadf@sadsddg.ld
-            [type] => alias
-            [active] => y
-        )
-
-    [oldDataRecord] => 
-                 */
             case "mail:mail_alias:on_after_insert":
-                /*
-                  [id] => 3
-                  [activeTab] =>
-                  [dataRecord] => Array
-                  (
-                  [destination] => sadf@sadsddg.ld
-                  [active] => y
-                  [id] =>
-                  [type] => alias
-                  [next_tab] =>
-                  [phpsessid] => 8qdeqragqj8f2alrh9k0l9ih06
-                  [source] => dsfg@sadsddg.ld
-                  [server_id] => 1
-                  )
-                 * 
-                  [oldDataRecord] =>
-                 */
-                $app->log(print_r($page_form, true), LOGLEVEL_DEBUG);
+                // $destination_user, $destination_domain, $destination, $source
+                if (isset($data['server_id'])) {
+                    $this->create_mail_alias_event(array(
+                        'event' => $event_name,
+                        'dataRecord' => is_array($page_form->dataRecord) ? $page_form->dataRecord : array(),
+                        'oldDataRecord' => is_array($page_form->oldDataRecord) ? $page_form->oldDataRecord : array(),
+                            ), $data['server_id']);
+                } else {
+                    foreach ($sogo_servers as $key => $value) {
+                        $this->create_mail_alias_event(array(
+                            'event' => $event_name,
+                            'dataRecord' => is_array($page_form->dataRecord) ? $page_form->dataRecord : array(), /* fail safe */
+                            'oldDataRecord' => is_array($page_form->oldDataRecord) ? $page_form->oldDataRecord : array(), /* fail safe */
+                                ), $value['server_id']);
+                    }
+                }
                 break;
             //* mail_domain insert / update / delete
             case "mail:mail_domain:on_after_update":
@@ -234,6 +186,14 @@ class sogo_plugin {
                 $app->log('Unknown event: ' . $event_name, LOGLEVEL_DEBUG);
                 break;
         }
+    }
+
+    function create_mail_alias_event($data, $server_id) {
+        global $app;
+        $app->log('Register remote action [sogo_mail_user_alias] for alias ' . $data['dataRecord']['source'] . ', on server ' . $server_id, LOGLEVEL_DEBUG);
+        $sql = "INSERT INTO sys_remoteaction (server_id, tstamp, action_type, action_param, action_state, response) " .
+                "VALUES (" . (int) $server_id . ", " . time() . ", 'sogo_mail_user_alias', '" . $app->sogo_helper->getDB()->quote(serialize($data)) . "', 'pending', '')";
+        $app->sogo_helper->getDB()->query($sql);
     }
 
     function create_mail_domain_event($data, $server_id) {

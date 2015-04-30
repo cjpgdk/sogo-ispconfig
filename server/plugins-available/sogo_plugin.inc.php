@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2014  Christian M. Jensen
+ * Copyright (C) 2015  Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Christian M. Jensen <christian@cmjscripter.net>
- * @copyright 2014 Christian M. Jensen
+ * @copyright 2015 Christian M. Jensen
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
  */
 class sogo_plugin {
     /*
-     * @todo make use of the same column name for all emails not mix it with c_uid, c_imaplogin c_uid is master and should be the only column to check
+     * @todo make use of the same column name for all emails not mix it with c_uid, c_imaplogin | c_uid is master and should be the only column to check
      */
 
     var $plugin_name = 'sogo_plugin';
@@ -47,7 +48,9 @@ class sogo_plugin {
         if (
                 !isset($conf['sogo_gnu_step_defaults']) || !isset($conf['sogo_gnu_step_defaults_sogod.plist']) ||
                 !isset($conf['sogo_su_command']) || !isset($conf['sogo_tool_binary']) || /* !isset($conf['sogo_binary']) || */
-                !isset($conf['sogo_database_name']) || !isset($conf['sogo_database_user']) || !isset($conf['sogo_database_passwd']) || !isset($conf['sogo_database_host']) || !isset($conf['sogo_database_port'])
+                !isset($conf['sogo_database_name']) || !isset($conf['sogo_database_user']) ||
+                !isset($conf['sogo_database_passwd']) || !isset($conf['sogo_database_host']) ||
+                !isset($conf['sogo_database_port'])
         ) {
             $app->log('SOGo configuration variables is missing in local config', LOGLEVEL_ERROR);
         } else {
@@ -83,39 +86,52 @@ class sogo_plugin {
 
             //* Register for remote actions
             $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
+            $app->plugins->registerAction('sogo_mail_user_alias', $this->plugin_name, 'action_mail_user_alias');
             $app->plugins->registerAction('sogo_mail_domain_uid', $this->plugin_name, 'action_mail_domain_uid');
         }
     }
 
     //* #START# remote actions
-    //* remote action mail domain update/insert/delete
-    public function action_mail_domain_uid($action_name, $data) {
-        global $app;
-        if (!is_array($data)) {
-            try {
-                $data = unserialize($data);
-            } catch (Exception $ex) {
-                $app->log("action_mail_domain_uid('', DATA_ARRAY): DATA_ARRAY is not a valid serialized string", LOGLEVEL_DEBUG);
-                return;
-            }
+
+    /**
+     * remote action mail user alias update/insert/delete
+     * @param string $action_name the action name (sogo_mail_user_alias)
+     * @param string|array $data an serialized string or array contaning email alias data 
+     * @return void
+     */
+    public function action_mail_user_alias($action_name, $data) {
+        if (!$this->_action_get_data_array($data)) {
+            return;
         }
-        if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
-            $app->log("action_mail_domain_uid('', DATA_ARRAY): DATA_ARRAY is not valid", LOGLEVEL_DEBUG);
+        if ($data['event'] == "mail:mail_alias:on_after_insert") {
+            $this->insert_sogo_mail_user_alias('mail_forwarding_insert', array(
+                'new' => $data['dataRecord'],
+                'old' => $data['oldDataRecord'],
+            ));
+        } else if ($data['event'] == "mail:mail_alias:on_after_update") {
+            $this->update_sogo_mail_user_alias('mail_forwarding_update', array(
+                'new' => $data['dataRecord'],
+                'old' => $data['oldDataRecord'],
+            ));
+        } else if ($data['event'] == "mail:mail_alias:on_after_delete") {
+            $this->remove_sogo_mail_user_alias('mail_forwarding_delete', array(
+                'new' => $data['dataRecord'],
+                'old' => $data['oldDataRecord'],
+            ));
+        }
+    }
+
+    /**
+     * remote action mail domain update/insert/delete
+     * @param string $action_name the action name (sogo_mail_domain_uid)
+     * @param string|array $data an serialized string or array contaning domain data 
+     * @return void
+     */
+    public function action_mail_domain_uid($action_name, $data) {
+        if (!$this->_action_get_data_array($data)) {
             return;
         }
         if ($data['event'] == "mail:mail_domain:on_after_insert") {
-            /* insert
-             * ** $data['dataRecord']
-             * [server_id] => 1
-             * [client_group_id] => 2
-             * [domain] => jhkll.gh
-             * [policy] => 0
-             * [active] => y
-             * [id] => 
-             * [type] => local
-             * [next_tab] => 
-             * [phpsessid] => .....
-             */
             $this->insert_sogo_mail_domain('mail_domain_insert', array(
                 'new' => $data['dataRecord'],
                 'old' => $data['oldDataRecord'],
@@ -127,60 +143,11 @@ class sogo_plugin {
                 $data['dataRecord']['domain_id'] = $data['dataRecord']['id'];
             else if (!isset($data['dataRecord']['domain_id']) && isset($data['oldDataRecord']['domain_id']))
                 $data['dataRecord']['domain_id'] = $data['oldDataRecord']['domain_id'];
-            /* update
-             * ** $data['dataRecord']
-             * 
-             * [domain_id] => 10
-             * [server_id] => 1
-             * [client_group_id] => 0
-             * [domain] => sdfsgh.dk
-             * [policy] => 0
-             * [active] => y
-             * [id] => 10
-             * [type] => local
-             * [next_tab] =>
-             * [phpsessid] =>  ...
-             * 
-             * ** $data['oldDataRecord']
-             * 
-             * [domain_id] => 10
-             * [server_id] => 1
-             * [domain] => sdfsgh.dk
-             * [active] => y
-             * ** NO NEED, users can access this database
-             * ** [sys_userid] => 1
-             * ** [sys_groupid] => 2
-             * ** [sys_perm_user] => riud
-             * ** [sys_perm_group] => ru
-             * ** [sys_perm_other] =>
-             * ** /NO NEED, users can access this database
-             * [dkim] => n
-             * [dkim_selector] => default
-             * [dkim_private] =>
-             * [dkim_public] =>
-             */
             $this->update_sogo_mail_domain('mail_domain_update', array(
                 'new' => $data['dataRecord'],
                 'old' => $data['oldDataRecord'],
             ));
         } else if ($data['event'] == "mail:mail_domain:on_after_delete") {
-            /* delete
-             * ** $data['oldDataRecord']
-             * 
-             * [domain_id] => 10
-             * [sys_userid] => 1
-             * [sys_groupid] => 0
-             * [sys_perm_user] => riud
-             * [sys_perm_group] => ru
-             * [sys_perm_other] => 
-             * [server_id] => 1
-             * [domain] => sdfsgh.dk
-             * [dkim] => n
-             * [dkim_selector] => default
-             * [dkim_private] => 
-             * [dkim_public] => 
-             * [active] => y
-             */
             $this->remove_sogo_mail_domain('mail_domain_delete', array(
                 'new' => $data['dataRecord'],
                 'old' => $data['oldDataRecord'],
@@ -188,11 +155,18 @@ class sogo_plugin {
         }
     }
 
+    /**
+     * remote acion for mail users sync
+     * @param string $action_name the action name (sogo_mail_user_sync)
+     * @param string $domain_name the domain name to sync users for
+     * @return void
+     */
     public function action_mail_user_sync($action_name, $domain_name) {
         $this->__syncMailUsers($domain_name);
     }
 
     //* #END# remote actions
+    //* ##
     //* #START# SOGO MODULE SETTINGS (TB: sogo_module)
 
     public function update_sogo_module_settings($event_name, $data) {
@@ -293,10 +267,10 @@ class sogo_plugin {
     public function remove_sogo_mail_user_alias($event_name, $data) {
         global $app;
         //* check event
-        if (!$app->sogo_helper->isEqual($event_name, 'mail_forwarding_delete'))
+        if ($event_name != 'mail_forwarding_delete')
             return;
         //* check this is an alias
-        if (!$app->sogo_helper->isEqual($data['old']['type'], 'alias'))
+        if (!isset($data['new']['type']) || ($data['new']['type'] != 'alias'))
             return;
 
         /**
@@ -305,7 +279,7 @@ class sogo_plugin {
         list($source_user, $source_domain) = explode('@', $data['old']['source']);
         list($destination_user, $destination_domain) = explode('@', $data['old']['destination']);
 
-        $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_user_alias(): {$data['old']['source']} => {$data['old']['destination']}");
+        $app->log("sogo_plugin::remove_sogo_mail_user_alias(): {$data['old']['source']} => {$data['old']['destination']}", LOGLEVEL_DEBUG);
         //* a simple sync should be ok 
         $this->__syncMailUsers($destination_domain);
         return TRUE;
@@ -320,16 +294,16 @@ class sogo_plugin {
     public function insert_sogo_mail_user_alias($event_name, $data) {
         global $app;
         //* check event
-        if (!$app->sogo_helper->isEqual($event_name, 'mail_forwarding_insert'))
+        if ($event_name != 'mail_forwarding_insert')
             return;
         //* check this is an alias
-        if (!$app->sogo_helper->isEqual($data['new']['type'], 'alias'))
+        if (!isset($data['new']['type']) || ($data['new']['type'] != 'alias'))
             return;
 
         list($source_user, $source_domain) = explode('@', $data['new']['source']);
         list($destination_user, $destination_domain) = explode('@', $data['new']['destination']);
 
-        $app->sogo_helper->logDebug("sogo_plugin::insert_sogo_mail_user_alias(): {$data['new']['source']} => {$data['new']['destination']}");
+        $app->log("sogo_plugin::insert_sogo_mail_user_alias(): {$data['new']['source']} => {$data['new']['destination']}", LOGLEVEL_DEBUG);
 
         //* don't sync on error
         if ($app->sogo_helper->check_alias_columns($destination_domain)) {
@@ -360,13 +334,14 @@ class sogo_plugin {
          */
 
         global $app;
-        if (!$app->sogo_helper->isEqual($event_name, 'mail_forwarding_update'))
+        if ($event_name != 'mail_forwarding_update')
             return;
 
         list($old_source_user, $old_source_domain) = explode('@', $data['old']['source']);
         list($new_source_user, $new_source_domain) = explode('@', $data['new']['source']);
         list($old_destination_user, $old_destination_domain) = explode('@', $data['old']['destination']);
         list($new_destination_user, $new_destination_domain) = explode('@', $data['new']['destination']);
+        //* check / create the required alias columns
         $app->sogo_helper->check_alias_columns($new_destination_domain);
         $is_synced = FALSE;
         /*
@@ -374,13 +349,13 @@ class sogo_plugin {
          * only done like this in case we need diferent actions on some of the changes
          */
         //* type changed
-        if (!$app->sogo_helper->isEqual($data['old']['type'], $data['new']['type'])) {
+        if ($data['old']['type'] != $data['new']['type']) {
             if (!$is_synced)
                 $this->__syncMailUsers($new_destination_domain);
             $is_synced = TRUE;
         }
         //* server changed
-        if (!$is_synced && !$app->sogo_helper->isEqual($data['old']['server_id'], $data['new']['server_id'])) {
+        if (!$is_synced && $data['old']['server_id'] != $data['new']['server_id']) {
             
         }
         //* alias changed
@@ -656,6 +631,29 @@ class sogo_plugin {
     //* ## Helper methods
 
     /**
+     * procces data from remote actions into an array
+     * @global app $app
+     * @param mixed $data
+     * @return boolean
+     */
+    private function _action_get_data_array(& $data) {
+        global $app;
+        if (!is_array($data)) {
+            try {
+                $data = unserialize($data);
+            } catch (Exception $ex) {
+                $app->log("action_mail_user_alias('', DATA_ARRAY): DATA_ARRAY is not a valid serialized string" . PHP_EOL . "Exception: " . $ex->getMessage() . PHP_EOL . "Trace: " . $ex->getTraceAsString(), LOGLEVEL_DEBUG);
+                return false;
+            }
+        }
+        if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
+            $app->log("action_mail_user_alias('', DATA_ARRAY): DATA_ARRAY is not valid", LOGLEVEL_DEBUG);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * create mail domain table and sync mail user for use with SOGo
      * @global app $app
      * @global array $conf
@@ -721,7 +719,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         global $app;
         if (!$this->__checkStateDropDomain($domain_name))
             return false;
-           
+
         //* create domain table if it do not exists
         if (!$app->sogo_helper->sogoTableExists($domain_name)) {
             $this->__create_sogo_table($domain_name);
