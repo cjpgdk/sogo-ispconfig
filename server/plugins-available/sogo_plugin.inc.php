@@ -116,18 +116,20 @@ class sogo_plugin {
         } else if ($data['event'] == "mail:mail_alias:on_after_delete") {
             $this->remove_sogo_mail_user_alias('mail_forwarding_delete', array(
                 'new' => $data['dataRecord'],
-                'old' => (!empty($data['oldDataRecord']) ? $data['oldDataRecord']: $data['dataRecord']),
+                'old' => (!empty($data['oldDataRecord']) ? $data['oldDataRecord'] : $data['dataRecord']),
             ));
         }
     }
 
     /**
      * remote action mail domain update/insert/delete
+     * @global array $conf
      * @param string $action_name the action name (sogo_mail_domain_uid)
      * @param string|array $data an serialized string or array contaning domain data 
      * @return void
      */
     public function action_mail_domain_uid($action_name, $data) {
+        global $conf;
         if (!$this->_action_get_data_array($data)) {
             return;
         }
@@ -148,9 +150,17 @@ class sogo_plugin {
                 'old' => $data['oldDataRecord'],
             ));
         } else if ($data['event'] == "mail:mail_domain:on_after_delete") {
+            /*
+             * remote action, 
+             * so we change the server id to this server, 
+             * otherwise we try to delete sogo domain on wrong server
+             */
+            $data['dataRecord']['server_id'] = $conf['server_id'];
+            if (!empty($data['oldDataRecord']))
+                $data['oldDataRecord']['server_id'] = $conf['server_id'];
             $this->remove_sogo_mail_domain('mail_domain_delete', array(
                 'new' => $data['dataRecord'],
-                'old' => $data['oldDataRecord'],
+                'old' => (!empty($data['oldDataRecord']) ? $data['oldDataRecord'] : $data['dataRecord']),
             ));
         }
     }
@@ -242,7 +252,18 @@ class sogo_plugin {
                     //* if users still exists for domain this is only a sogo domain config removal/reset
                     $this->__syncMailUsers($domain_name);
                 } else {
-                    //* no users left in db remove sogo tables
+                    //* no mail users left in db [mail_user] remove sogo tables
+
+                    $domain_table = $app->sogo_helper->getValidSOGoTableName($domain_name);
+                    $sqlres = & $app->sogo_helper->sqlConnect();
+                    if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                        while ($obj = $tmp->fetch_object()) {
+                            if (isset($obj->c_uid)) {
+                                $this->__deleteMailUser($obj->c_uid);
+                            }
+                        }
+                    }
+
                     $app->sogo_helper->dropSOGoUsersTable($domain_name, $data['old']['domain_id']);
                 }
             } else if ($app->sogo_helper->has_mail_users($domain_name, true)) {
@@ -474,8 +495,7 @@ class sogo_plugin {
      * @param array $data array of old and new data
      */
     public function remove_sogo_mail_user($event_name, $data) {
-        global $app;
-        if ($app->sogo_helper->isEqual($event_name, 'mail_user_delete'))
+        if ($event_name == 'mail_user_delete')
             $this->__deleteMailUser($data['old']['login']);
     }
 
@@ -492,14 +512,15 @@ class sogo_plugin {
     public function insert_sogo_mail_domain($event_name, $data) {
         global $app;
         //* check event
-        if (!$app->sogo_helper->isEqual($event_name, 'mail_domain_insert'))
+        if ($event_name != 'mail_domain_insert')
             return;
 
         if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
             $this->__create_sogo_table($data['new']['domain']);
-            $method = "sogo_plugin::insert_sogo_mail_domain():";
-            $this->__buildSOGoConfig($method);
         }
+        //* rebuild conf, so new domain settings/config actually gets added to SOGo
+        $method = "sogo_plugin::insert_sogo_mail_domain():";
+        $this->__buildSOGoConfig($method);
     }
 
     /**
@@ -607,13 +628,16 @@ class sogo_plugin {
     public function remove_sogo_mail_domain($event_name, $data) {
         global $app;
         if ($event_name == 'mail_domain_delete') {
+            $app->log("Delete domain {$data['old']['domain_id']}#{$data['old']['domain']}", LOGLEVEL_DEBUG);
             if ((int) $data['old']['domain_id'] == $data['old']['domain_id'] && (intval($data['old']['domain_id']) > 0)) {
                 $SOGoDomainID = $app->sogo_helper->getDB()->queryOneRecord("SELECT `sogo_id` FROM `sogo_domains` WHERE `domain_id`=" . intval($data['old']['domain_id']));
                 //* delete SOGo domain config if exists
                 if ($SOGoDomainID['sogo_id'] == intval($SOGoDomainID['sogo_id']) && (intval($SOGoDomainID['sogo_id']) > 0)) {
+                    $app->log("Delete sogo domain config: {$SOGoDomainID['sogo_id']}", LOGLEVEL_DEBUG);
                     $app->sogo_helper->getDB()->datalogDelete('sogo_domains', 'sogo_id', $SOGoDomainID['sogo_id']);
                     $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_domain(): delete SOGo config for domain: {$data['old']['domain_id']}#{$data['old']['domain']}");
                 } else {
+                    $app->log("No SOGo config, create fake configuration datalog delete", LOGLEVEL_DEBUG);
                     /*
                      * if no config exists force a datalog to call event sogo_domains_delete
                      * this ensures all tables in sogo db is removed as well and keeping the plugin functionality of ISPConfig
@@ -622,6 +646,8 @@ class sogo_plugin {
                      */
                     $app->sogo_helper->getDB()->datalogSave('sogo_domains', 'DELETE', 'sogo_id', -1, $data['old'], $data['new'], TRUE);
                 }
+            } else {
+                $app->log("Delete domain validation error: {$data['old']['domain_id']}#{$data['old']['domain']}", LOGLEVEL_DEBUG);
             }
         }
     }
@@ -840,8 +866,25 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                     if (isset($obj->c_uid) && !in_array($obj->c_uid, $good_mails))
                         $this->__deleteMailUser($obj->c_uid);
             }
+            $app->log("Sync Mail Users in {$domain_name}", LOGLEVEL_DEBUG);
+        } else {
+            //* no mail users drop sogo table
+            if ($app->sogo_helper->sogoTableExists($domain_name)) {
+                //* check if users exists in table, delete them with SOGo if they do
+                $domain_table = $app->sogo_helper->getValidSOGoTableName($domain_name);
+                $sqlres = & $app->sogo_helper->sqlConnect();
+                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                    while ($obj = $tmp->fetch_object()) {
+                        if (isset($obj->c_uid)) {
+                            //* only deletes from SOGo db
+                            $this->__deleteMailUser($obj->c_uid);
+                        }
+                    }
+                }
+                $app->sogo_helper->dropSOGoUsersTable($domain_name, -1);
+            }
+            $app->log("No users, dropping domain {$domain_name}", LOGLEVEL_DEBUG);
         }
-        $app->sogo_helper->logDebug("Sync Mail Users in {$domain_name}");
         return TRUE;
     }
 
@@ -870,13 +913,13 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         if (!empty($email) && (strpos($email, '@') !== FALSE)) {
             $cmd_arg = escapeshellarg("{$conf['sogo_tool_binary']}") . " remove " . escapeshellarg("{$email}");
             $cmd = str_replace('{command}', $cmd_arg, $conf['sogo_su_command']);
-            $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_user() \n\t - CALL:{$cmd}");
+            $app->log("sogo_plugin::remove_sogo_mail_user() \n\t - CALL:{$cmd}", LOGLEVEL_DEBUG);
             exec($cmd);
             $usrDom = explode('@', $email);
             $sqlres = & $app->sogo_helper->sqlConnect();
             $sqlres->query("DELETE FROM `{$app->sogo_helper->getValidSOGoTableName($usrDom[1])}` WHERE `c_uid` = '{$sqlres->escape_string($email)}'");
             if ($sqlres->error)
-                $app->sogo_helper->logDebug("sogo_plugin::remove_sogo_mail_user() \n\t - SQL Error: {$sqlres->error}");
+                $app->log("sogo_plugin::remove_sogo_mail_user() \n\t - SQL Error: {$sqlres->error}", LOGLEVEL_DEBUG);
         }
     }
 
@@ -888,11 +931,11 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                 //* check if users exists in table, delete them with SOGo if they do
                 $domain_table = $app->sogo_helper->getValidSOGoTableName($domain);
                 $sqlres = & $app->sogo_helper->sqlConnect();
-                if ($tmp = $sqlres->query("SELECT `c_imaplogin` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
                     while ($obj = $tmp->fetch_object()) {
-                        if (isset($obj->c_imaplogin)) {
+                        if (isset($obj->c_uid)) {
                             //* only deletes from SOGo db
-                            $this->__deleteMailUser($obj->c_imaplogin);
+                            $this->__deleteMailUser($obj->c_uid);
                         }
                     }
                 }

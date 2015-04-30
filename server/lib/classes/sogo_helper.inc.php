@@ -307,7 +307,6 @@ AND sc.`server_name` = s.`server_name";
      * @param integer $domain_id
      */
     public function dropSOGoUsersTable($domain_name, $domain_id) {
-        global $app;
         $this->logDebug("sogo_helper::dropSOGoUsersTable(): {$domain_id}#{$domain_name}");
         $sogo_db = & $this->sqlConnect();
         $sogo_db->query("DROP TABLE {$this->getValidSOGoTableName($domain_name)}");
