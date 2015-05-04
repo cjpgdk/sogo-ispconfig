@@ -459,7 +459,7 @@ class Installer {
 );
 //* sogo default configuration file(s)
 \$conf['sogo_gnu_step_defaults'] = '{SOGOHOMEDIR}/GNUstep/Defaults/.GNUstepDefaults';
-\$conf['sogo_gnu_step_defaults_sogod.plist'] = '{SOGOHOMEDIR}/var/lib/sogo/GNUstep/Defaults/sogod.plist';
+\$conf['sogo_gnu_step_defaults_sogod.plist'] = '{SOGOHOMEDIR}/GNUstep/Defaults/sogod.plist';
 
 //* template to use for table names in sogo db
 \$conf['sogo_domain_table_tpl'] = "{domain}_users";

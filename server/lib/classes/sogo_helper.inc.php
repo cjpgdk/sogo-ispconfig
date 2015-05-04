@@ -132,7 +132,7 @@ class sogo_helper {
      * @return boolean
      */
     public function has_mail_users($domain_name, $imap_enabled = true) {
-        $emails = $this->getDB()->queryOneRecord("SELECT count(*) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        $emails = $this->getDB()->queryOneRecord("SELECT count(`email`) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
         if ($emails !== FALSE && ((int) $emails['cnt'] > 0)) {
             return true;
         }

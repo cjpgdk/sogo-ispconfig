@@ -36,5 +36,28 @@ GRANT SELECT ,INSERT ,UPDATE (`status` ,`error`) ON `dbispconfig`.`sys_datalog` 
 GRANT SELECT ,INSERT ,UPDATE (`status` ,`error`) ON `dbispconfig`.`sys_datalog` TO 'ispcsrv3'@'192.168.1.12';
 
 
+//* REVOKE only if previous created
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_user` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_user` FROM 'ispcsrv3'@'192.168.1.12';
+
+GRANT SELECT ON `dbispconfig`.`mail_user` TO 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT ON `dbispconfig`.`mail_user` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
+
+//* REVOKE only if previous created
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_forwarding` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`mail_forwarding` FROM 'ispcsrv3'@'192.168.1.12';
+
+GRANT SELECT ON `dbispconfig`.`mail_forwarding` TO 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT ON `dbispconfig`.`mail_forwarding` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
+
+//* REVOKE only if previous created
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`sogo_config` FROM 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+REVOKE ALL PRIVILEGES ON `dbispconfig`.`sogo_config` FROM 'ispcsrv3'@'192.168.1.12';
+
+GRANT SELECT ON `dbispconfig`.`sogo_config` TO 'ispcsrv3'@'192.168.1.12';
+GRANT SELECT ON `dbispconfig`.`sogo_config` TO 'ispcsrv3'@'SERVER.EXAMPLE.COM';
+
 
 
