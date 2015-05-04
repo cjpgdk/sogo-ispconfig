@@ -123,10 +123,10 @@ if (isset($_POST['dochange']) && isset($_POST['server_id'])) {
                         } else
                             $app->log("{$sogo_domain['domain_name']} were not updated, error while saving data", LOGLEVEL_WARN);
                     }
-                } else
+                } else if (sogo_helper::isExtendedDebug())
                     $app->log("No need to update domain {$sogo_domain['domain_name']}", LOGLEVEL_DEBUG);
             }
-        } else
+        } else if (sogo_helper::isExtendedDebug())
             $app->log("mail domain with id {$value}, do not exists in database", LOGLEVEL_WARN);
     }
     //* change back to default, (properly not needed but just to be sure)

@@ -26,7 +26,7 @@ class SOGo {
     public $source_list = "/etc/apt/sources.list"; 
     public $source_list_dir = "/etc/apt/sources.list.d/";
     public $os = "debian";
-    public $os_name = "wheezy";
+    public $os_name = "jessie";
     public $os_supported = array('debian', 'ubuntu');
 
     public function run() {
@@ -109,9 +109,12 @@ class SOGo {
     public function debMirrors() {
         if ($this->os == "debian") {
             $this->echoMessage(PHP_EOL . "Whats the name of your system?");
-            $this->echoMessage("wheezy, squeeze, lenny [{$this->os_name}]: ", "");
+            $this->echoMessage("jessie, wheezy, squeeze, lenny [{$this->os_name}]: ", "");
             $this->os_name = strtolower(Installer::readInput("{$this->os_name}"));
             switch ($this->os_name) {
+                case 'jessie':
+                    //* jessie has the latest SOGo in official repository
+                    break;
                 case 'lenny':
                 case 'squeeze':
                 case 'wheezy':

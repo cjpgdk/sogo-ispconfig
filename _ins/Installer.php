@@ -55,7 +55,7 @@ class Installer {
     static public $error = "";
 
     /** @var boolean a var used as indicator if SOGo is located */
-    static public $have_sins_of_sogo = FALSE;
+    static public $have_signs_of_sogo = FALSE;
 
     /** @var boolean a var used to check if errors for individual steps */
     static private $isError = FALSE;
@@ -130,26 +130,26 @@ class Installer {
             self::$error = "[FAIL]: Unable to locate SOGo init script";
             self::$errors['step1'][] = self::$error;
             self::$isError = TRUE;
-            self::$have_sins_of_sogo = FALSE;
+            self::$have_signs_of_sogo = FALSE;
         } else if (file_exists(self::$sogo_init_script)) {
-            self::$have_sins_of_sogo = TRUE;
+            self::$have_signs_of_sogo = TRUE;
         }
         //* sogo-tool binary?
         if (empty(self::$sogo_tool_binary)) {
             self::$error = "[FAIL]: Unable to locate sogo-tool";
             self::$errors['step1'][] = self::$error;
-            self::$have_sins_of_sogo &= FALSE;
+            self::$have_signs_of_sogo &= FALSE;
         } else if (file_exists(self::$sogo_tool_binary)) {
-            self::$have_sins_of_sogo &= TRUE;
+            self::$have_signs_of_sogo &= TRUE;
         }
-        //* SOGo home dir ?
+        //* SOGo home dir ?s
         if (empty(self::$sogo_home_dir)) {
             self::$error = "[FAIL]: Unable to locate sogo home dir";
             self::$errors['step1'][] = self::$error;
             self::$isError = TRUE;
-            self::$have_sins_of_sogo &= FALSE;
+            self::$have_signs_of_sogo &= FALSE;
         } else if (file_exists(self::$sogo_home_dir) && is_dir(self::$sogo_home_dir)) {
-            self::$have_sins_of_sogo &= TRUE;
+            self::$have_signs_of_sogo &= TRUE;
         }
     }
 

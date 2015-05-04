@@ -22,6 +22,12 @@
  */
 class sogo_helper {
 
+    /**
+     * get sogo module config field 
+     * @param integer $server_id 
+     * @param string $field the config field to fetch or "all" (lowercase) to get them all 
+     * @return string|array result will be empty if $field does not exists
+     */
     public function getSOGoModuleConf($server_id = 1, $field = "all") {
         $result = $this->getDB()->queryOneRecord('SELECT * FROM `sogo_module` WHERE `server_id`=' . intval($server_id));
         if (strtolower($field) == 'all')
@@ -96,7 +102,7 @@ class sogo_helper {
 
     /**
      * get domain SOGo configuration id
-     * @param integer $server_id
+     * @param integer $domain_id
      * @return boolean
      */
     public function getDomainConfigIndex($domain_id) {
@@ -134,6 +140,11 @@ class sogo_helper {
         return (boolean) ($result['server_id'] == $server_id) && (isset($result['server_id']) && $result['server_id'] > 0);
     }
 
+    /**
+     * check if domain has a SOGo configuration
+     * @param integer $domain_id
+     * @return boolean
+     */
     public function configExistsByDomain($domain_id) {
         $result = $this->getDB()->queryOneRecord('SELECT sc.`server_id`, sd.`domain_id` FROM `sogo_config` sc, `sogo_domains` sd WHERE sc.`server_id`=sd.`server_id` AND sd.`domain_id`=' . intval($domain_id));
         return (boolean) ($result['domain_id'] == $domain_id) && (isset($result['server_id']) && $result['server_id'] > 0);
@@ -152,12 +163,17 @@ class sogo_helper {
     /**
      * gets the domain config fields from the database<br>
      * <pre><code>
+     * $conf = sogo_helper->getDomainConfigFields();
+     * print_r($conf);
+     * --------------------
      * array(
      *     COLUMN-NAME => array(
      *         name => COLUMN-NAME,
-     *         default => Default value as set in db,
+     *         default => [Default value, set in db],
      *     ),
+     *     ...
      * );
+     * --------------------
      * </code></pre>
      * @return array
      */

@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
  */
 class sogo_helper {
 
@@ -211,8 +212,8 @@ AND sc.`server_name` = s.`server_name";
             $server_default = $this->getDB()->queryOneRecord($server_default_sql);
 
             if (!$server_default) {
-                $this->logWarn("sogo_helper::getDomainConfig(): failed. Unable to get server config from domain {$domain_name}");
-                $this->logWarn("sogo_helper::getDomainConfig(): {$server_default_sql}");
+                $app->log("sogo_helper::getDomainConfig(): failed. Unable to get server config from domain {$domain_name}", LOGLEVEL_WARN);
+                $app->log("sogo_helper::getDomainConfig(): {$server_default_sql}", LOGLEVEL_WARN);
                 self::$dnCache[$domain_name] = false; //* if server default is not isset we must stop it from running to prevent SOGo or system failures
                 return self::$dnCache[$domain_name];
             }
@@ -302,7 +303,6 @@ AND sc.`server_name` = s.`server_name";
 
     /**
      * delete a SOGo mail domain table from SOGo db
-     * @global app $app
      * @param string $domain_name
      * @param integer $domain_id
      */

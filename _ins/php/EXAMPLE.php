@@ -3,8 +3,7 @@
 //* class name is not important
 class UpdateClass extends PHPUpdateBaseClass {
 
-    public function __construct() {/* INIT your php update here */
-    }
+    public function __construct() {/* INIT your php update here */}
 
     /**
      * method executed when updateing
