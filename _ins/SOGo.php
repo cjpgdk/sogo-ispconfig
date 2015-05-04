@@ -114,6 +114,7 @@ class SOGo {
             switch ($this->os_name) {
                 case 'jessie':
                     //* jessie has the latest SOGo in official repository
+                    return "";
                     break;
                 case 'lenny':
                 case 'squeeze':
