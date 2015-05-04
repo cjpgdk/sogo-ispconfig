@@ -75,24 +75,28 @@ if ($sogo_interface_version < $sogo_interface_version_latest) {
 
 //* run php ipdate file
 echo "Starting file based update" . PHP_EOL;
-require_once "_ins/PHPUpdateBaseClass.php";
-$phpupd_run = true;
-while ($phpupd_run == true) {
-    $next_php_version = intval($sogo_interface_version_php + 1);
-    if ($next_php_version <= 6)
-        continue; /* no php upgrade before v7 */
+if ($sogo_interface_version_php < $sogo_interface_version_latest) {
+    require_once "_ins/PHPUpdateBaseClass.php";
+    $phpupd_run = true;
+    while ($phpupd_run == true) {
+        $next_php_version = intval($sogo_interface_version_php + 1);
+        if ($next_php_version <= 6)
+            continue; /* no php upgrade before v7 */
 
-    $patch_filename = "_ins/php/{$next_php_version}.php";
-    if (is_file($patch_filename)) {
-        echo 'Loading PHP update file: ' . $patch_filename . PHP_EOL;
-        require_once $patch_filename;
-        if (isset($updateClass))
-            $updateClass->run();
-        else
-            echo 'Failed to run update file: ' . $patch_filename . PHP_EOL;
-        unset($updateClass);
-        $sogo_interface_version_php = $next_php_version;
-    } else
-        $phpupd_run = false;
+        $patch_filename = "_ins/php/{$next_php_version}.php";
+        if (is_file($patch_filename)) {
+            echo 'Loading PHP update file: ' . $patch_filename . PHP_EOL;
+            require_once $patch_filename;
+            if (isset($updateClass))
+                $updateClass->run();
+            else
+                echo 'Failed to run update file: ' . $patch_filename . PHP_EOL;
+            unset($updateClass);
+            $sogo_interface_version_php = $next_php_version;
+        } else
+            $phpupd_run = false;
+    }
+} else {
+    echo "No file based update neded" . PHP_EOL;
 }
 echo PHP_EOL . "all done i hope!" . PHP_EOL;
