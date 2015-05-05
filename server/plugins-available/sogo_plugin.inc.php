@@ -182,18 +182,86 @@ class sogo_plugin {
 
     public function update_sogo_module_settings($event_name, $data) {
         global $app, $conf;
-        $app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
+
+        //$app->sogo_helper->load_module_settings($conf['server_id']); //* reload they changed
+        $app->sogo_helper->module_settings->all_domains = ($data['new']['all_domains'] == 'y' ? TRUE : FALSE);
+        $app->sogo_helper->module_settings->allow_same_instance = ($data['new']['allow_same_instance'] == 'y' ? TRUE : FALSE);
+        $app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert = ($data['new']['config_rebuild_on_mail_user_insert'] == 'y' ? TRUE : FALSE);
+
+        //* mails on the SOGo server
+        if ($db_mail_domains = $app->sogo_helper->getMailDomainNames('y')) {
+            $create_mail_domains = array();
+            $ok_mail_domains = array();
+            foreach ($db_mail_domains as $value) {
+                if (!$app->sogo_helper->sogoTableExists($value['domain']))
+                    $create_mail_domains[] = $value['domain'];
+                else
+                    $ok_mail_domains[] = $value['domain'];
+            }
+            $db_mail_domains = array_merge($ok_mail_domains, $create_mail_domains);
+        }
+        //* get domains to remove
+        if (isset($db_mail_domains) && is_array($db_mail_domains) && !empty($db_mail_domains))
+            $remove_mail_domains = $app->sogo_helper->getDB()->queryAllRecords("SELECT * "
+                    . "FROM `mail_domain` WHERE "
+                    . "`domain` NOT IN ('" . implode("','", $db_mail_domains) . "')");
+        else
+            $remove_mail_domains = $app->sogo_helper->getDB()->queryAllRecords("SELECT * FROM `mail_domain`");
+
+        $app->log("Mail domains for this server: \n" . print_r($db_mail_domains, true), LOGLEVEL_DEBUG);
+        $app->log("Mail domains to remove: \n" . print_r($remove_mail_domains, true), LOGLEVEL_DEBUG);
+        
+
+        //* create domains
+        if (isset($create_mail_domains) && is_array($create_mail_domains)) {
+            foreach ($create_mail_domains as $value) {
+                if (!$app->sogo_helper->sogoTableExists($value)) {
+                    $app->log("Creatign domain: " . $value, LOGLEVEL_DEBUG);
+                    $this->insert_sogo_mail_domain(mail_domain_insert, array(
+                        'new' => array('domain' => $value),
+                        'old' => array(),
+                    ));
+                }
+            }
+        }
+        //* remove domains
+        if (isset($remove_mail_domains) && is_array($remove_mail_domains)) {
+            foreach ($remove_mail_domains as $value) {
+                if ($app->sogo_helper->sogoTableExists($value['domain'])) {
+                    $app->log("Droping domain: " . $value['domain'], LOGLEVEL_DEBUG);
+                    $value['server_id'] = $conf['server_id']; //* force server to this one.
+                    $this->remove_sogo_mail_domain('mail_domain_delete', array(
+                        'new' => $value,
+                        'old' => $value,
+                    ));
+                } else {
+                    $app->log("Not Droping domain: " . $value['domain'], LOGLEVEL_DEBUG);
+                }
+            }
+        }
+
         $this->__buildSOGoConfig("sogo_plugin::update_sogo_module_settings():");
     }
 
     public function insert_sogo_module_settings($event_name, $data) {
         global $app, $conf;
         $app->sogo_helper->load_module_settings($conf['server_id']); //* just added
+        $allow_same_instance = $app->sogo_helper->module_settings->allow_same_instance;
+        $all_domains = $app->sogo_helper->module_settings->all_domains;
+        if ($all_domains && $allow_same_instance) {
+            //* handled by __buildSOGoConfig()
+        } else if ($all_domains && !$allow_same_instance) {
+            //* remove all none local domains
+        } else if (!$all_domains && $allow_same_instance) {
+            //* remove all domains without configuration
+        } else {
+            //* remove all domains except local with config
+        }
         $this->__buildSOGoConfig("sogo_plugin::insert_sogo_module_settings():");
     }
 
     public function remove_sogo_module_settings($event_name, $data) {
-        //* should NEVER be called!
+        //* @todo empty sogo db for users and domains and remove all config.
     }
 
     //* #END# SOGO MODULE SETTINGS (TB: sogo_config)

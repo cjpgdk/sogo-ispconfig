@@ -60,7 +60,6 @@ class sogo_plugin {
     function register_change_for_sogo($event_name, $page_form) {
         global $app, $conf;
         $app->uses('sogo_helper');
-
         //* get vars for mail user events
         if (strpos($event_name, 'mail_user') !== false) {
             //* get mail domain.
@@ -68,7 +67,8 @@ class sogo_plugin {
             if (isset($email_domain[1]))
                 $email_domain = $email_domain[1];
             else {
-                $app->log('Email domain from email failed: ' . $page_form->dataRecord['email'], LOGLEVEL_WARN);
+                //* properly just changing tab
+                //$app->log('Email domain from email failed: ' . $page_form->dataRecord['email'], LOGLEVEL_WARN);
                 return;
             }
             $sql = "SELECT * FROM sogo_domains WHERE domain_name = '{$app->sogo_helper->getDB()->quote($email_domain)}'";
@@ -98,20 +98,19 @@ class sogo_plugin {
             $data = $app->sogo_helper->getDB()->queryOneRecord($sql);
         }
 
-        //* check if SOGo is handled by this server, or if we create a new event for other server
-        if (isset($data['server_id']) && $data['server_id'] == $conf['server_id']) {
+        //* get all server with allow_same_instance active
+        $sogo_servers = array();
+        $sql = "SELECT `server_id` FROM `sogo_module` WHERE allow_same_instance='y' " . (isset($data['server_id']) ? "AND `server_id`!={$app->sogo_helper->getDB()->quote($data['server_id'])}" : "");
+        $tmp = $app->sogo_helper->getDB()->queryAllRecords($sql);
+        if (is_array($tmp)) {
+            $sogo_servers = $tmp;
+            unset($tmp);
+        }
+
+        //* check if SOGo is handled by this server and $sogo_servers is empty
+        if (isset($data['server_id']) && $data['server_id'] == $conf['server_id'] && empty($sogo_servers)) {
             $app->log('Data server is the same as this server.!', LOGLEVEL_DEBUG);
             return;
-        } else if (!isset($data['server_id'])) {
-            //* in cases where no SOGo config exists announce the new domain to all servers with allow_same_instance active
-            $sogo_servers = array();
-            $sql = "SELECT `server_id` FROM `sogo_module` WHERE allow_same_instance='y'";
-            $tmp = $app->sogo_helper->getDB()->queryAllRecords($sql);
-            if (is_array($tmp)) {
-                $sogo_servers = $tmp;
-                unset($tmp);
-            } else
-                return;
         }
 
         //* handle events for remote SOGo server
@@ -127,7 +126,8 @@ class sogo_plugin {
                         'dataRecord' => is_array($page_form->dataRecord) ? $page_form->dataRecord : array(),
                         'oldDataRecord' => is_array($page_form->oldDataRecord) ? $page_form->oldDataRecord : array(),
                             ), $data['server_id']);
-                } else {
+                }
+                if (isset($sogo_servers) && !empty($sogo_servers) && is_array($sogo_servers)) {
                     foreach ($sogo_servers as $key => $value) {
                         $this->create_mail_alias_event(array(
                             'event' => $event_name,
@@ -141,7 +141,7 @@ class sogo_plugin {
             case "mail:mail_domain:on_after_update":
             case "mail:mail_domain:on_after_delete":
             case "mail:mail_domain:on_after_insert":
-                if (!isset($data['server_id'])) {
+                if (isset($sogo_servers) && !empty($sogo_servers) && is_array($sogo_servers)) {
                     foreach ($sogo_servers as $key => $value) {
                         $this->create_mail_domain_event(array(
                             'event' => $event_name,
@@ -149,7 +149,8 @@ class sogo_plugin {
                             'oldDataRecord' => is_array($page_form->oldDataRecord) ? $page_form->oldDataRecord : array(), /* fail safe */
                                 ), $value['server_id']);
                     }
-                } else {
+                }
+                if (isset($data['server_id'])) {
                     $this->create_mail_domain_event(array(
                         'event' => $event_name,
                         'dataRecord' => is_array($page_form->dataRecord) ? $page_form->dataRecord : array(),
@@ -160,13 +161,15 @@ class sogo_plugin {
             //* mail_user insert / update / delete
             case "mail:mail_user:on_after_insert": {
                     if (strtolower(trim($app->sogo_helper->getSOGoModuleConf($data['server_id'], 'config_rebuild_on_mail_user_insert'))) == 'y') {
+                        //* @todo add for all servers with allow_same_instance active
                         $app->sogo_helper->getDB()->datalogSave('sogo_domains', 'update', 'domain_name', $email_domain, $data, $data, true);
                     } else {
-                        if (!isset($data['server_id'])) {
+                        if (isset($sogo_servers) && !empty($sogo_servers) && is_array($sogo_servers)) {
                             foreach ($sogo_servers as $key => $value) {
                                 $this->create_mail_user_sync_event($email_domain, $value['server_id']);
                             }
-                        } else {
+                        }
+                        if (isset($data['server_id'])) {
                             $app->log('Rebuild SOGo on mail user insert Disabled', LOGLEVEL_DEBUG);
                             $this->create_mail_user_sync_event($email_domain, $data['server_id']);
                         }
@@ -175,11 +178,12 @@ class sogo_plugin {
                 break;
             case "mail:mail_user:on_after_update":
             case "mail:mail_user:on_after_delete":
-                if (!isset($data['server_id'])) {
+                if (isset($sogo_servers) && !empty($sogo_servers) && is_array($sogo_servers)) {
                     foreach ($sogo_servers as $key => $value) {
                         $this->create_mail_user_sync_event($email_domain, $value['server_id']);
                     }
-                } else {
+                }
+                if (isset($data['server_id'])) {
                     $this->create_mail_user_sync_event($email_domain, $data['server_id']);
                 }
                 break;
