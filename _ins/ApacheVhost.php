@@ -48,6 +48,10 @@ class ApacheVhost extends VhostBase {
             $httpconfdir = "/etc/apache2/conf.d/";
         }
         exec("apache2ctl -v", $out);
+        if (!isset($out[0])) {
+            echo PHP_EOL . "Apache is installed on this server";
+            return;
+        }
         //Server version: Apache/2.2.22 (Debian)
         $apaversion = "2.2";
         if (preg_match("/Apache\/([0-9\.]+)/i", $out[0], $matches)) {
@@ -77,6 +81,7 @@ class ApacheVhost extends VhostBase {
 
             self::execWriteOut('a2enmod proxy proxy_http headers rewrite', $out);
             if (isset($out) && is_array($out)) {
+                
             } else {
                 echo PHP_EOL . PHP_EOL . 'please verify the following modules for apache is enabled';
                 echo PHP_EOL . 'a2enmod proxy proxy_http headers rewrite' . PHP_EOL;
