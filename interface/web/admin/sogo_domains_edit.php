@@ -1,7 +1,7 @@
 <?php
 
-/*
- * Copyright (C) 2014  Christian M. Jensen
+/**
+ * Copyright (C) 2015  Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
  */
 
 $tform_def_file = "form/sogo_domains.tform.php";
-
 require_once '../../lib/config.inc.php';
 require_once '../../lib/app.inc.php';
-
 $app->auth->check_module_permissions('admin');
 if (method_exists($app->auth, 'check_security_permissions')) {
     $app->auth->check_security_permissions('admin_allow_server_services');
@@ -33,12 +32,9 @@ if (method_exists($app->auth, 'check_security_permissions')) {
     if (!$app->auth->is_admin())
         die('only allowed for administrators.');
 }
-
 $app->uses('tpl,tform,functions,sogo_helper');
 $app->load('tform_actions');
-
 class tform_action extends tform_actions {
-
     /** @global app $app */
     public function onLoad() {
         global $app;
@@ -50,7 +46,6 @@ class tform_action extends tform_actions {
                                 intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
                 );
         $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
-
         //* if no config for domain exists set id = 0 to create a new
         if ($dId != 0 && !$app->sogo_helper->configDomainExists($dId)) {
             $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
@@ -80,11 +75,9 @@ class tform_action extends tform_actions {
         $_SESSION['s']['module']["sogo_conifg_domain_id"] = $dId;
         parent::onLoad();
     }
-
     /** @global app $app */
     public function onShow() {
         global $app;
-
         $dId = (int) (
                 isset($_REQUEST["domain_id"]) ?
                         intval($_REQUEST["domain_id"]) :
@@ -100,7 +93,6 @@ class tform_action extends tform_actions {
         }
         parent::onShow();
     }
-
     /** @global app $app */
     public function onShowEnd() {
         global $app;
@@ -109,7 +101,6 @@ class tform_action extends tform_actions {
         $app->tpl->setVar('server_name', $this->__server_name);
         parent::onShowEnd();
     }
-
     /** @global app $app */
     public function onShowNew() {
         global $app;
@@ -129,12 +120,10 @@ class tform_action extends tform_actions {
         }
         parent::onShowNew();
     }
-
     public function onBeforeInsert() {
         $this->onBeforeUpdate(false);
         parent::onBeforeInsert();
     }
-
     public function onBeforeUpdate($callBase = true) {
         global $app;
         if (!isset($this->dataRecord['server_id'])) {
@@ -149,12 +138,10 @@ class tform_action extends tform_actions {
         if ($callBase)
             parent::onBeforeUpdate();
     }
-
     public function onAfterInsert() {
         $this->onAfterUpdate(false);
         parent::onAfterInsert();
     }
-
     public function onAfterUpdate($callBase = true) {
         global $app;
         if (!isset($this->dataRecord['domain_id'])) {
@@ -181,8 +168,6 @@ class tform_action extends tform_actions {
         if ($callBase)
             parent::onAfterUpdate();
     }
-
 }
-
 $app->tform_action = new tform_action();
 $app->tform_action->onLoad();
