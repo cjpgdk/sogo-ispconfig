@@ -120,7 +120,7 @@ class sogo_plugin {
             case "mail:mail_alias:on_after_delete":
             case "mail:mail_alias:on_after_insert":
                 // $destination_user, $destination_domain, $destination, $source
-                if (isset($data['server_id'])) {
+                if (isset($data['server_id']) && $data['server_id'] != $conf['server_id']) {
                     $this->create_mail_alias_event(array(
                         'event' => $event_name,
                         'dataRecord' => is_array($page_form->dataRecord) ? $page_form->dataRecord : array(),
@@ -150,7 +150,7 @@ class sogo_plugin {
                                 ), $value['server_id']);
                     }
                 }
-                if (isset($data['server_id'])) {
+                if (isset($data['server_id']) && $data['server_id'] != $conf['server_id']) {
                     $this->create_mail_domain_event(array(
                         'event' => $event_name,
                         'dataRecord' => is_array($page_form->dataRecord) ? $page_form->dataRecord : array(),
@@ -183,7 +183,7 @@ class sogo_plugin {
                         $this->create_mail_user_sync_event($email_domain, $value['server_id']);
                     }
                 }
-                if (isset($data['server_id'])) {
+                if (isset($data['server_id']) && $data['server_id'] != $conf['server_id']) {
                     $this->create_mail_user_sync_event($email_domain, $data['server_id']);
                 }
                 break;

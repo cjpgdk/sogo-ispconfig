@@ -208,8 +208,8 @@ class sogo_plugin {
         else
             $remove_mail_domains = $app->sogo_helper->getDB()->queryAllRecords("SELECT * FROM `mail_domain`");
 
-        $app->log("Mail domains for this server: \n" . print_r($db_mail_domains, true), LOGLEVEL_DEBUG);
-        $app->log("Mail domains to remove: \n" . print_r($remove_mail_domains, true), LOGLEVEL_DEBUG);
+        //$app->log("Mail domains for this server: \n" . print_r($db_mail_domains, true), LOGLEVEL_DEBUG);
+        //$app->log("Mail domains to remove: \n" . print_r($remove_mail_domains, true), LOGLEVEL_DEBUG);
         
 
         //* create domains
@@ -245,7 +245,11 @@ class sogo_plugin {
 
     public function insert_sogo_module_settings($event_name, $data) {
         global $app, $conf;
-        $app->sogo_helper->load_module_settings($conf['server_id']); //* just added
+
+        //$app->sogo_helper->load_module_settings($conf['server_id']); //* just added
+        $app->sogo_helper->module_settings->all_domains = ($data['new']['all_domains'] == 'y' ? TRUE : FALSE);
+        $app->sogo_helper->module_settings->allow_same_instance = ($data['new']['allow_same_instance'] == 'y' ? TRUE : FALSE);
+        $app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert = ($data['new']['config_rebuild_on_mail_user_insert'] == 'y' ? TRUE : FALSE);
         $allow_same_instance = $app->sogo_helper->module_settings->allow_same_instance;
         $all_domains = $app->sogo_helper->module_settings->all_domains;
         if ($all_domains && $allow_same_instance) {
@@ -816,9 +820,11 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         if (!$this->__checkStateDropDomain($domain_name))
             return false;
 
+        $new_table = false;
         //* create domain table if it do not exists
         if (!$app->sogo_helper->sogoTableExists($domain_name)) {
             $this->__create_sogo_table($domain_name);
+            $new_table = true; //* createing new table, must rebuild config..!
         }
         $emails = $app->sogo_helper->getDB()->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
         if (!empty($emails)) {
@@ -937,6 +943,11 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                         $this->__deleteMailUser($obj->c_uid);
             }
             $app->log("Sync Mail Users in {$domain_name}", LOGLEVEL_DEBUG);
+            
+            if ($new_table) {
+                $app->log("Mail domain '{$domain_name}', is newly created rebuilding SOGo config", LOGLEVEL_DEBUG);
+                $this->__buildSOGoConfig("__syncMailUsers():");
+            }
         } else {
             //* no mail users drop sogo table
             if ($app->sogo_helper->sogoTableExists($domain_name)) {
@@ -954,6 +965,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                 $app->sogo_helper->dropSOGoUsersTable($domain_name, -1);
             }
             $app->log("No users, dropping domain {$domain_name}", LOGLEVEL_DEBUG);
+            $this->__buildSOGoConfig("__syncMailUsers():"); //* @todo validate this is needed (looks like it)
         }
         return TRUE;
     }
@@ -1144,6 +1156,12 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
         } else {
             $app->log("SOGo Server config not found", LOGLEVEL_DEBUG);
         }
+    }
+    
+    
+    public function __construct() {
+        global $app;
+        unset($app->sogo_helper);
     }
 
 }
