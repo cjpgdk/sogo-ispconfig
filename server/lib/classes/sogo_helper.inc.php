@@ -24,7 +24,7 @@
 class sogo_helper {
 
     /** @var mysqli */
-    static private $_sqlObject = NULL;
+    private $_sqlObject = NULL;
 
     /** @var array */
     static private $daCache = array();
@@ -420,25 +420,25 @@ AND sc.`server_name` = s.`server_name";
     public function & sqlConnect() {
         global $conf;
 
-        if (self::$_sqlObject == NULL) {
-            self::$_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
+        if ($this->_sqlObject == NULL) {
+            $this->_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
             if (mysqli_connect_errno()) {
                 $this->logError(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()));
                 return;
             }
         }
         //* check if the connetion is still good.!
-        if (self::$_sqlObject->ping()) {
-            return self::$_sqlObject;
+        if ($this->_sqlObject->ping()) {
+            return $this->_sqlObject;
         } else {
             //* not good create a new one.
-            self::$_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
+            $this->_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
             if (mysqli_connect_errno()) {
                 $this->logError(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()));
                 return;
             }
         }
-        return self::$_sqlObject;
+        return $this->_sqlObject;
     }
 
     /**
@@ -505,6 +505,13 @@ AND sc.`server_name` = s.`server_name";
             return $db->quote($str);
         }
         return $str;
+    }
+    
+    public function __construct() {
+        if ($this->_sqlObject != null)
+            try {
+                $this->_sqlObject->close();
+            } catch (Exception $ex) {}
     }
 
     /*     * *******************
