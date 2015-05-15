@@ -78,7 +78,7 @@ class sogo_module {
         //* Stop memcached
         if (file_exists($conf['init_scripts'] . '/memcached'))
             exec($conf['init_scripts'] . '/memcached stop');
-        
+        sleep(5); //* giv it 5 seconds to compleate memcached is a ***** sometimes
         //* Start memcached
         if (file_exists($conf['init_scripts'] . '/memcached'))
             exec($conf['init_scripts'] . '/memcached start');

@@ -249,12 +249,41 @@ class sogo_plugin {
     }
 
     public function insert_sogo_module_settings($event_name, $data) {
-        global $app, $conf;
         $this->update_sogo_module_settings($event_name, $data);
     }
 
     public function remove_sogo_module_settings($event_name, $data) {
+        global $app, $conf;
+        $app->log("SOGo configuration is deleted removing all domains and related configurations for SOGo", LOGLEVEL_DEBUG);
         //* @todo empty sogo db for users and domains and remove all config.
+        if ($remove_mail_domains = $app->sogo_helper->getDB()->queryAllRecords("SELECT `domain`, `domain_id` FROM `mail_domain`")) {
+            foreach ($remove_mail_domains as $value) {
+                if ($app->sogo_helper->sogoTableExists($value['domain'])) {
+                    $domain_table = $app->sogo_helper->getValidSOGoTableName($value['domain']);
+                    $sqlres = & $app->sogo_helper->sqlConnect();
+                    if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                        while ($obj = $tmp->fetch_object()) {
+                            if (isset($obj->c_uid)) {
+                                $this->__deleteMailUser($obj->c_uid);
+                            }
+                        }
+                    }
+                    $app->sogo_helper->dropSOGoUsersTable($value['domain'], $value['domain_id']);
+                }
+            }
+        }
+        if (file_exists($conf['sogo_gnu_step_defaults'])) {
+            //* unly try no need for errors
+            if (@unlink($conf['sogo_gnu_step_defaults'])) {
+                touch($conf['sogo_gnu_step_defaults']); //* needs to be there.!
+            }
+        }
+        if (file_exists($conf['sogo_gnu_step_defaults_sogod.plist'])) {
+            //* unly try no need for errors
+            @unlink($conf['sogo_gnu_step_defaults_sogod.plist']);
+        }
+        //* 'sogoForeceRestart', stop and start memcached and SOGo
+        $app->services->restartServiceDelayed('sogoForeceRestart', 'restart');
     }
 
     //* #END# SOGO MODULE SETTINGS (TB: sogo_config)
