@@ -416,6 +416,8 @@ AND sc.`server_name` = s.`server_name";
      * Get a mysqli connection object to the mysql database server
      * @global array $conf
      * @return mysqli
+     * 
+     * @todo create fail safe in case sql connect fails, currently it will kill the server.php script causing ispconfig cron to stop working
      */
     public function & sqlConnect() {
         global $conf;
@@ -507,7 +509,7 @@ AND sc.`server_name` = s.`server_name";
         return $str;
     }
     
-    public function __construct() {
+    public function __destruct() {
         if ($this->_sqlObject != null)
             try {
                 $this->_sqlObject->close();

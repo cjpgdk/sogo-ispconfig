@@ -42,6 +42,13 @@ class sogo_plugin {
     function onLoad() {
         global $app, $conf;
         $app->uses('sogo_helper,sogo_config');
+        //* check if a config even exists
+        $sql = "SELECT * FROM `sogo_config` WHERE `server_id`=" . intval($conf['server_id']);
+        $server_default = $app->sogo_helper->getDB(false)->queryOneRecord($sql);
+        if (!$server_default) {
+            $app->log('SOGo plugin: No server configuration aborting...', LOGLEVEL_DEBUG);
+            return;
+        }
         $app->sogo_helper->load_module_settings($conf['server_id']);
 
         //* check sogo config before we register events
@@ -88,7 +95,7 @@ class sogo_plugin {
             //* Register for remote actions
             $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
             $app->plugins->registerAction('sogo_mail_user_alias', $this->plugin_name, 'action_mail_user_alias');
-            $app->plugins->registerAction('sogo_mail_domain_uid', $this->plugin_name, 'action_mail_domain_uid');
+            $app->plugins->registerAction('sogo_mail_domain_uid', $this->plugin_name, 'action_mail_domain');
         }
     }
 
@@ -129,7 +136,7 @@ class sogo_plugin {
      * @param string|array $data an serialized string or array contaning domain data 
      * @return void
      */
-    public function action_mail_domain_uid($action_name, $data) {
+    public function action_mail_domain($action_name, $data) {
         global $conf;
         if (!$this->_action_get_data_array($data)) {
             return;
@@ -210,8 +217,6 @@ class sogo_plugin {
 
         //$app->log("Mail domains for this server: \n" . print_r($db_mail_domains, true), LOGLEVEL_DEBUG);
         //$app->log("Mail domains to remove: \n" . print_r($remove_mail_domains, true), LOGLEVEL_DEBUG);
-        
-
         //* create domains
         if (isset($create_mail_domains) && is_array($create_mail_domains)) {
             foreach ($create_mail_domains as $value) {
@@ -245,23 +250,7 @@ class sogo_plugin {
 
     public function insert_sogo_module_settings($event_name, $data) {
         global $app, $conf;
-
-        //$app->sogo_helper->load_module_settings($conf['server_id']); //* just added
-        $app->sogo_helper->module_settings->all_domains = ($data['new']['all_domains'] == 'y' ? TRUE : FALSE);
-        $app->sogo_helper->module_settings->allow_same_instance = ($data['new']['allow_same_instance'] == 'y' ? TRUE : FALSE);
-        $app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert = ($data['new']['config_rebuild_on_mail_user_insert'] == 'y' ? TRUE : FALSE);
-        $allow_same_instance = $app->sogo_helper->module_settings->allow_same_instance;
-        $all_domains = $app->sogo_helper->module_settings->all_domains;
-        if ($all_domains && $allow_same_instance) {
-            //* handled by __buildSOGoConfig()
-        } else if ($all_domains && !$allow_same_instance) {
-            //* remove all none local domains
-        } else if (!$all_domains && $allow_same_instance) {
-            //* remove all domains without configuration
-        } else {
-            //* remove all domains except local with config
-        }
-        $this->__buildSOGoConfig("sogo_plugin::insert_sogo_module_settings():");
+        $this->update_sogo_module_settings($event_name, $data);
     }
 
     public function remove_sogo_module_settings($event_name, $data) {
@@ -943,7 +932,7 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                         $this->__deleteMailUser($obj->c_uid);
             }
             $app->log("Sync Mail Users in {$domain_name}", LOGLEVEL_DEBUG);
-            
+
             if ($new_table) {
                 $app->log("Mail domain '{$domain_name}', is newly created rebuilding SOGo config", LOGLEVEL_DEBUG);
                 $this->__buildSOGoConfig("__syncMailUsers():");
@@ -1145,11 +1134,11 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
                     $app->services->restartServiceDelayed('sogo', 'restart');
                 } else {
                     //* log error somthing when't wrong (check: /var/log/ispconfig/cron.log)
-                    $app->sogo_helper->logError("{$method} Unable to rebuild and/or save new SOGo config...");
+                    $app->log("{$method} Unable to rebuild and/or save new SOGo config...", LOGLEVEL_ERROR);
                 }
             } else {
                 //* in case we build invalid SOGo config create error
-                $app->sogo_helper->logError("SOGo Config is not valid:" . PHP_EOL . implode(PHP_EOL, libxml_get_errors()));
+                $app->log("SOGo Config is not valid:" . PHP_EOL . implode(PHP_EOL, libxml_get_errors()), LOGLEVEL_ERROR);
                 //* only log FULL configuration in debug mode
                 $app->log("Failed SOGo XML Config:" . PHP_EOL . $sogod, LOGLEVEL_DEBUG);
             }
@@ -1157,9 +1146,8 @@ CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_na
             $app->log("SOGo Server config not found", LOGLEVEL_DEBUG);
         }
     }
-    
-    
-    public function __construct() {
+
+    public function __destruct() {
         global $app;
         unset($app->sogo_helper);
     }
