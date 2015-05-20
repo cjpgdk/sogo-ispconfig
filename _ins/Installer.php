@@ -419,36 +419,17 @@ class Installer {
 <?php
 
 /*
-method to use when generating the unique id for the domain
-"" sogo domain config key "id"
-
-Supported PHP default medthods are
-     - md5, sha1, crypt, crc32
-propperply more but these are widely used.
-
-if you like to use the domain name as is
-without encoding use "plain"
-
-rule of thumb the encoding method must take one argument
-and be available as procedural code and return the result
-
-md5("domain-name.com");
-sha1("domain-name.com");
-crypt("domain-name.com");
-
-if not isset md5 is used
-
- **** side note the resulting string is used with sogo-integrator to identify the domain 
- */ 
-\$conf['sogo_unique_id_method'] = 'md5';
-/*
  SOGo sudo command to use when executing a SOGo binary
  eg. 
  su -p -c '{command}' sogo
  sudo -u sogo {command}
- **** if you must quote the command ONLY USE ' (Single quote) NOT " (Double quote)
+ **** if you must quote the command ONLY USE ' (Single quote) NOT "(Double quote)
 */
 \$conf['sogo_su_command'] = 'sudo -u sogo {command}';
+/*
+  //* full path to sogo binary
+  \$conf['sogo_binary'] = '/usr/sbin/sogod';
+ */
 //* full path to sogo-tool binary 
 \$conf['sogo_tool_binary'] = '{SOGOTOOLBIN}';
 //* name of the database used for SOGo
