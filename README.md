@@ -12,33 +12,58 @@ sogo-ispconfig is an attempt to integrate as much as possible of the configurati
 
 Installation
 --------------
-since the update of [ISPConfig] to version 3.0.4.5p3 the old versions of this addon is not recommended to use, but as this is your choice have a look here [Update 9]
+Simply run on the latest ispconfig version
+
+```
+cd /tmp
+wget https://github.com/cmjnisse/sogo-ispconfig/archive/master.tar.gz -O sogo-ispconfig.tar.gz
+tar -xvf sogo-ispconfig.tar.gz
+cd sogo-ispconfig-master
+php install.php
+```
+
+for a more indept description read [Install Latest](https://github.com/cmjnisse/sogo-ispconfig/wiki/Install-Latest), it may be a bit outdated but it will most certainly work
+
+Upgrading from "Update 9"
+you need to run `php upgrade-u9.php` but read/follow this [guide](https://github.com/cmjnisse/sogo-ispconfig/wiki/Upgrading-from-%22update-9%22)
 
 ##### Note
+since the update of [ISPConfig] to version 3.0.4.5p3 the old versions of this addon is not recommended to use, but as this is your choice have a look here [Update 9]
+
 Since i moved it all into GitHub the old links in the installer do not work any more and the only way can install [Update 9] is by getting started here [Update 9]
 
 Once i get finished with Update 10, you will be able to use it with only the files you download no out going links, and it will feature installing SOGo, updating from earlier version etc.. just like the old installer
 
 License
 ----
+sogo-ispconfig is licensed under, GNU General Public License version 3
 
-GNU General Public License version 3
+---------------------------------------
 
-includes Sortable (MIT LICENSE)
+the code inculdes [Sortable] version 0.5.0 created by GitHub user [RubaXa](https://github.com/RubaXa/) and is licensed under "MIT"
+
+[Sortable] — is a minimalist JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery. Support AngularJS.
+
 Copyright 2013 Lebedev Konstantin http://rubaxa.github.io/Sortable/
 
-Sortable — is a minimalist JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery. Support AngularJS.
+---------------------------------------
 
-http://rubaxa.github.io/Sortable/
+[Sortable] is present in the following files
+
+```
+interface/web/admin/templates/sogo_domains_user_edit.htm
+interface/web/mail/templates/sogo_domains_edit.htm
+interface/web/mail/templates/sogo_domains_reseller_edit.htm
+interface/web/mail/templates/sogo_domains_user_edit.htm
+```
 
 
-##### NOTE
-DONT'T USE THIS VERSION ON TOP OF "[Update 9](https://github.com/cmjnisse/sogo-ispconfig/tree/6108d77c99ae2bd75efa38f2b60c77cc542885dd)"
-it will not work, wait to i create a tag/release on update 10 THANK YOU.!
+##### HELP ME
 
-also for any troubles or issues post them as an issue here at GitHub
+use the issue system here at GitHub for help, questions, or suggestions
 
 
 [SOGo]:http://sogo.nu/
 [ISPConfig]:http://www.ispconfig.org
 [Update 9]:https://github.com/cmjnisse/sogo-ispconfig/wiki/Install-Update-9
+[Sortable]:http://rubaxa.github.io/Sortable/
