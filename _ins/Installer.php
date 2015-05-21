@@ -1,7 +1,7 @@
 <?php
 
-/*
- * Copyright (C) 2014  Christian M. Jensen
+/**
+ * Copyright (C) 2015  Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
+ * 
+ * @todo Add ask for sogo system user and group name
  */
 
 class Installer {
@@ -419,17 +422,41 @@ class Installer {
 <?php
 
 /*
+method to use when generating the unique id for the domain
+"" sogo domain config key "id"
+
+Supported PHP default medthods are
+     - md5, sha1, crypt, crc32
+propperply more but these are widely used.
+
+if you like to use the domain name as is
+without encoding use "plain"
+
+rule of thumb the encoding method must take one argument
+and be available as procedural code and return the result
+
+md5("domain-name.com");
+sha1("domain-name.com");
+crypt("domain-name.com");
+
+if not isset md5 is used
+
+ **** side note the resulting string is used with sogo-integrator to identify the domain 
+ */ 
+\$conf['sogo_unique_id_method'] = 'md5';
+
+//* SOGo system user name
+\$conf['sogo_system_user'] = 'sogo';
+//* SOGo system group name
+\$conf['sogo_system_group'] = 'sogo';
+/*
  SOGo sudo command to use when executing a SOGo binary
  eg. 
  su -p -c '{command}' sogo
  sudo -u sogo {command}
- **** if you must quote the command ONLY USE ' (Single quote) NOT "(Double quote)
+ **** if you must quote the command ONLY USE ' (Single quote) NOT " (Double quote)
 */
-\$conf['sogo_su_command'] = 'sudo -u sogo {command}';
-/*
-  //* full path to sogo binary
-  \$conf['sogo_binary'] = '/usr/sbin/sogod';
- */
+\$conf['sogo_su_command'] = 'sudo -u ' . \$conf['sogo_system_user'] . ' {command}';
 //* full path to sogo-tool binary 
 \$conf['sogo_tool_binary'] = '{SOGOTOOLBIN}';
 //* name of the database used for SOGo
@@ -460,6 +487,7 @@ class Installer {
 //* sogo default configuration file(s)
 \$conf['sogo_gnu_step_defaults'] = '{SOGOHOMEDIR}/GNUstep/Defaults/.GNUstepDefaults';
 \$conf['sogo_gnu_step_defaults_sogod.plist'] = '{SOGOHOMEDIR}/GNUstep/Defaults/sogod.plist';
+\$conf['sogo_system_default_conf'] = '/etc/sogo/sogo.conf';
 
 //* template to use for table names in sogo db
 \$conf['sogo_domain_table_tpl'] = "{domain}_users";

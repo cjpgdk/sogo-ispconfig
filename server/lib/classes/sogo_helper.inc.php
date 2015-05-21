@@ -40,13 +40,287 @@ class sogo_helper {
     static private $sogo_server = array();
 
     /**
+     * used to avoid duplicate queries on multi data updates in one session
+     * @var array 
+     */
+    static private $_queryHash = array();
+
+    /**
+     * sync all mail users and aliases for a given domain name
+     * @global app $app
+     * @param string $domain_name
+     * @param boolean $imap_enabled if set to false will sync all email addresses, is set to true will only sync email addresses with imap enabled
+     * @return boolean
+     */
+    public function sync_mail_users($domain_name, $imap_enabled = true) {
+        global $app;
+        if (!$this->check_domain_state_drop($domain_name))
+            return false;
+
+        $new_table = false;
+        //* create domain table if it do not exists
+        if (!$this->sogo_table_exists($domain_name)) {
+            $this->create_sogo_table($domain_name);
+            $new_table = true; //* createing new table, must rebuild config..!
+        }
+        $emails = $this->getDB(true)->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        $sqlres = & $this->sqlConnect();
+        $sqlres->set_charset("utf8");
+        $sqlres->query("SET NAMES utf8");
+        $sqlres->query("SET character_set_results='utf8'");
+        if (!empty($emails)) {
+            $domain_config = $this->get_domain_config($domain_name, true);
+            if (!$domain_config || !is_array($domain_config)) {
+                $app->log("SOGo Sync Mail Users - Unable to fetch the domain config for domain [{$domain_name}]", LOGLEVEL_ERROR);
+                return false;
+            }
+            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoSieveServer']);
+            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoIMAPServer']);
+            $_tmpSQL = array('users' => array(), 'alias' => array());
+            $good_mails = array();
+            foreach ($emails as $email) {
+                $good_mails[] = $email['login'];
+                if ($this->sogo_mail_user_exists($email['login'], "{$this->get_valid_sogo_table_name($domain_name)}")) {
+                    $_tmpSQL['users'][] = "UPDATE `{$this->get_valid_sogo_table_name($domain_name)}` SET "
+                            . " `c_uid` = '{$sqlres->escape_string($email['login'])}' ,"
+                            . " `c_cn` = '{$sqlres->escape_string($email['name'])}' ,"
+                            . " `c_name` = '{$sqlres->escape_string($email['login'])}' ,"
+                            . " `mail` = '{$sqlres->escape_string($this->idn_decode($email['email']))}' ,"
+                            . " `c_imaplogin` = '{$sqlres->escape_string($email['login'])}' ,"
+                            . " `c_sievehostname` = '{$sqlres->escape_string($domain_config['SOGoSieveServer'])}' ,"
+                            . " `c_imaphostname` = '{$sqlres->escape_string($domain_config['SOGoIMAPServer'])}' ,"
+                            . " `c_domain` = '{$sqlres->escape_string($domain_name)}' ,"
+                            . " `c_password` = '{$sqlres->escape_string($email['password'])}' "
+                            . " WHERE `c_uid`='{$sqlres->escape_string($email['login'])}';";
+                } else {
+                    $_tmpSQL['users'][] = "INSERT INTO `{$this->get_valid_sogo_table_name($domain_name)}` "
+                            . "(`c_uid`, `c_cn`, `c_name`, `mail`, `c_imaplogin`, `c_sievehostname`, `c_imaphostname`, `c_domain`, `c_password`) "
+                            . "VALUES "
+                            . "("
+                            . "'{$sqlres->escape_string($email['login'])}', "
+                            . "'{$sqlres->escape_string($email['name'])}', "
+                            . "'{$sqlres->escape_string($email['login'])}', "
+                            . "'{$sqlres->escape_string($this->idn_decode($email['email']))}', "
+                            . "'{$sqlres->escape_string($email['login'])}', "
+                            . "'{$sqlres->escape_string($domain_config['SOGoSieveServer'])}', "
+                            . "'{$sqlres->escape_string($domain_config['SOGoIMAPServer'])}', "
+                            . "'{$sqlres->escape_string($domain_name)}', "
+                            . "'{$sqlres->escape_string($email['password'])}'"
+                            . ");";
+                }
+                $mail_aliases = $this->getDB()->queryAllRecords("SELECT `source` FROM `mail_forwarding` WHERE `destination` = '{$this->dbEscapeString($email['login'])}' AND `type`='alias' AND `active`='y';");
+                //* get alias columns in table for domain
+                $dtacount = (int) $this->get_sogo_table_alias_column_count($domain_name);
+
+                $aliasSQL = "UPDATE `{$this->get_valid_sogo_table_name($domain_name)}` SET ";
+                //* only do alias update if a column exists for it 
+                if ($dtacount > 0) {
+                    $ac = 0;
+                    foreach ($mail_aliases as $key => $value) {
+                        $aliasSQL .= " `alias_{$ac}` = '{$sqlres->escape_string($this->idn_decode($value['source']))}' ,";
+                        $ac++;
+                        //* must be a better way but, need some results here so break on max alias columns in tb
+                        if ($dtacount == $ac)
+                            break;
+                    }
+                    $acount_n = (int) $this->get_max_alias_count($domain_name, 'n'); //* none active
+                    $acount_y = (int) $this->get_max_alias_count($domain_name, 'y'); //* active
+                    $a_cnt = (int) ($acount_n + $acount_y);
+                    //* if mail_forward table holds more aliases than columns in sogo table limit to number in sogo table
+                    if ($a_cnt > $dtacount) {
+                        $a_cnt = $dtacount;
+                    } else {
+                        $a_cnt = ($a_cnt < $dtacount ? $dtacount : $a_cnt);
+                    }
+
+                    for ($ac; $ac < $a_cnt; $ac++) {
+                        $aliasSQL .= " `alias_{$ac}` = '' ,";
+                    }
+                    $_tmpSQL['alias'][] = trim($aliasSQL, ',')
+                            . " WHERE "
+                            . " `c_uid` = '{$sqlres->escape_string($email['login'])}' AND"
+                            . " `c_cn` = '{$sqlres->escape_string($email['name'])}' AND"
+                            . " `c_name` = '{$sqlres->escape_string($email['login'])}' AND"
+                            . " `mail` = '{$sqlres->escape_string($this->idn_decode($email['email']))}' AND"
+                            . " `c_imaplogin` = '{$sqlres->escape_string($email['login'])}' AND"
+                            . " `c_sievehostname` = '{$sqlres->escape_string($domain_config['SOGoSieveServer'])}' AND"
+                            . " `c_imaphostname` = '{$sqlres->escape_string($domain_config['SOGoIMAPServer'])}' AND"
+                            . " `c_domain` = '{$sqlres->escape_string($domain_name)}' AND"
+                            . " `c_password` = '{$sqlres->escape_string($email['password'])}';";
+                }
+                /*
+                 * server_id
+                 * name
+                 * disableimap
+                 * disablesieve
+                 * disablesieve-filter
+                 */
+            }
+            foreach ($_tmpSQL['users'] as $value) {
+                $_queryHash = md5($value); //* avoid multiple of the same query
+                if (in_array($_queryHash, self::$_queryHash))
+                    continue;
+                if (!$sqlres->query($value)) {
+                    $app->log("sogo_plugin::sync_mail_users(): sync users failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1), LOGLEVEL_ERROR);
+                }
+                self::$_queryHash[] = $_queryHash;
+            }
+            foreach ($_tmpSQL['alias'] as $value) {
+                $_queryHash = md5($value); //* avoid multiple of the same query
+                if (in_array($_queryHash, self::$_queryHash))
+                    continue;
+                if (!$sqlres->query($value)) {
+                    $app->log("sogo_plugin::sync_mail_users(): sync users aliases failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1), LOGLEVEL_ERROR);
+                }
+                self::$_queryHash[] = $_queryHash;
+            }
+
+            //* for SOGo on other server than mail server, make sure delete users gets removed
+            $sql = "SELECT c_uid FROM `{$this->get_valid_sogo_table_name($domain_name)}` WHERE NOT `c_uid` IN ('" . implode("','", $good_mails) . "')";
+            if ($tmp = $sqlres->query($sql)) {
+                while ($obj = $tmp->fetch_object())
+                    if (isset($obj->c_uid) && !in_array($obj->c_uid, $good_mails))
+                        $this->delete_mail_user($obj->c_uid);
+            }
+            $app->log("Sync Mail Users in {$domain_name}", LOGLEVEL_DEBUG);
+
+            if ($new_table) {
+                $app->log("Mail domain '{$domain_name}', is newly created rebuilding SOGo config", LOGLEVEL_DEBUG);
+                $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
+            }
+        } else {
+            //* no mail users drop sogo table
+            if ($this->sogo_table_exists($domain_name)) {
+                //* check if users exists in table, delete them with SOGo if they do
+                $domain_table = $this->get_valid_sogo_table_name($domain_name);
+                $sqlres = & $this->sqlConnect();
+                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                    while ($obj = $tmp->fetch_object()) {
+                        if (isset($obj->c_uid)) {
+                            //* only deletes from SOGo db
+                            $this->delete_mail_user($obj->c_uid);
+                        }
+                    }
+                }
+                $this->drop_sogo_users_table($domain_name, -1);
+            }
+            $app->log("No users, dropping domain {$domain_name}", LOGLEVEL_DEBUG);
+            $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
+        }
+        return TRUE;
+    }
+
+    public function sogo_mail_user_exists($email, $table) {
+        $sqlres = & $this->sqlConnect();
+        $usr = $sqlres->query("SELECT `c_imaplogin` FROM {$table} WHERE `c_imaplogin`='{$sqlres->escape_string($email)}'");
+        return ($usr !== FALSE && count($usr->fetch_assoc()) > 0 ? TRUE : FALSE);
+    }
+
+    /**
+     * method to remove a sogo user from sogo storage
+     * @global app $app
+     * @global array $conf
+     * @param string $email the email address to remove
+     */
+    public function delete_mail_user($email) {
+        global $app, $conf;
+        if (!empty($email) && (strpos($email, '@') !== FALSE)) {
+            $cmd_arg = escapeshellarg("{$conf['sogo_tool_binary']}") . " remove " . escapeshellarg("{$email}");
+            $cmd = str_replace('{command}', $cmd_arg, $conf['sogo_su_command']);
+            $app->log("sogo_plugin::remove_sogo_mail_user() \n\t - CALL:{$cmd}", LOGLEVEL_DEBUG);
+            exec($cmd);
+            $usrDom = explode('@', $email);
+            $sqlres = & $this->sqlConnect();
+            $sqlres->query("DELETE FROM `{$this->get_valid_sogo_table_name($usrDom[1])}` WHERE `c_uid` = '{$sqlres->escape_string($email)}'");
+            if ($sqlres->error)
+                $app->log("sogo_plugin::remove_sogo_mail_user() \n\t - SQL Error: {$sqlres->error}", LOGLEVEL_DEBUG);
+        }
+    }
+
+    public function check_domain_state_drop($domain, $domain_id = -1) {
+        if (!$this->is_domain_active($domain)) {
+            //* not active
+            if ($this->sogo_table_exists($domain)) {
+                //* check if users exists in table, delete them with SOGo if they do
+                $domain_table = $this->get_valid_sogo_table_name($domain);
+                $sqlres = & $this->sqlConnect();
+                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                    while ($obj = $tmp->fetch_object()) {
+                        if (isset($obj->c_uid)) {
+                            //* only deletes from SOGo db
+                            $this->delete_mail_user($obj->c_uid);
+                        }
+                    }
+                }
+                $this->drop_sogo_users_table($domain, $domain_id);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * create mail domain table and sync mail user for use with SOGo
+     * @global app $app
+     * @global array $conf
+     * @param string $domain_name
+     * @return boolean
+     */
+    public function create_sogo_table($domain_name) {
+        global $app, $conf;
+        if (!$this->has_mail_users($domain_name, true)) {
+            //* dont create no users
+            $app->log("sogo_helper::create_sogo_table(): Refusing to create table for domain: {$domain_name}, NO USERS", LOGLEVEL_DEBUG);
+            return;
+        }
+        if ($this->sogo_table_exists($domain_name)) {
+            $app->log("sogo_helper::create_sogo_table(): SOGo table exists for domain: {$domain_name}", LOGLEVEL_DEBUG);
+            return $this->sync_mail_users($domain_name);
+        }
+
+        //* @todo optimize table to reduce the space requirements (varchar(500) too much in most cases)
+        $sql = "
+CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
+  `c_uid` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `c_cn` text CHARACTER SET utf8 NOT NULL,
+  `c_name` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `mail` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `c_imaplogin` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `c_sievehostname` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `c_imaphostname` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `c_domain` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `c_password` varchar(255) CHARACTER SET utf8 NOT NULL";
+
+        //* build up the mail aliases
+        $acount_n = (int) $this->get_max_alias_count($domain_name, 'n'); //* none active
+        $acount_y = (int) $this->get_max_alias_count($domain_name, 'y'); //* active
+        $a_cnt = (int) ($acount_n + $acount_y);
+        if ($a_cnt > 0) {
+            //* append alias sql
+            for ($index = 0; $index < $a_cnt; $index++) {
+                $sql .= ",
+    `alias_{$index}` varchar(500) CHARACTER SET utf8 NOT NULL";
+            }
+        }
+        //* end sql mail aliases statement
+        $sql .= ",
+  UNIQUE KEY `c_uid` ( `c_uid` ( 333 ) )
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+        $sqlres = & $this->sqlConnect();
+        $result = $sqlres->query($sql) ? TRUE : FALSE;
+        $app->log("sogo_helper::create_sogo_table(): add SOGo table for domain: {$domain_name}" . (!$result ? "\n\tERROR\t\n{$sql}" : ""), ($result ? LOGLEVEL_DEBUG : LOGLEVEL_ERROR));
+        $result &= $this->sync_mail_users($domain_name);
+        return $result;
+    }
+
+    /**
      * query all mail domains, based on module settings
      * @global app $app
      * @global array $conf
      * @param string $active
      * @return boolean|array boolean false on failure or empty query
      */
-    public function getMailDomainNames($active = 'y') {
+    public function get_mail_domain_names($active = 'y') {
         global $app, $conf;
         if (!in_array($active, array('n', 'y')))
             $active = 'y';
@@ -72,7 +346,6 @@ class sogo_helper {
 
     public function load_module_settings($server_id = 1) {
         global $app;
-        //* $server_id are for the future
         $query = "SELECT * FROM `sogo_module` WHERE `server_id`=" . intval($server_id);
         $settings = $this->getDB(false)->queryOneRecord($query);
 
@@ -92,18 +365,35 @@ class sogo_helper {
         }
     }
 
+    public function explode2array(& $value, $separator, $set_tpl_loop = false, $tpl_loop_item_name = NULL, $tpl_loop_name = NULL, & $tpl) {
+        if ($set_tpl_loop === FALSE) {
+            $value = explode($separator, $value);
+        } else if (
+                ($tpl_loop_item_name !== null && is_string($tpl_loop_item_name) && strlen($tpl_loop_item_name) > 0) &&
+                ($tpl_loop_name !== null && is_string($tpl_loop_name) && strlen($tpl_loop_name) > 0) &&
+                ($tpl !== null && $tpl instanceof tpl)
+        ) {
+            $_arr = explode($separator, $value);
+            $arr = array();
+            foreach ($_arr as $item)
+                $arr[] = array($tpl_loop_item_name => $item);
+            $tpl->setLoop($tpl_loop_name, $arr);
+        }
+    }
+
     /**
      * check the number of alias columns for a domain name, and create more if to low
      * @param string $domain
      * @return boolean
      */
     public function check_alias_columns($domain) {
+        global $app;
         //* get total alias count for domain
         $acount_n = (int) $this->get_max_alias_count($domain, 'n'); //* none active
         $acount_y = (int) $this->get_max_alias_count($domain, 'y'); //* active
         $acount = (int) ($acount_n + $acount_y);
         //* get alias columns in table for domain
-        $dtacount = (int) $this->getSOGoTableAliasColumnCount($domain);
+        $dtacount = (int) $this->get_sogo_table_alias_column_count($domain);
         $has_error = FALSE;
         //* if alias columns count in table for domain are to low
         if ($dtacount < $acount) {
@@ -111,12 +401,12 @@ class sogo_helper {
             $sql = array();
             for ($index = 0; $index < intval(($acount - $dtacount)); $index++) {
                 $_i = (int) ($dtacount + $index);
-                $sql[] = "ALTER TABLE `{$this->getValidSOGoTableName($domain)}` ADD `alias_{$_i}` VARCHAR( 500 ) NOT NULL ";
+                $sql[] = "ALTER TABLE `{$this->get_valid_sogo_table_name($domain)}` ADD `alias_{$_i}` VARCHAR( 500 ) NOT NULL ";
             }
             $sqlres = & $this->sqlConnect();
             foreach ($sql as $value) {
                 if (!$sqlres->query($value)) {
-                    $this->logError("sogo_helper::check_alias_columns(): update domain table for [{$domain}], FAILD" . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1));
+                    $app->log("sogo_helper::check_alias_columns(): update domain table for [{$domain}], FAILD" . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1), LOGLEVEL_ERROR);
                     $has_error = TRUE;
                 }
             }
@@ -139,7 +429,7 @@ class sogo_helper {
         return false;
     }
 
-    public function getServer($sid) {
+    public function get_server($sid) {
         if (!isset(self::$sogo_server[$sid])) {
             global $app, $conf;
             if ($sid === NULL || !is_int($sid))
@@ -157,7 +447,7 @@ class sogo_helper {
      * @param integer $server_id
      * @return array|boolean
      */
-    public function getServerConfig($server_id = NULL) {
+    public function get_server_config($server_id = NULL) {
         if (!isset(self::$sCache[$server_id])) {
             global $app, $conf;
             if ($server_id === NULL || !is_int($server_id))
@@ -167,7 +457,7 @@ class sogo_helper {
             $server_default = $this->getDB(false)->queryOneRecord($sql);
 
             if (!$server_default) {
-                $this->logError("SOGo get server config failed.");
+                $app->log("SOGo get server config failed.", LOGLEVEL_ERROR);
                 self::$sCache[$server_id] = false;
                 return self::$sCache[$server_id];
             }
@@ -198,7 +488,7 @@ class sogo_helper {
      * @param boolean $full_server_conf set to true gets the full config for a domain including server defaults
      * @return array|boolean boolean false on error
      */
-    public function getDomainConfig($domain_name, $full_server_conf = false) {
+    public function get_domain_config($domain_name, $full_server_conf = false) {
         if (!isset(self::$dnCache[$domain_name]) && $this->is_domain_active($domain_name)) {
             global $app;
             //* get server default config (BASED on domain name)
@@ -212,12 +502,12 @@ AND sc.`server_name` = s.`server_name";
             $server_default = $this->getDB()->queryOneRecord($server_default_sql);
 
             if (!$server_default) {
-                $app->log("sogo_helper::getDomainConfig(): failed. Unable to get server config from domain {$domain_name}", LOGLEVEL_WARN);
-                $app->log("sogo_helper::getDomainConfig(): {$server_default_sql}", LOGLEVEL_WARN);
+                $app->log("sogo_helper::get_domain_config(): failed. Unable to get server config from domain {$domain_name}", LOGLEVEL_WARN);
+                $app->log("sogo_helper::get_domain_config(): {$server_default_sql}", LOGLEVEL_WARN);
                 self::$dnCache[$domain_name] = false; //* if server default is not isset we must stop it from running to prevent SOGo or system failures
                 return self::$dnCache[$domain_name];
             }
-            //* @todo if same instace is allowed force server url / ip on the mail server (NO localhosts)
+            //* @todo if same instace is allowed force server host / ip on the mail server (NO localhosts)
             $parse_url = parse_url($server_default["SOGoSieveServer"]);
             $server_default["SOGoSieveServer"] = (isset($parse_url['host']) ? $parse_url['host'] : (isset($parse_url['path']) && $parse_url['path'] == $server_default["SOGoSieveServer"] ? $server_default["SOGoSieveServer"] : ""));
             $parse_url = parse_url($server_default["SOGoIMAPServer"]);
@@ -286,10 +576,10 @@ AND sc.`server_name` = s.`server_name";
      * @param string $domain_name
      * @return int
      */
-    public function getSOGoTableAliasColumnCount($domain_name) {
+    public function get_sogo_table_alias_column_count($domain_name) {
         global $conf;
         $sqlres = & $this->sqlConnect();
-        $sql = "SELECT * FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME`='{$sqlres->escape_string($this->getValidSOGoTableName($domain_name))}' AND `TABLE_SCHEMA`='{$conf['sogo_database_name']}' AND `COLUMN_NAME` LIKE 'alias_%'";
+        $sql = "SELECT * FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME`='{$sqlres->escape_string($this->get_valid_sogo_table_name($domain_name))}' AND `TABLE_SCHEMA`='{$conf['sogo_database_name']}' AND `COLUMN_NAME` LIKE 'alias_%'";
         $tmp = $sqlres->query($sql);
         $c = 0;
         while ($obj = $tmp->fetch_object())
@@ -306,12 +596,15 @@ AND sc.`server_name` = s.`server_name";
      * @param string $domain_name
      * @param integer $domain_id
      */
-    public function dropSOGoUsersTable($domain_name, $domain_id) {
-        $this->logDebug("sogo_helper::dropSOGoUsersTable(): {$domain_id}#{$domain_name}");
-        $sogo_db = & $this->sqlConnect();
-        $sogo_db->query("DROP TABLE {$this->getValidSOGoTableName($domain_name)}");
-        if ($sogo_db->error) {
-            $this->logWarn("sogo_plugin::sogo_domain_delete(): SQL ERROR:\n{$sogo_db->error}\n{$domain_id}#{$domain_name}");
+    public function drop_sogo_users_table($domain_name, $domain_id) {
+        global $app;
+        if (!empty($domain_name) && $domain_name !== false) {
+            $app->log("sogo_helper::drop_sogo_users_table(): {$domain_id}#{$domain_name}", LOGLEVEL_DEBUG);
+            $sogo_db = & $this->sqlConnect();
+            $sogo_db->query("DROP TABLE {$this->get_valid_sogo_table_name($domain_name)}");
+            if ($sogo_db->error) {
+                $app->log("sogo_helper::sogo_domain_delete(): SQL ERROR:\n{$sogo_db->error}\n{$domain_id}#{$domain_name}", LOGLEVEL_WARN);
+            }
         }
         unset(self::$sutCache[$domain_name]);
     }
@@ -322,10 +615,10 @@ AND sc.`server_name` = s.`server_name";
      * @param string $domain
      * @return boolean
      */
-    public function sogoTableExists($domain) {
+    public function sogo_table_exists($domain) {
         if (!isset(self::$sutCache[$domain])) {
-            global $conf;
-            $domain = $this->getValidSOGoTableName($domain);
+            global $conf, $app;
+            $domain = $this->get_valid_sogo_table_name($domain);
             $sqlres = & $this->sqlConnect();
             $sql1 = "SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA`='{$sqlres->escape_string($conf['sogo_database_name'])}' AND `TABLE_NAME`='{$sqlres->escape_string($domain)}'";
             $tmp = $sqlres->query($sql1);
@@ -335,11 +628,11 @@ AND sc.`server_name` = s.`server_name";
                     return self::$sutCache[$domain];
                 }
             }
-            $this->logDebug("SOGo table do not exists [{$domain}]");
+            $app->log("SOGo table do not exists [{$domain}]", LOGLEVEL_DEBUG);
             self::$sutCache[$domain] = false;
             return self::$sutCache[$domain];
         }
-        return self::$sutCache[$domain];
+        return (bool) self::$sutCache[$domain];
     }
 
     /**
@@ -347,8 +640,9 @@ AND sc.`server_name` = s.`server_name";
      * @param string $domain_name
      * @return string 
      */
-    public function getValidSOGoTableName($domain_name) {
+    public function get_valid_sogo_table_name($domain_name) {
         global $conf;
+        //* @todo remove all double "_", but it will have a major effect on existing setups
         $domain_name = str_replace(array('-', '.'), '_', $domain_name);
         return str_replace('{domain}', $domain_name, $conf['sogo_domain_table_tpl']);
     }
@@ -363,11 +657,12 @@ AND sc.`server_name` = s.`server_name";
         if (!isset(self::$daCache[md5($domain_name . $active)])) {
             $a_cnt = 0;
             $aliases = $this->get_alias_counters($domain_name, $active);
-            foreach ($aliases as $value) {
-                //* get highest mail alias counter 
-                $a_cnt = (int) ((int) $a_cnt < (int) $value['alias_cnt'] ? $value['alias_cnt'] : $a_cnt);
-            }
-            self::$daCache[md5($domain_name . $active)] = (int) $a_cnt;
+            if (is_array($aliases)) {
+                foreach ($aliases as $value)
+                    $a_cnt = (int) ((int) $a_cnt < (int) $value['alias_cnt'] ? $value['alias_cnt'] : $a_cnt);
+                self::$daCache[md5($domain_name . $active)] = (int) $a_cnt;
+            } else
+                self::$daCache[md5($domain_name . $active)] = 0;
         }
         return (int) self::$daCache[md5($domain_name . $active)];
     }
@@ -420,12 +715,12 @@ AND sc.`server_name` = s.`server_name";
      * @todo create fail safe in case sql connect fails, currently it will kill the server.php script causing ispconfig cron to stop working
      */
     public function & sqlConnect() {
-        global $conf;
+        global $conf, $app;
 
         if ($this->_sqlObject == NULL) {
             $this->_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
             if (mysqli_connect_errno()) {
-                $this->logError(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()));
+                $app->log(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()), LOGLEVEL_ERROR);
                 return;
             }
         }
@@ -436,7 +731,7 @@ AND sc.`server_name` = s.`server_name";
             //* not good create a new one.
             $this->_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
             if (mysqli_connect_errno()) {
-                $this->logError(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()));
+                $app->log(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()), LOGLEVEL_ERROR);
                 return;
             }
         }
@@ -508,66 +803,96 @@ AND sc.`server_name` = s.`server_name";
         }
         return $str;
     }
-    
+
     public function __destruct() {
         if ($this->_sqlObject != null)
             try {
                 $this->_sqlObject->close();
-            } catch (Exception $ex) {}
+            } catch (Exception $ex) {
+                
+            }
     }
 
-    /*     * *******************
-     * are to be removed
-     * never meant as a permanent thing
-     * ******************* */
-
+    //* #START:# Methods from interface/lib/class/function.php:~354
     /**
-     * log errors
-     * @global app $app
-     * @param string $str
-     * @deprecated use $app->log
+     * IDN converter wrapper.
+     * all converter classes should be placed in ISPC_CLASS_PATH.'/idn/'
      */
-    public function logError($str) {
-        global $app;
-        $app->log($str, LOGLEVEL_ERROR);
-    }
+    private function _idn_encode_decode($domain, $encode = true) {
+        if ($domain == '')
+            return '';
+        if (preg_match('/^[0-9\.]+$/', $domain))
+            return $domain; // may be an ip address - anyway does not need to bee encoded
 
-    /**
-     * log warnings
-     * @global app $app
-     * @param string $str
-     * @deprecated use $app->log
-     */
-    public function logWarn($str) {
-        global $app;
-        $app->log($str, LOGLEVEL_WARN);
-    }
 
-    /**
-     * log debug
-     * @global app $app
-     * @param string $str
-     * @deprecated use $app->log
-     */
-    public function logDebug($str) {
-        global $app;
-        $app->log($str, LOGLEVEL_DEBUG);
-    }
-
-    /**
-     * compere to strings
-     * @param string $arg_0
-     * @param string $arg_1
-     * @return boolean
-     * @deprecated use if ($arg_0 == $arg_1)
-     */
-    public function isEqual($arg_0, $arg_1) {
-        if ($arg_0 == $arg_1) {
-            return TRUE;
+            
+// get domain and user part if it is an email
+        $user_part = false;
+        if (strpos($domain, '@') !== false) {
+            $user_part = substr($domain, 0, strrpos($domain, '@'));
+            $domain = substr($domain, strrpos($domain, '@') + 1);
         }
-        return FALSE;
+
+        if ($encode == true) {
+            if (function_exists('idn_to_ascii')) {
+                $domain = idn_to_ascii($domain);
+            } elseif (file_exists(ISPC_CLASS_PATH . '/idn/idna_convert.class.php')) {
+                /* use idna class:
+                 * @author  Matthias Sommerfeld <mso@phlylabs.de>
+                 * @copyright 2004-2011 phlyLabs Berlin, http://phlylabs.de
+                 * @version 0.8.0 2011-03-11
+                 */
+                if (!is_object($this->idn_converter) || $this->idn_converter_name != 'idna_convert.class') {
+                    include_once ISPC_CLASS_PATH . '/idn/idna_convert.class.php';
+                    $this->idn_converter = new idna_convert(array('idn_version' => 2008));
+                    $this->idn_converter_name = 'idna_convert.class';
+                }
+                $domain = $this->idn_converter->encode($domain);
+            }
+        } else {
+            if (function_exists('idn_to_utf8')) {
+                $domain = idn_to_utf8($domain);
+            } elseif (file_exists(ISPC_CLASS_PATH . '/idn/idna_convert.class.php')) {
+                /* use idna class:
+                 * @author  Matthias Sommerfeld <mso@phlylabs.de>
+                 * @copyright 2004-2011 phlyLabs Berlin, http://phlylabs.de
+                 * @version 0.8.0 2011-03-11
+                 */
+
+                if (!is_object($this->idn_converter) || $this->idn_converter_name != 'idna_convert.class') {
+                    include_once ISPC_CLASS_PATH . '/idn/idna_convert.class.php';
+                    $this->idn_converter = new idna_convert(array('idn_version' => 2008));
+                    $this->idn_converter_name = 'idna_convert.class';
+                }
+                $domain = $this->idn_converter->decode($domain);
+            }
+        }
+
+        if ($user_part !== false)
+            return $user_part . '@' . $domain;
+        else
+            return $domain;
     }
 
+    //* from interface/lib/class/function.php:~411
+    public function idn_encode($domain) {
+        $domains = explode("\n", $domain);
+        for ($d = 0; $d < count($domains); $d++) {
+            $domains[$d] = $this->_idn_encode_decode($domains[$d], true);
+        }
+        return implode("\n", $domains);
+    }
+
+    //* from interface/lib/class/function.php:~419
+    public function idn_decode($domain) {
+        $domains = explode("\n", $domain);
+        for ($d = 0; $d < count($domains); $d++) {
+            $domains[$d] = $this->_idn_encode_decode($domains[$d], false);
+        }
+        return implode("\n", $domains);
+    }
+
+    //* #END:# Methods from interface/lib/class/function.php
 }
 
 class sogo_module_settings {

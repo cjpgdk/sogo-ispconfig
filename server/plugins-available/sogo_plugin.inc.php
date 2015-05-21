@@ -29,12 +29,6 @@ class sogo_plugin {
     var $plugin_name = 'sogo_plugin';
     var $class_name = 'sogo_plugin';
 
-    /**
-     * used to avoid duplicate queries on multi data updates in one session
-     * @var array 
-     */
-    static private $_queryHash = array();
-
     function onInstall() {
         return false;
     }
@@ -196,11 +190,11 @@ class sogo_plugin {
         $app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert = ($data['new']['config_rebuild_on_mail_user_insert'] == 'y' ? TRUE : FALSE);
 
         //* mails on the SOGo server
-        if ($db_mail_domains = $app->sogo_helper->getMailDomainNames('y')) {
+        if ($db_mail_domains = $app->sogo_helper->get_mail_domain_names('y')) {
             $create_mail_domains = array();
             $ok_mail_domains = array();
             foreach ($db_mail_domains as $value) {
-                if (!$app->sogo_helper->sogoTableExists($value['domain']))
+                if (!$app->sogo_helper->sogo_table_exists($value['domain']))
                     $create_mail_domains[] = $value['domain'];
                 else
                     $ok_mail_domains[] = $value['domain'];
@@ -220,7 +214,7 @@ class sogo_plugin {
         //* create domains
         if (isset($create_mail_domains) && is_array($create_mail_domains)) {
             foreach ($create_mail_domains as $value) {
-                if (!$app->sogo_helper->sogoTableExists($value)) {
+                if (!$app->sogo_helper->sogo_table_exists($value)) {
                     $app->log("Creatign domain: " . $value, LOGLEVEL_DEBUG);
                     $this->insert_sogo_mail_domain(mail_domain_insert, array(
                         'new' => array('domain' => $value),
@@ -232,7 +226,7 @@ class sogo_plugin {
         //* remove domains
         if (isset($remove_mail_domains) && is_array($remove_mail_domains)) {
             foreach ($remove_mail_domains as $value) {
-                if ($app->sogo_helper->sogoTableExists($value['domain'])) {
+                if ($app->sogo_helper->sogo_table_exists($value['domain'])) {
                     $app->log("Droping domain: " . $value['domain'], LOGLEVEL_DEBUG);
                     $value['server_id'] = $conf['server_id']; //* force server to this one.
                     $this->remove_sogo_mail_domain('mail_domain_delete', array(
@@ -245,7 +239,7 @@ class sogo_plugin {
             }
         }
 
-        $this->__buildSOGoConfig("sogo_plugin::update_sogo_module_settings():");
+        $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
     }
 
     public function insert_sogo_module_settings($event_name, $data) {
@@ -258,8 +252,8 @@ class sogo_plugin {
         //* @todo empty sogo db for users and domains and remove all config.
         if ($remove_mail_domains = $app->sogo_helper->getDB()->queryAllRecords("SELECT `domain`, `domain_id` FROM `mail_domain`")) {
             foreach ($remove_mail_domains as $value) {
-                if ($app->sogo_helper->sogoTableExists($value['domain'])) {
-                    $domain_table = $app->sogo_helper->getValidSOGoTableName($value['domain']);
+                if ($app->sogo_helper->sogo_table_exists($value['domain'])) {
+                    $domain_table = $app->sogo_helper->get_valid_sogo_table_name($value['domain']);
                     $sqlres = & $app->sogo_helper->sqlConnect();
                     if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
                         while ($obj = $tmp->fetch_object()) {
@@ -268,20 +262,31 @@ class sogo_plugin {
                             }
                         }
                     }
-                    $app->sogo_helper->dropSOGoUsersTable($value['domain'], $value['domain_id']);
+                    $app->sogo_helper->drop_sogo_users_table($value['domain'], $value['domain_id']);
                 }
             }
         }
-        if (file_exists($conf['sogo_gnu_step_defaults'])) {
-            //* unly try no need for errors
-            if (@unlink($conf['sogo_gnu_step_defaults'])) {
-                touch($conf['sogo_gnu_step_defaults']); //* needs to be there.!
-            }
-        }
-        if (file_exists($conf['sogo_gnu_step_defaults_sogod.plist'])) {
-            //* unly try no need for errors
-            @unlink($conf['sogo_gnu_step_defaults_sogod.plist']);
-        }
+        if (file_exists($conf['sogo_gnu_step_defaults']))
+            if (@unlink($conf['sogo_gnu_step_defaults']))
+                @touch($conf['sogo_gnu_step_defaults']); //* needs to be there.!
+
+            if (file_exists($conf['sogo_gnu_step_defaults'] . ".back"))
+            @unlink($conf['sogo_gnu_step_defaults'] . ".back");
+        if (file_exists($conf['sogo_gnu_step_defaults'] . ".bck"))
+            @unlink($conf['sogo_gnu_step_defaults'] . ".bck");
+
+        if (file_exists($conf['sogo_gnu_step_defaults_sogod.plist']))
+            if (@unlink($conf['sogo_gnu_step_defaults_sogod.plist']))
+                @touch($conf['sogo_gnu_step_defaults_sogod.plist']); //* needs to be there, if it exists
+
+            if (file_exists($conf['sogo_gnu_step_defaults_sogod.plist'] . ".back"))
+            @unlink($conf['sogo_gnu_step_defaults_sogod.plist'] . ".back");
+
+        //* try to delete .lck folder if it exists.
+        $lck_dir = str_replace(".GNUstepDefaults", ".lck", $conf['sogo_gnu_step_defaults']);
+        if (file_exists($lck_dir) || is_dir($lck_dir))
+            @rmdir($lck_dir);
+
         //* 'sogoForeceRestart', stop and start memcached and SOGo
         $app->services->restartServiceDelayed('sogoForeceRestart', 'restart');
     }
@@ -291,18 +296,18 @@ class sogo_plugin {
     //* #START# SOGO CONFIG (TB: sogo_config)
 
     public function update_sogo_config($event_name, $data) {
-        $method = "sogo_plugin::update_sogo_config():";
-        $this->__buildSOGoConfig($method);
+        global $app, $conf;
+        $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
     }
 
     public function insert_sogo_config($event_name, $data) {
-        $method = "sogo_plugin::insert_sogo_config():";
-        $this->__buildSOGoConfig($method);
+        global $app, $conf;
+        $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
     }
 
     public function remove_sogo_config($event_name, $data) {
-        $method = "sogo_plugin::remove_sogo_config():";
-        $this->__buildSOGoConfig($method);
+        global $app, $conf;
+        $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
     }
 
     //* #END# SOGO CONFIG (TB: sogo_config)
@@ -338,14 +343,14 @@ class sogo_plugin {
             return;
         }
         if ($event_name == 'sogo_domains_delete') {
-            if ($app->sogo_helper->sogoTableExists($domain_name)) {
+            if ($app->sogo_helper->sogo_table_exists($domain_name)) {
                 if ($app->sogo_helper->has_mail_users($domain_name, true)) {
                     //* if users still exists for domain this is only a sogo domain config removal/reset
                     $this->__syncMailUsers($domain_name);
                 } else {
                     //* no mail users left in db [mail_user] remove sogo tables
 
-                    $domain_table = $app->sogo_helper->getValidSOGoTableName($domain_name);
+                    $domain_table = $app->sogo_helper->get_valid_sogo_table_name($domain_name);
                     $sqlres = & $app->sogo_helper->sqlConnect();
                     if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
                         while ($obj = $tmp->fetch_object()) {
@@ -355,14 +360,13 @@ class sogo_plugin {
                         }
                     }
 
-                    $app->sogo_helper->dropSOGoUsersTable($domain_name, $data['old']['domain_id']);
+                    $app->sogo_helper->drop_sogo_users_table($domain_name, $data['old']['domain_id']);
                 }
             } else if ($app->sogo_helper->has_mail_users($domain_name, true)) {
                 //* if users still exists for domain this is only a sogo domain config removal/reset
                 $this->__create_sogo_table($domain_name);
             }
-            $method = "sogo_plugin::remove_sogo_domain():";
-            $this->__buildSOGoConfig($method);
+            $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
         }
     }
 
@@ -390,6 +394,8 @@ class sogo_plugin {
          */
         list($source_user, $source_domain) = explode('@', $data['old']['source']);
         list($destination_user, $destination_domain) = explode('@', $data['old']['destination']);
+        if ($destdomenc = $app->sogo_helper->idn_encode($destination_domain))
+            $destination_domain = $destdomenc;
 
         $app->log("sogo_plugin::remove_sogo_mail_user_alias(): {$data['old']['source']} => {$data['old']['destination']}", LOGLEVEL_DEBUG);
         //* a simple sync should be ok 
@@ -414,14 +420,15 @@ class sogo_plugin {
 
         list($source_user, $source_domain) = explode('@', $data['new']['source']);
         list($destination_user, $destination_domain) = explode('@', $data['new']['destination']);
+        if ($destdomenc = $app->sogo_helper->idn_encode($destination_domain))
+            $destination_domain = $destdomenc;
 
         $app->log("sogo_plugin::insert_sogo_mail_user_alias(): {$data['new']['source']} => {$data['new']['destination']}", LOGLEVEL_DEBUG);
 
         //* don't sync on error
         if ($app->sogo_helper->check_alias_columns($destination_domain)) {
             $this->__syncMailUsers($destination_domain);
-            $method = "sogo_plugin::insert_sogo_mail_user_alias():";
-            $this->__buildSOGoConfig($method);
+            $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
         }
         return TRUE;
     }
@@ -453,6 +460,10 @@ class sogo_plugin {
         list($new_source_user, $new_source_domain) = explode('@', $data['new']['source']);
         list($old_destination_user, $old_destination_domain) = explode('@', $data['old']['destination']);
         list($new_destination_user, $new_destination_domain) = explode('@', $data['new']['destination']);
+        if ($olddomenc = $app->sogo_helper->idn_encode($old_destination_domain))
+            $old_destination_domain = $olddomenc;
+        if ($newdomenc = $app->sogo_helper->idn_encode($new_destination_domain))
+            $new_destination_domain = $newdomenc;
         //* check / create the required alias columns
         $app->sogo_helper->check_alias_columns($new_destination_domain);
         $is_synced = FALSE;
@@ -524,8 +535,7 @@ class sogo_plugin {
             //* a simple sync should be ok 
             $this->__syncMailUsers($domain);
             if ($app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert) {
-                $method = "sogo_plugin::insert_sogo_mail_user():";
-                $this->__buildSOGoConfig($method);
+                $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
             }
         }
         return TRUE;
@@ -540,7 +550,7 @@ class sogo_plugin {
      */
     public function update_sogo_mail_user($event_name, $data) {
         global $app, $conf;
-        if ($app->sogo_helper->isEqual($event_name, 'mail_user_update')) {
+        if ($event_name == 'mail_user_update') {
             list($old_user, $old_domain) = explode('@', $data['old']['email']);
             list($new_user, $new_domain) = explode('@', $data['new']['email']);
             //* in reponse to user/domain changed
@@ -554,7 +564,7 @@ class sogo_plugin {
                 //* make sure new domain is created
                 if ($old_domain != $new_domain) {
                     $this->__deleteMailUser($data['old']['login']); //* remove all related to old user 
-                    if (!$app->sogo_helper->sogoTableExists($new_domain)) {
+                    if (!$app->sogo_helper->sogo_table_exists($new_domain)) {
                         $this->__create_sogo_table($new_domain); //* allso syncs all users!
                         $sync = TRUE;
                     }
@@ -610,8 +620,7 @@ class sogo_plugin {
             $this->__create_sogo_table($data['new']['domain']);
         }
         //* rebuild conf, so new domain settings/config actually gets added to SOGo
-        $method = "sogo_plugin::insert_sogo_mail_domain():";
-        $this->__buildSOGoConfig($method);
+        $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
     }
 
     /**
@@ -704,8 +713,7 @@ class sogo_plugin {
                  * $data['new']['server_id']
                  */
             }
-            $method = "sogo_plugin::update_sogo_mail_domain():";
-            $this->__buildSOGoConfig($method);
+            $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
         }
     }
 
@@ -771,409 +779,43 @@ class sogo_plugin {
     }
 
     /**
-     * create mail domain table and sync mail user for use with SOGo
-     * @global app $app
-     * @global array $conf
-     * @param string $domain_name
-     * @return boolean
+     * @deprecated pre-u10 use sogo_helper::create_sogo_table($domain_name)
      */
     private function __create_sogo_table($domain_name) {
-        global $app, $conf;
-
-        if (!$app->sogo_helper->has_mail_users($domain_name, true)) {
-            //* dont create no users
-            $app->log("sogo_plugin::__create_sogo_table(): Refusing to create table for domain: {$domain_name}, NO USERS", LOGLEVEL_DEBUG);
-            return;
-        }
-        if ($app->sogo_helper->sogoTableExists($domain_name)) {
-            $app->log("sogo_plugin::__create_sogo_table(): SOGo table exists for domain: {$domain_name}", LOGLEVEL_DEBUG);
-            return $this->__syncMailUsers($domain_name);
-        }
-
-        //* @todo optimize table to reduce the space requirements (varchar(500) too much in most cases)
-        $sql = "
-CREATE TABLE IF NOT EXISTS `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` (
-  `c_uid` varchar(500) CHARACTER SET utf8 NOT NULL,
-  `c_cn` text CHARACTER SET utf8 NOT NULL,
-  `c_name` varchar(500) CHARACTER SET utf8 NOT NULL,
-  `mail` varchar(500) CHARACTER SET utf8 NOT NULL,
-  `c_imaplogin` varchar(500) CHARACTER SET utf8 NOT NULL,
-  `c_sievehostname` varchar(500) CHARACTER SET utf8 NOT NULL,
-  `c_imaphostname` varchar(500) CHARACTER SET utf8 NOT NULL,
-  `c_domain` varchar(255) CHARACTER SET utf8 NOT NULL,
-  `c_password` varchar(255) CHARACTER SET utf8 NOT NULL";
-
-        //* build up the mail aliases
-        $acount_n = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'n'); //* none active
-        $acount_y = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'y'); //* active
-        $a_cnt = (int) ($acount_n + $acount_y);
-        if ($a_cnt > 0) {
-            //* append alias sql
-            for ($index = 0; $index < $a_cnt; $index++) {
-                $sql .= ",
-    `alias_{$index}` varchar(500) CHARACTER SET utf8 NOT NULL";
-            }
-        }
-
-        //* end sql statement
-        $sql .= ",
-  KEY `c_uid` (`c_uid`(333))
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-        $sqlres = & $app->sogo_helper->sqlConnect();
-        $result = $sqlres->query($sql) ? TRUE : FALSE;
-        $app->log("sogo_plugin::__create_sogo_table(): add SOGo table for domain: {$domain_name}" . (!$result ? "\n\tERROR\t\n{$sql}" : ""), ($result ? LOGLEVEL_DEBUG : LOGLEVEL_ERROR));
-        $result &= $this->__syncMailUsers($domain_name);
-        return $result;
+        global $app;
+        return $app->sogo_helper->create_sogo_table($domain_name);
     }
 
     /**
-     * sync all mail users and aliases for a given domain name
-     * @global app $app
-     * @param string $domain_name
-     * @param boolean $imap_enabled if set to false will sync all email addresses, is set to true will only sync email addresses with imap enabled
-     * @return boolean
+     * @deprecated pre-u10 use sogo_helper::sync_mail_users($domain_name, $imap_enabled)
      */
     private function __syncMailUsers($domain_name, $imap_enabled = true) {
         global $app;
-        if (!$this->__checkStateDropDomain($domain_name))
-            return false;
-
-        $new_table = false;
-        //* create domain table if it do not exists
-        if (!$app->sogo_helper->sogoTableExists($domain_name)) {
-            $this->__create_sogo_table($domain_name);
-            $new_table = true; //* createing new table, must rebuild config..!
-        }
-        $emails = $app->sogo_helper->getDB()->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
-        if (!empty($emails)) {
-            $domain_config = $app->sogo_helper->getDomainConfig($domain_name, true);
-            if (!$domain_config || !is_array($domain_config)) {
-                $app->sogo_helper->logError("SOGo Sync Mail Users - Unable to fetch the domain config for domain [{$domain_name}]");
-                return false;
-            }
-            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoSieveServer']);
-            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoIMAPServer']);
-            $_tmpSQL = array('users' => array(), 'alias' => array());
-            $good_mails = array();
-            foreach ($emails as $email) {
-                $good_mails[] = $email['login'];
-                if ($this->__sogo_mail_user_exists($email['login'], "{$app->sogo_helper->getValidSOGoTableName($domain_name)}")) {
-                    $_tmpSQL['users'][] = "UPDATE `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` SET "
-                            . " `c_uid` = '{$app->sogo_helper->dbEscapeString($email['login'])}' ,"
-                            . " `c_cn` = '{$app->sogo_helper->dbEscapeString($email['name'])}' ,"
-                            . " `c_name` = '{$app->sogo_helper->dbEscapeString($email['login'])}' ,"
-                            . " `mail` = '{$app->sogo_helper->dbEscapeString($email['email'])}' ,"
-                            . " `c_imaplogin` = '{$app->sogo_helper->dbEscapeString($email['login'])}' ,"
-                            . " `c_sievehostname` = '{$app->sogo_helper->dbEscapeString($domain_config['SOGoSieveServer'])}' ,"
-                            . " `c_imaphostname` = '{$app->sogo_helper->dbEscapeString($domain_config['SOGoIMAPServer'])}' ,"
-                            . " `c_domain` = '{$app->sogo_helper->dbEscapeString($domain_name)}' ,"
-                            . " `c_password` = '{$app->sogo_helper->dbEscapeString($email['password'])}' "
-                            . " WHERE `c_uid`='{$app->sogo_helper->dbEscapeString($email['login'])}';";
-                } else {
-                    $_tmpSQL['users'][] = "INSERT INTO `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` "
-                            . "(`c_uid`, `c_cn`, `c_name`, `mail`, `c_imaplogin`, `c_sievehostname`, `c_imaphostname`, `c_domain`, `c_password`) "
-                            . "VALUES "
-                            . "("
-                            . "'{$app->sogo_helper->dbEscapeString($email['login'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($email['name'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($email['login'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($email['email'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($email['login'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($domain_config['SOGoSieveServer'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($domain_config['SOGoIMAPServer'])}', "
-                            . "'{$app->sogo_helper->dbEscapeString($domain_name)}', "
-                            . "'{$app->sogo_helper->dbEscapeString($email['password'])}'"
-                            . ");";
-                }
-                $mail_aliases = $app->sogo_helper->getDB()->queryAllRecords("SELECT `source` FROM `mail_forwarding` WHERE `destination` = '{$app->sogo_helper->dbEscapeString($email['login'])}' AND `type`='alias' AND `active`='y';");
-                //* get alias columns in table for domain
-                $dtacount = (int) $app->sogo_helper->getSOGoTableAliasColumnCount($domain_name);
-
-                $aliasSQL = "UPDATE `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` SET ";
-                //* only do alias update if a column exists for it 
-                if ($dtacount > 0) {
-                    $ac = 0;
-                    foreach ($mail_aliases as $key => $value) {
-                        $aliasSQL .= " `alias_{$ac}` = '{$app->sogo_helper->dbEscapeString($value['source'])}' ,";
-                        $ac++;
-                        //* must be a better way but, need some results here so break on max alias columns in tb
-                        if ($dtacount == $ac)
-                            break;
-                    }
-                    $acount_n = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'n'); //* none active
-                    $acount_y = (int) $app->sogo_helper->get_max_alias_count($domain_name, 'y'); //* active
-                    $a_cnt = (int) ($acount_n + $acount_y);
-                    //* if mail_forward table holds more aliases than columns in sogo table limit to number in sogo table
-                    if ($a_cnt > $dtacount) {
-                        $a_cnt = $dtacount;
-                    } else {
-                        $a_cnt = ($a_cnt < $dtacount ? $dtacount : $a_cnt);
-                    }
-
-                    for ($ac; $ac < $a_cnt; $ac++) {
-                        $aliasSQL .= " `alias_{$ac}` = '' ,";
-                    }
-                    $_tmpSQL['alias'][] = trim($aliasSQL, ',')
-                            . " WHERE "
-                            . " `c_uid` = '{$app->sogo_helper->dbEscapeString($email['login'])}' AND"
-                            . " `c_cn` = '{$app->sogo_helper->dbEscapeString($email['name'])}' AND"
-                            . " `c_name` = '{$app->sogo_helper->dbEscapeString($email['login'])}' AND"
-                            . " `mail` = '{$app->sogo_helper->dbEscapeString($email['email'])}' AND"
-                            . " `c_imaplogin` = '{$app->sogo_helper->dbEscapeString($email['login'])}' AND"
-                            . " `c_sievehostname` = '{$app->sogo_helper->dbEscapeString($domain_config['SOGoSieveServer'])}' AND"
-                            . " `c_imaphostname` = '{$app->sogo_helper->dbEscapeString($domain_config['SOGoIMAPServer'])}' AND"
-                            . " `c_domain` = '{$app->sogo_helper->dbEscapeString($domain_name)}' AND"
-                            . " `c_password` = '{$app->sogo_helper->dbEscapeString($email['password'])}';";
-                }
-                /*
-                 * server_id
-                 * name
-                 * disableimap
-                 * disablesieve
-                 * disablesieve-filter
-                 */
-            }
-            $sqlres = & $app->sogo_helper->sqlConnect();
-            foreach ($_tmpSQL['users'] as $value) {
-                $_queryHash = md5($value); //* avoid multiple of the same query
-                if (in_array($_queryHash, self::$_queryHash))
-                    continue;
-                if (!$sqlres->query($value)) {
-                    $app->sogo_helper->logError("sogo_plugin::__syncMailUsers(): sync users failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1));
-                }
-                self::$_queryHash[] = $_queryHash;
-            }
-            foreach ($_tmpSQL['alias'] as $value) {
-                $_queryHash = md5($value); //* avoid multiple of the same query
-                if (in_array($_queryHash, self::$_queryHash))
-                    continue;
-                if (!$sqlres->query($value)) {
-                    $app->sogo_helper->logError("sogo_plugin::__syncMailUsers(): sync users aliases failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1));
-                }
-                self::$_queryHash[] = $_queryHash;
-            }
-
-            //* for SOGo on other server than mail server, make sure delete users gets removed
-            $sql = "SELECT c_uid FROM `{$app->sogo_helper->getValidSOGoTableName($domain_name)}` WHERE NOT `c_uid` IN ('" . implode("','", $good_mails) . "')";
-            if ($tmp = $sqlres->query($sql)) {
-                while ($obj = $tmp->fetch_object())
-                    if (isset($obj->c_uid) && !in_array($obj->c_uid, $good_mails))
-                        $this->__deleteMailUser($obj->c_uid);
-            }
-            $app->log("Sync Mail Users in {$domain_name}", LOGLEVEL_DEBUG);
-
-            if ($new_table) {
-                $app->log("Mail domain '{$domain_name}', is newly created rebuilding SOGo config", LOGLEVEL_DEBUG);
-                $this->__buildSOGoConfig("__syncMailUsers():");
-            }
-        } else {
-            //* no mail users drop sogo table
-            if ($app->sogo_helper->sogoTableExists($domain_name)) {
-                //* check if users exists in table, delete them with SOGo if they do
-                $domain_table = $app->sogo_helper->getValidSOGoTableName($domain_name);
-                $sqlres = & $app->sogo_helper->sqlConnect();
-                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
-                    while ($obj = $tmp->fetch_object()) {
-                        if (isset($obj->c_uid)) {
-                            //* only deletes from SOGo db
-                            $this->__deleteMailUser($obj->c_uid);
-                        }
-                    }
-                }
-                $app->sogo_helper->dropSOGoUsersTable($domain_name, -1);
-            }
-            $app->log("No users, dropping domain {$domain_name}", LOGLEVEL_DEBUG);
-            $this->__buildSOGoConfig("__syncMailUsers():"); //* @todo validate this is needed (looks like it)
-        }
-        return TRUE;
+        return $app->sogo_helper->sync_mail_users($domain_name, $imap_enabled);
     }
 
     /**
-     * 
-     * @global app $app
-     * @param type $email
-     * @param type $table
-     * @return type
+     * @deprecated pre-u10 use sogo_helper::sogo_mail_user_exists($email, $table)
      */
     private function __sogo_mail_user_exists($email, $table) {
         global $app;
-        $sqlres = & $app->sogo_helper->sqlConnect();
-        $usr = $sqlres->query("SELECT `c_imaplogin` FROM {$table} WHERE `c_imaplogin`='{$app->sogo_helper->dbEscapeString($email)}'");
-        return ($usr !== FALSE && count($usr->fetch_assoc()) > 0 ? TRUE : FALSE);
+        return $app->sogo_helper->sogo_mail_user_exists($email, $table);
     }
 
     /**
-     * method to remove a sogo user from sogo storage
-     * @global app $app
-     * @global array $conf
-     * @param string $email the email address to remove
+     * @deprecated pre-u10 use sogo_helper::delete_mail_user($email)
      */
     private function __deleteMailUser($email) {
-        global $app, $conf;
-        if (!empty($email) && (strpos($email, '@') !== FALSE)) {
-            $cmd_arg = escapeshellarg("{$conf['sogo_tool_binary']}") . " remove " . escapeshellarg("{$email}");
-            $cmd = str_replace('{command}', $cmd_arg, $conf['sogo_su_command']);
-            $app->log("sogo_plugin::remove_sogo_mail_user() \n\t - CALL:{$cmd}", LOGLEVEL_DEBUG);
-            exec($cmd);
-            $usrDom = explode('@', $email);
-            $sqlres = & $app->sogo_helper->sqlConnect();
-            $sqlres->query("DELETE FROM `{$app->sogo_helper->getValidSOGoTableName($usrDom[1])}` WHERE `c_uid` = '{$sqlres->escape_string($email)}'");
-            if ($sqlres->error)
-                $app->log("sogo_plugin::remove_sogo_mail_user() \n\t - SQL Error: {$sqlres->error}", LOGLEVEL_DEBUG);
-        }
-    }
-
-    private function __checkStateDropDomain($domain, $domain_id = -1) {
         global $app;
-        if (!$app->sogo_helper->is_domain_active($domain)) {
-            //* not active
-            if ($app->sogo_helper->sogoTableExists($domain)) {
-                //* check if users exists in table, delete them with SOGo if they do
-                $domain_table = $app->sogo_helper->getValidSOGoTableName($domain);
-                $sqlres = & $app->sogo_helper->sqlConnect();
-                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
-                    while ($obj = $tmp->fetch_object()) {
-                        if (isset($obj->c_uid)) {
-                            //* only deletes from SOGo db
-                            $this->__deleteMailUser($obj->c_uid);
-                        }
-                    }
-                }
-                $app->sogo_helper->dropSOGoUsersTable($domain, $domain_id);
-            }
-            return false;
-        }
-        return true;
+        return $app->sogo_helper->delete_mail_user($email);
     }
 
     /**
-     * 
-     * @global app $app
-     * @global array $conf
-     * @param type $method
+     * @deprecated pre-u10 use sogo_helper::check_domain_state_drop($domain_name, $imap_enabled)
      */
-    private function __buildSOGoConfig($method) {
-        global $app, $conf;
-        $app->log("buildSOGoConfig: called by [{$method}]", LOGLEVEL_DEBUG);
-        //* get server config (CURRENT RUNNING server config)
-        if ($sconf = $app->sogo_helper->getServerConfig()) {
-            $sconf['SOGoMailListViewColumnsOrder'] = explode(',', $sconf['SOGoMailListViewColumnsOrder']);
-            $sconf['SOGoCalendarDefaultRoles'] = explode(',', $sconf['SOGoCalendarDefaultRoles']);
-
-            //* if called more then once
-            if (!is_object($app->sogo_config) && !class_exists('sogo_config'))
-                $app->uses('sogo_config');
-            else if (!is_object($app->sogo_config) && class_exists('sogo_config'))
-                $app->sogo_config = new sogo_config();
-
-            //* build XML document
-            $app->sogo_config->createConfig(array('sogod' => $sconf));
-            //* holder for builded domain xml config
-            $sogodomsconf = "";
-            //* query mail domains active and based on module settings
-            if ($mail_domains = $app->sogo_helper->getMailDomainNames('y')) {
-                //* on success loop mail domains, prepare config
-                foreach ($mail_domains as $value) {
-                    if (!$app->sogo_helper->sogoTableExists($value['domain']))
-                        continue;
-                    $dconf = $app->sogo_helper->getDomainConfig($value['domain'], TRUE);
-
-                    //* get domain config template for domains (conf-custom then main conf)
-                    $tpl = $app->sogo_helper->getTemplateObject("sogo_domain.master");
-                    if ($tpl !== null && $tpl instanceof tpl) {
-                        //* loop domain config
-                        foreach ($dconf as $key => $value2) {
-                            if (($sconf[$key] == $value2 || $key == 'server_name') && ($key != 'SOGoSMTPServer')) {
-                                //* skip config settings that is default the server!
-                            } else if ($key == 'SOGoSuperUsernames') {
-                                $_arr = explode(',', $dconf['SOGoSuperUsernames']);
-                                $arr = array();
-                                foreach ($_arr as $value3)
-                                    $arr[] = array('SOGoSuperUsername' => $value3);
-                                $tpl->setLoop('SOGoSuperUsernames', $arr);
-                            } else if ($key == 'SOGoCalendarDefaultRoles') {
-                                if (implode(',', $sconf[$key]) == $dconf['SOGoCalendarDefaultRoles'])
-                                    continue;
-                                $_arr = explode(',', $dconf['SOGoCalendarDefaultRoles']);
-                                $arr = array();
-                                foreach ($_arr as $value3)
-                                    $arr[] = array('SOGoCalendarDefaultRole' => $value3);
-                                $tpl->setLoop('SOGoCalendarDefaultRoles', $arr);
-                            } else if ($key == 'SOGoMailListViewColumnsOrder') {
-                                if (implode(',', $sconf[$key]) == $dconf['SOGoMailListViewColumnsOrder'])
-                                    continue;
-                                $_arr = explode(',', $dconf['SOGoMailListViewColumnsOrder']);
-                                $arr = array();
-                                foreach ($_arr as $value3)
-                                    $arr[] = array('SOGoMailListViewColumn' => $value3);
-                                $tpl->setLoop('SOGoMailListViewColumnsOrder', $arr);
-                            } else if ($key == 'SOGoMailMessageCheck' || $key == 'SOGoRefreshViewCheck') {
-                                //* write both for compatibility with debian lenny (SOGo 2.0.6b)
-                                $tpl->setVar('SOGoMailMessageCheck', $value2);
-                                $tpl->setVar('SOGoRefreshViewCheck', $value2);
-                            } else
-                                $tpl->setVar($key, $value2); //* default isset as normal var
-                        }
-                        $tpl->setVar('domain', $value['domain']);
-                        $tpl->setVar('SOGOUNIQID', md5($value['domain']));
-                        $tpl->setVar('CONNECTIONVIEWURL', "mysql://{$conf['sogo_database_user']}:{$conf['sogo_database_passwd']}@{$conf['sogo_database_host']}:{$conf['sogo_database_port']}/{$conf['sogo_database_name']}/{$app->sogo_helper->getValidSOGoTableName($value['domain'])}");
-                        $tpl->setVar($conf['sogo_domain_extra_vars']);
-                        $MailFieldNames = array();
-                        $dtacount = (int) $app->sogo_helper->getSOGoTableAliasColumnCount($value['domain']); //* get alias columns in table for domain
-                        for ($i = 0; $i < $dtacount; $i++) {
-                            $MailFieldNames[] = array('MailFieldName' => 'alias_' . $i);
-                        }
-                        $tpl->setLoop('MailFieldNames', $MailFieldNames); //* set alias names loop
-                        $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array((isset($dconf['server_name_real']) ? $dconf['server_name_real'] : $dconf['server_name']), $value['domain']), $tpl->grab());
-                    }
-
-                    //$app->log(print_r($sconf, TRUE), LOGLEVEL_DEBUG);
-                    //$app->log(print_r($dconf, TRUE), LOGLEVEL_DEBUG);
-                    //$app->log(print_r($sogodomsconf, TRUE), LOGLEVEL_DEBUG);
-                }
-                //* END: mail domains loop
-            }
-            $this_server = $app->sogo_helper->getServer((int) $conf['server_id']);
-            $replace_vars = array('{SOGODOMAINSCONF}', '{SOGOUSERN}', '{SOGOUSERPW}', '{MYSQLHOST}', '{MYSQLPORT}', '{SOGODB}', '{SERVERNAME}',);
-            $replace_values = array($sogodomsconf, $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_host'], $conf['sogo_database_port'], $conf['sogo_database_name'], $this_server['server_name'],);
-            //* replace default vars in default sogo config
-            $sogod = $app->sogo_config->getConfigReplace(sogo_config::CONFIG_FULL, $replace_vars, $replace_values);
-            //* replace default vars in sogo config (sogod.plist)
-            $sogodplist = $app->sogo_config->getConfigReplace(sogo_config::CONFIG_PLIST, $replace_vars, $replace_values);
-
-            //* load it as DOMDocument Object (this validates the XML)
-            if ($app->sogo_config->loadSOGoConfigString($sogod) !== FALSE) {
-                unset($app->sogo_config); //* unset everything (- ~5kB per. domain)
-                $result = TRUE;
-                if (file_exists($conf['sogo_gnu_step_defaults']))
-                    copy($conf['sogo_gnu_step_defaults'], $conf['sogo_gnu_step_defaults'] . ".back");
-                $result = file_put_contents($conf['sogo_gnu_step_defaults'], $sogod); //* try writing to the file
-                //* debug the result
-                $app->log("{$method} Write file [{$conf['sogo_gnu_step_defaults']}] " . ($result ? "Succeeded" : "Failed") . " (CONFIG var: sogo_gnu_step_defaults)", LOGLEVEL_DEBUG);
-                //* check if file exists (sogod.plist)
-                if (file_exists($conf['sogo_gnu_step_defaults_sogod.plist'])) {
-                    copy($conf['sogo_gnu_step_defaults_sogod.plist'], $conf['sogo_gnu_step_defaults_sogod.plist'] . ".back");
-                    $result = file_put_contents($conf['sogo_gnu_step_defaults_sogod.plist'], $sogodplist);
-                    $app->log("{$method} Write file [{$conf['sogo_gnu_step_defaults_sogod.plist']}] " . ($result ? "Succeeded" : "Failed") . " (CONFIG var: sogo_gnu_step_defaults_sogod.plist)", LOGLEVEL_DEBUG);
-                }
-                //* test the result
-                if ($result) {
-                    //* log more debug and restart
-                    $app->log("{$method} rebuilded SOGo config OK", LOGLEVEL_DEBUG);
-                    $app->services->restartServiceDelayed('sogo', 'restart');
-                } else {
-                    //* log error somthing when't wrong (check: /var/log/ispconfig/cron.log)
-                    $app->log("{$method} Unable to rebuild and/or save new SOGo config...", LOGLEVEL_ERROR);
-                }
-            } else {
-                //* in case we build invalid SOGo config create error
-                $app->log("SOGo Config is not valid:" . PHP_EOL . implode(PHP_EOL, libxml_get_errors()), LOGLEVEL_ERROR);
-                //* only log FULL configuration in debug mode
-                $app->log("Failed SOGo XML Config:" . PHP_EOL . $sogod, LOGLEVEL_DEBUG);
-            }
-        } else {
-            $app->log("SOGo Server config not found", LOGLEVEL_DEBUG);
-        }
+    private function __checkStateDropDomain($domain, $domain_id = -1) {
+        global $app;
+        return $app->sogo_helper->check_domain_state_drop($domain, $domain_id);
     }
 
     public function __destruct() {

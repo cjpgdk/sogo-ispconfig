@@ -1,17 +1,41 @@
 <?php
 
 /*
- SOGo sudo command to use when executing a SOGo binary
- eg. 
- su -p -c '{command}' sogo
- sudo -u sogo {command}
- **** if you must quote the command ONLY USE ' (Single quote) NOT "(Double quote)
-*/
-$conf['sogo_su_command'] = 'sudo -u sogo {command}';
-/*
-  //* full path to sogo binary
-  $conf['sogo_binary'] = '/usr/sbin/sogod';
+  method to use when generating the unique id for he domain
+  "" sogo domain config key "id"
+
+  Supported PHP default medthods are
+  - md5, sha1, crypt, crc32
+  propperply more but these are widely used.
+
+  if you like to use the domain name as is
+  without encoding use "plain"
+
+  rule of thumb the encoding method must take one argument
+  and be available as procedural code and return the result
+
+  md5("domain-name.com");
+  sha1("domain-name.com");
+  crypt("domain-name.com");
+
+  if not isset md5 is used
+
+ **** side note the resulting string is used with sogo-integrator to identify the domain 
  */
+$conf['sogo_unique_id_method'] = 'md5';
+
+//* SOGo system user name
+$conf['sogo_system_user'] = 'sogo';
+//* SOGo system group name
+$conf['sogo_system_group'] = 'sogo';
+/*
+  SOGo sudo command to use when executing a SOGo binary
+  eg.
+  su -p -c '{command}' sogo
+  sudo -u sogo {command}
+ **** if you must quote the command ONLY USE ' (Single quote) NOT " (Double quote)
+ */
+$conf['sogo_su_command'] = 'sudo -u ' . $conf['sogo_system_user'] . ' {command}';
 //* full path to sogo-tool binary 
 $conf['sogo_tool_binary'] = '/usr/sbin/sogo-tool';
 //* name of the database used for SOGo
@@ -31,17 +55,18 @@ $conf['sogo_domain_extra_vars'] = array(
     'userPasswordAlgorithm' => 'crypt',
     /*
       The default behaviour is to store newly set
-      passwords with out the scheme (default: NO). 
+      passwords with out the scheme (default: NO).
       This can be overridden by setting to YES
       and will result in passwords stored as {scheme}encryptedPass
      */
     'prependPasswordScheme' => 'NO',
-    //* human identification name of the address book
+    //* human identification name of the address book
     'displayName' => 'Users in {domain}',
 );
 //* sogo default configuration file(s)
 $conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
 $conf['sogo_gnu_step_defaults_sogod.plist'] = '/var/lib/sogo/GNUstep/Defaults/sogod.plist';
+$conf['sogo_system_default_conf'] = '/etc/sogo/sogo.conf';
 
 //* template to use for table names in sogo db
 $conf['sogo_domain_table_tpl'] = "{domain}_users";
