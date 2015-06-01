@@ -113,8 +113,6 @@ class SOGo {
             $this->os_name = strtolower(Installer::readInput("{$this->os_name}"));
             switch ($this->os_name) {
                 case 'jessie':
-                    return "deb http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}" . PHP_EOL . "#deb-src http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}";
-                    break;
                 case 'lenny':
                 case 'squeeze':
                 case 'wheezy':
