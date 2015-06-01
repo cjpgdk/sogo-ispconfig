@@ -93,15 +93,16 @@ server
    proxy_http_version 1.1;
    
    location = / {
-      rewrite ^ http://\$server_name:\$server_port/SOGo; 
+      rewrite ^ \$scheme://\$server_name:\$server_port/SOGo; 
       allow all; 
    }
+   
    # For IOS 7 
-
    location = /principals/ {
-      rewrite ^ http://\$server_name:\$server_port/SOGo/dav; 
+      rewrite ^ \$scheme://\$server_name:\$server_port/SOGo/dav; 
       allow all; 
    }
+   
    location ^~/SOGo {
       proxy_pass http://{SOGoListenIpPort}; 
       proxy_redirect http://{SOGoListenIpPort} default; 
