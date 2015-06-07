@@ -112,12 +112,18 @@ class SOGo {
             $this->echoMessage("jessie, wheezy, squeeze, lenny [{$this->os_name}]: ", "");
             $this->os_name = strtolower(Installer::readInput("{$this->os_name}"));
             switch ($this->os_name) {
-                case 'jessie':
                 case 'lenny':
+                    return "deb http://inverse.ca/debian/ {$this->os_name} {$this->os_name}" 
+                        . PHP_EOL . "#deb-src http://inverse.ca/debian/ {$this->os_name} {$this->os_name}";
+                    break;
                 case 'squeeze':
                 case 'wheezy':
+                case 'jessie':
                 default:
-                    return "deb http://inverse.ca/debian/ {$this->os_name} {$this->os_name}" . PHP_EOL . "#deb-src http://inverse.ca/debian/ {$this->os_name} {$this->os_name}";
+                    return "deb http://inverse.ca/debian/ {$this->os_name} {$this->os_name}" 
+                        . PHP_EOL . "#deb-src http://inverse.ca/debian/ {$this->os_name} {$this->os_name}"
+                        . PHP_EOL . PHP_EOL . "#deb-src http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}"
+                        . PHP_EOL . "#deb-src http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}";
                     break;
             }
         } else if ($this->os == "ubuntu") {
@@ -126,14 +132,20 @@ class SOGo {
             $this->os_name = strtolower(Installer::readInput("trusty"));
             switch ($this->os_name) {
                 case 'lucid':
-                    return "deb http://inverse.ca/ubuntu/ lucid main" . PHP_EOL . "#deb-src http://inverse.ca/ubuntu/ lucid main";
+                    return "deb http://inverse.ca/ubuntu/ lucid main" 
+                        . PHP_EOL . "#deb-src http://inverse.ca/ubuntu/ lucid main" 
+                        . PHP_EOL . PHP_EOL . "#deb http://inverse.ca/ubuntu-nightly/ lucid main" 
+                        . PHP_EOL . "#deb-src http://inverse.ca/ubuntu-nightly/ lucid main";
                 case 'trusty':
                 case 'precise':
                 case 'oneiric':
                 case 'natty':
                 case 'maverick':
                 default:
-                    return "deb http://inverse.ca/ubuntu/ {$this->os_name} {$this->os_name}" . PHP_EOL . "#deb-src http://inverse.ca/ubuntu/ {$this->os_name} {$this->os_name}";
+                    return "deb http://inverse.ca/ubuntu/ {$this->os_name} {$this->os_name}" 
+                        . PHP_EOL . "#deb-src http://inverse.ca/ubuntu/ {$this->os_name} {$this->os_name}" 
+                        . PHP_EOL . PHP_EOL . "#deb http://inverse.ca/ubuntu-nightly/ {$this->os_name} {$this->os_name}" 
+                        . PHP_EOL . "#deb-src http://inverse.ca/ubuntu-nightly/ {$this->os_name} {$this->os_name}";
                     break;
             }
         }
