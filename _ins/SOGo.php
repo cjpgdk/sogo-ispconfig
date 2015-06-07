@@ -122,7 +122,7 @@ class SOGo {
                 default:
                     return "deb http://inverse.ca/debian/ {$this->os_name} {$this->os_name}" 
                         . PHP_EOL . "#deb-src http://inverse.ca/debian/ {$this->os_name} {$this->os_name}"
-                        . PHP_EOL . PHP_EOL . "#deb-src http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}"
+                        . PHP_EOL . PHP_EOL . "#deb http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}"
                         . PHP_EOL . "#deb-src http://inverse.ca/debian-nightly/ {$this->os_name} {$this->os_name}";
                     break;
             }
