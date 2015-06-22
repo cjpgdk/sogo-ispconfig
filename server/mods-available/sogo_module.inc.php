@@ -113,7 +113,7 @@ class sogo_module {
                         //* END: loop domain config
                         $tpl->setVar('domain', $value['domain']);
 
-                        if (!isset($conf['sogo_unique_id_method']) || !function_exists($conf['sogo_unique_id_method']))
+                        if (!isset($conf['sogo_unique_id_method']) || (!function_exists($conf['sogo_unique_id_method']) && $conf['sogo_unique_id_method']!="plain"))
                             $conf['sogo_unique_id_method'] = "md5";
                         $conf['sogo_unique_id_method'] = strtolower($conf['sogo_unique_id_method']);
                         if ($conf['sogo_unique_id_method'] == "plain")
