@@ -1,6 +1,6 @@
 <?php
 
-class UpdateClass extends PHPUpdateBaseClass {
+class UpdateClass7 extends PHPUpdateBaseClass {
 
     /**
      * method executed when updateing
@@ -58,4 +58,4 @@ class UpdateClass extends PHPUpdateBaseClass {
 
 }
 
-$updateClass = new UpdateClass();
+$updateClass = new UpdateClass7();
