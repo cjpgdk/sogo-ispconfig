@@ -45,6 +45,15 @@ $_SESSION["s"]["form"]["return_to"] = "";
 
 class tform_action extends tform_actions {
 
+    public function onAfterDelete() {
+        global $conf;
+        //* delete from the server too.
+        if ($this->dataRecord['filetype'] == "download" && file_exists($conf['sogo_plugins_upload_dir'] . "/" . $this->dataRecord['file'])) {
+            @unlink($conf['sogo_plugins_upload_dir'] . "/" . $this->dataRecord['file']);
+        }
+        parent::onAfterDelete();
+    }
+
 }
 
 $app->tform_action = new tform_action();

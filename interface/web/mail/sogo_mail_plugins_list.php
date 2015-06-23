@@ -28,23 +28,7 @@ $list_def_file = "list/sogo_plugins.list.php";
 $app->auth->check_module_permissions('mail');
 $app->uses('listform_actions');
 if (!$app->auth->is_admin()) {
-    //* not admin filter inactive plugins
-    /*
-    @todo
-        temporary solution
-        the better option will by to set the proper values in db columns
-        --- Client only plugin ---
-        [sys_userid, sys_groupid] = set to clients values 
-        [sys_perm_other] = Set to empty
-        --- all clients ---
-        [sys_userid, sys_groupid] = set to what ever..
-        [sys_perm_other] = 'r'; r= read only for all
-        
-        do this in file.
-        interface/web/admin/sogo_plugins_edit.php:64
-        and 
-        interface/web/admin/sogo_plugins_edit.php:88
-    */
+    //* not admin filter inactive plugins, we longer need " AND " statement but to avoid manual update of all plugins, we keep it here
     $app->listform_actions->SQLExtWhere = " `active`='y'  AND (`client_id`='{$_SESSION['s']['user']['client_id']}' OR `client_id`='0') ";
 }
 $app->listform_actions->onLoad();
