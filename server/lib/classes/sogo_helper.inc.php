@@ -212,7 +212,7 @@ class sogo_helper {
 
     public function sogo_mail_user_exists($email, $table) {
         $sqlres = & $this->sqlConnect();
-        $usr = $sqlres->query("SELECT `c_imaplogin` FROM {$table} WHERE `c_imaplogin`='{$sqlres->escape_string($email)}'");
+        $usr = $sqlres->query("SELECT `c_imaplogin` FROM {$table} WHERE `c_imaplogin`='{$sqlres->escape_string($email)}' OR `c_uid`='{$sqlres->escape_string($email)}'");
         return ($usr !== FALSE && count($usr->fetch_assoc()) > 0 ? TRUE : FALSE);
     }
 

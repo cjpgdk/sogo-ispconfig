@@ -22,9 +22,6 @@
  * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
  */
 class sogo_plugin {
-    /*
-     * @todo make use of the same column name for all emails not mix it with c_uid, c_imaplogin | c_uid is master and should be the only column to check
-     */
 
     var $plugin_name = 'sogo_plugin';
     var $class_name = 'sogo_plugin';
@@ -174,7 +171,8 @@ class sogo_plugin {
      * @return void
      */
     public function action_mail_user_sync($action_name, $domain_name) {
-        $this->__syncMailUsers($domain_name);
+        global $app;
+        $app->sogo_helper->sync_mail_users($domain_name);
     }
 
     //* #END# remote actions
@@ -249,7 +247,6 @@ class sogo_plugin {
     public function remove_sogo_module_settings($event_name, $data) {
         global $app, $conf;
         $app->log("SOGo configuration is deleted removing all domains and related configurations for SOGo", LOGLEVEL_DEBUG);
-        //* @todo empty sogo db for users and domains and remove all config.
         if ($remove_mail_domains = $app->sogo_helper->getDB()->queryAllRecords("SELECT `domain`, `domain_id` FROM `mail_domain`")) {
             foreach ($remove_mail_domains as $value) {
                 if ($app->sogo_helper->sogo_table_exists($value['domain'])) {
@@ -258,7 +255,7 @@ class sogo_plugin {
                     if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
                         while ($obj = $tmp->fetch_object()) {
                             if (isset($obj->c_uid)) {
-                                $this->__deleteMailUser($obj->c_uid);
+                                $app->sogo_helper->delete_mail_user($obj->c_uid);
                             }
                         }
                     }
@@ -346,7 +343,7 @@ class sogo_plugin {
             if ($app->sogo_helper->sogo_table_exists($domain_name)) {
                 if ($app->sogo_helper->has_mail_users($domain_name, true)) {
                     //* if users still exists for domain this is only a sogo domain config removal/reset
-                    $this->__syncMailUsers($domain_name);
+                    $app->sogo_helper->sync_mail_users($domain_name);
                 } else {
                     //* no mail users left in db [mail_user] remove sogo tables
 
@@ -355,7 +352,7 @@ class sogo_plugin {
                     if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
                         while ($obj = $tmp->fetch_object()) {
                             if (isset($obj->c_uid)) {
-                                $this->__deleteMailUser($obj->c_uid);
+                                $app->sogo_helper->delete_mail_user($obj->c_uid);
                             }
                         }
                     }
@@ -364,7 +361,7 @@ class sogo_plugin {
                 }
             } else if ($app->sogo_helper->has_mail_users($domain_name, true)) {
                 //* if users still exists for domain this is only a sogo domain config removal/reset
-                $this->__create_sogo_table($domain_name);
+                $app->sogo_helper->create_sogo_table($domain_name);
             }
             $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
         }
@@ -398,8 +395,8 @@ class sogo_plugin {
             $destination_domain = $destdomenc;
 
         $app->log("sogo_plugin::remove_sogo_mail_user_alias(): {$data['old']['source']} => {$data['old']['destination']}", LOGLEVEL_DEBUG);
-        //* a simple sync should be ok 
-        $this->__syncMailUsers($destination_domain);
+        //* a simple sync should be ok
+        $app->sogo_helper->sync_mail_users($destination_domain);
         return TRUE;
     }
 
@@ -427,7 +424,7 @@ class sogo_plugin {
 
         //* don't sync on error
         if ($app->sogo_helper->check_alias_columns($destination_domain)) {
-            $this->__syncMailUsers($destination_domain);
+            $app->sogo_helper->sync_mail_users($destination_domain);
             $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
         }
         return TRUE;
@@ -468,13 +465,13 @@ class sogo_plugin {
         $app->sogo_helper->check_alias_columns($new_destination_domain);
         $is_synced = FALSE;
         /*
-         * all using __syncMailUsers
+         * all using $app->sogo_helper->sync_mail_users
          * only done like this in case we need diferent actions on some of the changes
          */
         //* type changed
         if ($data['old']['type'] != $data['new']['type']) {
             if (!$is_synced)
-                $this->__syncMailUsers($new_destination_domain);
+                $app->sogo_helper->sync_mail_users($new_destination_domain);
             $is_synced = TRUE;
         }
         //* server changed
@@ -487,7 +484,7 @@ class sogo_plugin {
                 //* domain changed
             }
             if (!$is_synced)
-                $this->__syncMailUsers($new_destination_domain);
+                $app->sogo_helper->sync_mail_users($new_destination_domain);
             $is_synced = TRUE;
         }
         //* destination changed
@@ -497,17 +494,17 @@ class sogo_plugin {
              */
             if ($old_destination_domain != $new_destination_domain) {
                 //* domain changed
-                $this->__syncMailUsers($old_destination_domain);
+                $app->sogo_helper->sync_mail_users($old_destination_domain);
             }
 
             if (!$is_synced)
-                $this->__syncMailUsers($new_destination_domain);
+                $app->sogo_helper->sync_mail_users($new_destination_domain);
             $is_synced = TRUE;
         }
         //* active changed
         if ($data['old']['active'] != $data['new']['active']) {
             if (!$is_synced)
-                $this->__syncMailUsers($new_destination_domain);
+                $app->sogo_helper->sync_mail_users($new_destination_domain);
             $is_synced = TRUE;
         }
     }
@@ -531,9 +528,9 @@ class sogo_plugin {
         list($user, $domain) = explode('@', $data['new']['email']);
 
         //* only sync active domains, if not active make sure all data in sogo is gone!
-        if ($this->__checkStateDropDomain($domain)) {
+        if ($app->sogo_helper->check_domain_state_drop($domain)) {
             //* a simple sync should be ok 
-            $this->__syncMailUsers($domain);
+            $app->sogo_helper->sync_mail_users($domain);
             if ($app->sogo_helper->module_settings->config_rebuild_on_mail_user_insert) {
                 $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
             }
@@ -558,26 +555,26 @@ class sogo_plugin {
                 $app->log("sogo_plugin::update_sogo_mail_user(): change email, OLD:{$data['old']['email']} , NEW:{$data['new']['email']}", LOGLEVEL_DEBUG);
                 /*
                   we do this in "$this->remove_sogo_domain(...);"
-                  $this->__deleteMailUser($data['old']['login']);
+                  $app->sogo_helper->delete_mail_user($data['old']['login']);
                  */
                 $sync = FALSE;
                 //* make sure new domain is created
                 if ($old_domain != $new_domain) {
-                    $this->__deleteMailUser($data['old']['login']); //* remove all related to old user 
+                    $app->sogo_helper->delete_mail_user($data['old']['login']); //* remove all related to old user 
                     if (!$app->sogo_helper->sogo_table_exists($new_domain)) {
-                        $this->__create_sogo_table($new_domain); //* allso syncs all users!
+                        $app->sogo_helper->create_sogo_table($new_domain); //* allso syncs all users!
                         $sync = TRUE;
                     }
                 }
                 //* if only username is changed
                 if ($old_user != $new_user) {
-                    $this->__deleteMailUser($data['old']['login']); //* remove all related to old user 
+                    $app->sogo_helper->delete_mail_user($data['old']['login']); //* remove all related to old user 
                 }
                 //* e-mail is changed so sync it all
                 if ($old_domain != $new_domain)
-                    $this->__syncMailUsers($old_domain);
+                    $app->sogo_helper->sync_mail_users($old_domain);
                 if (!$sync)
-                    $this->__syncMailUsers($new_domain);
+                    $app->sogo_helper->sync_mail_users($new_domain);
                 $sync = TRUE;
             }
 
@@ -585,7 +582,7 @@ class sogo_plugin {
                 $app->log("sogo_plugin::update_sogo_mail_user(): change password, on {$data['new']['email']}", LOGLEVEL_DEBUG);
                 //* sync all based on new domain
                 if (!$sync)
-                    $this->__syncMailUsers($new_domain);
+                    $app->sogo_helper->sync_mail_users($new_domain);
             }
         }
     }
@@ -596,8 +593,9 @@ class sogo_plugin {
      * @param array $data array of old and new data
      */
     public function remove_sogo_mail_user($event_name, $data) {
+        global $app;
         if ($event_name == 'mail_user_delete')
-            $this->__deleteMailUser($data['old']['login']);
+            $app->sogo_helper->sync_mail_usersr($data['old']['login']);
     }
 
     //* #END# MAIL USERS (TB: mail_user)
@@ -617,7 +615,7 @@ class sogo_plugin {
             return;
 
         if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
-            $this->__create_sogo_table($data['new']['domain']);
+            $app->sogo_helper->create_sogo_table($data['new']['domain']);
         }
         //* rebuild conf, so new domain settings/config actually gets added to SOGo
         $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
@@ -643,7 +641,7 @@ class sogo_plugin {
 
                 //* change domain name (SOGO db)
                 $this->remove_sogo_domain('sogo_domains_delete', $data);
-                $this->__create_sogo_table($data['new']['domain']);
+                $app->sogo_helper->create_sogo_table($data['new']['domain']);
                 $change_domain = TRUE;
             }
             $owner_check = $app->sogo_helper->getDB()->queryOneRecord('SELECT `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other` FROM `sogo_domains` WHERE `domain_id`=' . intval($data['old']['domain_id']));
@@ -694,7 +692,7 @@ class sogo_plugin {
             if ($data['new']['active'] == 'n') {
                 $this->remove_sogo_domain('sogo_domains_delete', $data);
             } else if ($data['new']['active'] == 'y') {
-                $this->__create_sogo_table($data['new']['domain']);
+                $app->sogo_helper->create_sogo_table($data['new']['domain']);
             }
             if ($change_domain) {
                 /*
@@ -777,47 +775,7 @@ class sogo_plugin {
         }
         return true;
     }
-
-    /**
-     * @deprecated pre-u10 use sogo_helper::create_sogo_table($domain_name)
-     */
-    private function __create_sogo_table($domain_name) {
-        global $app;
-        return $app->sogo_helper->create_sogo_table($domain_name);
-    }
-
-    /**
-     * @deprecated pre-u10 use sogo_helper::sync_mail_users($domain_name, $imap_enabled)
-     */
-    private function __syncMailUsers($domain_name, $imap_enabled = true) {
-        global $app;
-        return $app->sogo_helper->sync_mail_users($domain_name, $imap_enabled);
-    }
-
-    /**
-     * @deprecated pre-u10 use sogo_helper::sogo_mail_user_exists($email, $table)
-     */
-    private function __sogo_mail_user_exists($email, $table) {
-        global $app;
-        return $app->sogo_helper->sogo_mail_user_exists($email, $table);
-    }
-
-    /**
-     * @deprecated pre-u10 use sogo_helper::delete_mail_user($email)
-     */
-    private function __deleteMailUser($email) {
-        global $app;
-        return $app->sogo_helper->delete_mail_user($email);
-    }
-
-    /**
-     * @deprecated pre-u10 use sogo_helper::check_domain_state_drop($domain_name, $imap_enabled)
-     */
-    private function __checkStateDropDomain($domain, $domain_id = -1) {
-        global $app;
-        return $app->sogo_helper->check_domain_state_drop($domain, $domain_id);
-    }
-
+    
     public function __destruct() {
         global $app;
         unset($app->sogo_helper);

@@ -80,7 +80,6 @@ class sogo_module {
                 //* Start: mail domains loop
                 foreach ($mail_domains as $value) {
                     if (!$app->sogo_helper->sogo_table_exists($value['domain'])) {
-                        //* @todo check for users, create table, mail users sync (issue #16)
                         if ($app->sogo_helper->has_mail_users($value['domain'])) {
                             $app->sogo_helper->create_sogo_table($value['domain']);
                         } else
