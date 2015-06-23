@@ -30,10 +30,12 @@ if ($sogo_interface_version === FALSE || !isset($sogo_interface_version['value']
     $sogo_interface_version = $db->queryOneRecord("SELECT `value` FROM sys_config WHERE `name`='sogo' AND `group`='addons'");
 if ($sogo_interface_version === FALSE || !isset($sogo_interface_version['value']))
     $sogo_interface_version = '0'; //* no db version
-if (preg_match("/[0-9]\.([0-9])/i", $sogo_interface_version['value'], $matches))
-    $sogo_interface_version = $matches[1];
-else
-    $sogo_interface_version = $sogo_interface_version['value'];
+else {
+    if (preg_match("/[0-9]\.([0-9])/i", $sogo_interface_version['value'], $matches))
+        $sogo_interface_version = $matches[1];
+    else
+        $sogo_interface_version = $sogo_interface_version['value'];
+}
 
 echo PHP_EOL . PHP_EOL; //* give some space thanks
 //* start copy files
@@ -82,7 +84,14 @@ if ($sogo_interface_version_php < $sogo_interface_version_latest) {
         $next_php_version = intval($sogo_interface_version_php + 1);
         if ($next_php_version <= 6)
             continue; /* no php upgrade before v7 */
-
+        if ($next_php_version == 7){
+            echo PHP_EOL . "[WARNING] ++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
+            echo "[WARNING] Update script for update 7, may run indefinitely " . PHP_EOL;
+            echo "[WARNING] so please empty the table 'sogo_module' manually " . PHP_EOL;
+            echo "[WARNING] and check the server config. that will fix this" . PHP_EOL;
+            echo "[WARNING] ++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL . PHP_EOL;
+            continue; 
+        }
         $patch_filename = "_ins/php/{$next_php_version}.php";
         if (is_file($patch_filename)) {
             echo 'Loading PHP update file: ' . $patch_filename . PHP_EOL;
