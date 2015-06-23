@@ -1,7 +1,7 @@
 <?php
 
 //* class name is not important
-class UpdateClass extends PHPUpdateBaseClass {
+class UpdateClass8 extends PHPUpdateBaseClass {
 
     public function __construct() {/* INIT your php update here */}
 
@@ -61,4 +61,4 @@ class UpdateClass extends PHPUpdateBaseClass {
 }
 
 //* var named $updateClass must not change
-$updateClass = new UpdateClass();
+$updateClass = new UpdateClass8();
