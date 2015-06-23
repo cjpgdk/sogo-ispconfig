@@ -48,26 +48,28 @@ class sogo_helper {
     /**
      * sync all mail users and aliases for a given domain name
      * @global app $app
+     * @global array $conf
      * @param string $domain_name
      * @param boolean $imap_enabled if set to false will sync all email addresses, is set to true will only sync email addresses with imap enabled
      * @return boolean
      */
     public function sync_mail_users($domain_name, $imap_enabled = true) {
-        global $app;
+        global $app, $conf;
         if (!$this->check_domain_state_drop($domain_name))
             return false;
 
         $new_table = false;
         //* create domain table if it do not exists
         if (!$this->sogo_table_exists($domain_name)) {
-            $this->create_sogo_table($domain_name);
+            $this->create_sogo_table($domain_name, false);
             $new_table = true; //* createing new table, must rebuild config..!
         }
-        $emails = $this->getDB(true)->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        $emails = $this->getDB(true)->queryAllRecords("SELECT * FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? " AND `disableimap` = 'n'" : ""));
         $sqlres = & $this->sqlConnect();
-        $sqlres->set_charset("utf8");
-        $sqlres->query("SET NAMES utf8");
-        $sqlres->query("SET character_set_results='utf8'");
+        if ($sqlres->set_charset("{$conf['db_charset']}")) {
+            $sqlres->query("SET NAMES {$conf['db_charset']}");
+            $sqlres->query("SET character_set_results='{$conf['db_charset']}'");
+        }
         if (!empty($emails)) {
             $domain_config = $this->get_domain_config($domain_name, true);
             if (!$domain_config || !is_array($domain_config)) {
@@ -78,14 +80,26 @@ class sogo_helper {
             $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoIMAPServer']);
             $_tmpSQL = array('users' => array(), 'alias' => array());
             $good_mails = array();
+
+            $sogo_table_name = $this->get_valid_sogo_table_name($domain_name);
+
+            $has_idn_column_sql = "SELECT * FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME`='{$sqlres->escape_string($sogo_table_name)}' AND `TABLE_SCHEMA`='{$conf['sogo_database_name']}' AND `COLUMN_NAME` = 'idn_mail'";
+            $tmp = $sqlres->query($has_idn_column_sql);
+            $has_idn_column = (bool) (count($tmp->fetch_assoc()) > 0);
+
             foreach ($emails as $email) {
                 $good_mails[] = $email['login'];
-                if ($this->sogo_mail_user_exists($email['login'], "{$this->get_valid_sogo_table_name($domain_name)}")) {
-                    $_tmpSQL['users'][] = "UPDATE `{$this->get_valid_sogo_table_name($domain_name)}` SET "
+                if ($this->sogo_mail_user_exists($email['login'], "{$sogo_table_name}")) {
+                    $append_sql = "";
+                    if ($has_idn_column)
+                        $append_sql = "   `idn_mail` = '{$sqlres->escape_string($this->idn_decode($email['email']))}' ,   ";
+                    
+                    $_tmpSQL['users'][] = "UPDATE `{$sogo_table_name}` SET "
                             . " `c_uid` = '{$sqlres->escape_string($email['login'])}' ,"
                             . " `c_cn` = '{$sqlres->escape_string($email['name'])}' ,"
                             . " `c_name` = '{$sqlres->escape_string($email['login'])}' ,"
-                            . " `mail` = '{$sqlres->escape_string($this->idn_decode($email['email']))}' ,"
+                            . " `mail` = '{$sqlres->escape_string($email['email'])}' ,"
+                            . $append_sql
                             . " `c_imaplogin` = '{$sqlres->escape_string($email['login'])}' ,"
                             . " `c_sievehostname` = '{$sqlres->escape_string($domain_config['SOGoSieveServer'])}' ,"
                             . " `c_imaphostname` = '{$sqlres->escape_string($domain_config['SOGoIMAPServer'])}' ,"
@@ -93,14 +107,23 @@ class sogo_helper {
                             . " `c_password` = '{$sqlres->escape_string($email['password'])}' "
                             . " WHERE `c_uid`='{$sqlres->escape_string($email['login'])}';";
                 } else {
-                    $_tmpSQL['users'][] = "INSERT INTO `{$this->get_valid_sogo_table_name($domain_name)}` "
-                            . "(`c_uid`, `c_cn`, `c_name`, `mail`, `c_imaplogin`, `c_sievehostname`, `c_imaphostname`, `c_domain`, `c_password`) "
+                    
+                    $append_sql = "";
+                    $append_sql2 = "";
+                    if ($has_idn_column){
+                        $append_sql = " `idn_mail`,";
+                        $append_sql2 = "'{$sqlres->escape_string($this->idn_decode($email['email']))}', ";
+                    }
+                        
+                    $_tmpSQL['users'][] = "INSERT INTO `{$sogo_table_name}` "
+                            . "(`c_uid`, `c_cn`, `c_name`, `mail`,{$append_sql} `c_imaplogin`, `c_sievehostname`, `c_imaphostname`, `c_domain`, `c_password`) "
                             . "VALUES "
                             . "("
                             . "'{$sqlres->escape_string($email['login'])}', "
                             . "'{$sqlres->escape_string($email['name'])}', "
                             . "'{$sqlres->escape_string($email['login'])}', "
-                            . "'{$sqlres->escape_string($this->idn_decode($email['email']))}', "
+                            . "'{$sqlres->escape_string($email['email'])}', "
+                            . $append_sql2
                             . "'{$sqlres->escape_string($email['login'])}', "
                             . "'{$sqlres->escape_string($domain_config['SOGoSieveServer'])}', "
                             . "'{$sqlres->escape_string($domain_config['SOGoIMAPServer'])}', "
@@ -112,12 +135,12 @@ class sogo_helper {
                 //* get alias columns in table for domain
                 $dtacount = (int) $this->get_sogo_table_alias_column_count($domain_name);
 
-                $aliasSQL = "UPDATE `{$this->get_valid_sogo_table_name($domain_name)}` SET ";
+                $aliasSQL = "UPDATE `{$sogo_table_name}` SET ";
                 //* only do alias update if a column exists for it 
                 if ($dtacount > 0) {
                     $ac = 0;
                     foreach ($mail_aliases as $key => $value) {
-                        $aliasSQL .= " `alias_{$ac}` = '{$sqlres->escape_string($this->idn_decode($value['source']))}' ,";
+                        $aliasSQL .= " `alias_{$ac}` = '{$sqlres->escape_string($this->idn_encode($value['source']))}' ,";
                         $ac++;
                         //* must be a better way but, need some results here so break on max alias columns in tb
                         if ($dtacount == $ac)
@@ -141,7 +164,7 @@ class sogo_helper {
                             . " `c_uid` = '{$sqlres->escape_string($email['login'])}' AND"
                             . " `c_cn` = '{$sqlres->escape_string($email['name'])}' AND"
                             . " `c_name` = '{$sqlres->escape_string($email['login'])}' AND"
-                            . " `mail` = '{$sqlres->escape_string($this->idn_decode($email['email']))}' AND"
+                            . " `mail` = '{$sqlres->escape_string($email['email'])}' AND"
                             . " `c_imaplogin` = '{$sqlres->escape_string($email['login'])}' AND"
                             . " `c_sievehostname` = '{$sqlres->escape_string($domain_config['SOGoSieveServer'])}' AND"
                             . " `c_imaphostname` = '{$sqlres->escape_string($domain_config['SOGoIMAPServer'])}' AND"
@@ -176,7 +199,7 @@ class sogo_helper {
             }
 
             //* for SOGo on other server than mail server, make sure delete users gets removed
-            $sql = "SELECT c_uid FROM `{$this->get_valid_sogo_table_name($domain_name)}` WHERE NOT `c_uid` IN ('" . implode("','", $good_mails) . "')";
+            $sql = "SELECT c_uid FROM `{$sogo_table_name}` WHERE NOT `c_uid` IN ('" . implode("','", $good_mails) . "')";
             if ($tmp = $sqlres->query($sql)) {
                 while ($obj = $tmp->fetch_object())
                     if (isset($obj->c_uid) && !in_array($obj->c_uid, $good_mails))
@@ -192,9 +215,8 @@ class sogo_helper {
             //* no mail users drop sogo table
             if ($this->sogo_table_exists($domain_name)) {
                 //* check if users exists in table, delete them with SOGo if they do
-                $domain_table = $this->get_valid_sogo_table_name($domain_name);
                 $sqlres = & $this->sqlConnect();
-                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($domain_table)}`;")) {
+                if ($tmp = $sqlres->query("SELECT `c_uid` FROM `{$sqlres->escape_string($sogo_table_name)}`;")) {
                     while ($obj = $tmp->fetch_object()) {
                         if (isset($obj->c_uid)) {
                             //* only deletes from SOGo db
@@ -266,25 +288,32 @@ class sogo_helper {
      * @param string $domain_name
      * @return boolean
      */
-    public function create_sogo_table($domain_name) {
+    public function create_sogo_table($domain_name, $call_sync = true) {
         global $app, $conf;
         if (!$this->has_mail_users($domain_name, true)) {
             //* dont create no users
             $app->log("sogo_helper::create_sogo_table(): Refusing to create table for domain: {$domain_name}, NO USERS", LOGLEVEL_DEBUG);
-            return;
+            return false;
         }
         if ($this->sogo_table_exists($domain_name)) {
             $app->log("sogo_helper::create_sogo_table(): SOGo table exists for domain: {$domain_name}", LOGLEVEL_DEBUG);
-            return $this->sync_mail_users($domain_name);
+            if ($call_sync)
+                return $this->sync_mail_users($domain_name);
+            else
+                return true;
         }
-
+        
+        // ALTER TABLE `xyz_users` ADD `idn_mail` VARCHAR( 500 ) NOT NULL AFTER `mail`
+        
         //* @todo optimize table to reduce the space requirements (varchar(500) too much in most cases)
+        //* @todo use mysql charset from config file.!
         $sql = "
 CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
   `c_uid` varchar(500) CHARACTER SET utf8 NOT NULL,
   `c_cn` text CHARACTER SET utf8 NOT NULL,
   `c_name` varchar(500) CHARACTER SET utf8 NOT NULL,
   `mail` varchar(500) CHARACTER SET utf8 NOT NULL,
+  `idn_mail` varchar(500) CHARACTER SET utf8 NOT NULL,
   `c_imaplogin` varchar(500) CHARACTER SET utf8 NOT NULL,
   `c_sievehostname` varchar(500) CHARACTER SET utf8 NOT NULL,
   `c_imaphostname` varchar(500) CHARACTER SET utf8 NOT NULL,
@@ -309,7 +338,8 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         $sqlres = & $this->sqlConnect();
         $result = $sqlres->query($sql) ? TRUE : FALSE;
         $app->log("sogo_helper::create_sogo_table(): add SOGo table for domain: {$domain_name}" . (!$result ? "\n\tERROR\t\n{$sql}" : ""), ($result ? LOGLEVEL_DEBUG : LOGLEVEL_ERROR));
-        $result &= $this->sync_mail_users($domain_name);
+        if ($call_sync)
+            $result &= $this->sync_mail_users($domain_name);
         return $result;
     }
 
@@ -327,16 +357,16 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         $mail_domains_sql = FALSE;
         if ($this->module_settings->all_domains && $this->module_settings->allow_same_instance) {
             //* allow all domains + same instance
-            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='y'";
+            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='{$active}'";
         } else if (!$this->module_settings->all_domains && $this->module_settings->allow_same_instance) {
             //* allow only domains with sogo domain config + same instance
-            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='y' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=sd.`server_id`";
+            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='{$active}' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=sd.`server_id`";
         } else if ($this->module_settings->all_domains && !$this->module_settings->allow_same_instance) {
             //* allow all domains but only for this server
-            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='y' AND `server_id`=" . intval($conf['server_id']);
+            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='{$active}' AND `server_id`=" . intval($conf['server_id']);
         } else if (!$this->module_settings->all_domains && !$this->module_settings->allow_same_instance) {
             //* allow only domains with sogo domain config and located on this server
-            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='y' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=" . intval($conf['server_id']);
+            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='{$active}' AND md.`domain_id`=sd.`domain_id` AND md.`server_id`=" . intval($conf['server_id']);
         }
         if ($mail_domains_sql !== FALSE) {
             return $this->getDB()->queryAllRecords($mail_domains_sql);
@@ -422,7 +452,7 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
      * @return boolean
      */
     public function has_mail_users($domain_name, $imap_enabled = true) {
-        $emails = $this->getDB()->queryOneRecord("SELECT count(`email`) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? "AND `disableimap` = 'n'" : ""));
+        $emails = $this->getDB()->queryOneRecord("SELECT count(`email`) as cnt FROM `mail_user` WHERE `email` LIKE '%@{$domain_name}'" . ($imap_enabled ? " AND `disableimap` = 'n'" : ""));
         if ($emails !== FALSE && ((int) $emails['cnt'] > 0)) {
             return true;
         }
@@ -630,7 +660,7 @@ AND sc.`server_name` = s.`server_name";
             }
             $app->log("SOGo table do not exists [{$domain}]", LOGLEVEL_DEBUG);
             self::$sutCache[$domain] = false;
-            return self::$sutCache[$domain];
+            return (bool) self::$sutCache[$domain];
         }
         return (bool) self::$sutCache[$domain];
     }
@@ -654,17 +684,18 @@ AND sc.`server_name` = s.`server_name";
      * @return integer
      */
     public function get_max_alias_count($domain_name, $active = 'y') {
-        if (!isset(self::$daCache[md5($domain_name . $active)])) {
+        $_md5 = md5($domain_name . $active);
+        if (!isset(self::$daCache[$_md5])) {
             $a_cnt = 0;
             $aliases = $this->get_alias_counters($domain_name, $active);
             if (is_array($aliases)) {
                 foreach ($aliases as $value)
                     $a_cnt = (int) ((int) $a_cnt < (int) $value['alias_cnt'] ? $value['alias_cnt'] : $a_cnt);
-                self::$daCache[md5($domain_name . $active)] = (int) $a_cnt;
+                self::$daCache[$_md5] = (int) $a_cnt;
             } else
-                self::$daCache[md5($domain_name . $active)] = 0;
+                self::$daCache[$_md5] = 0;
         }
-        return (int) self::$daCache[md5($domain_name . $active)];
+        return (int) self::$daCache[$_md5];
     }
 
     /**
@@ -680,11 +711,12 @@ AND sc.`server_name` = s.`server_name";
         if (!in_array($active, array('n', 'y')))
             $active = 'y';
         $sql = "SELECT DISTINCT (SELECT COUNT(*) FROM `mail_forwarding` WHERE `destination`=mf.`destination` AND `type`='alias' AND `active`='{$active}') AS alias_cnt FROM `mail_forwarding` mf WHERE `destination`='{$destination}' AND `type`='alias' AND `active`='{$active}'";
-        if (!isset(self::$daCache[md5($sql)])) {
+        $sql_md5 = md5($sql);
+        if (!isset(self::$daCache[$sql_md5])) {
             $res = $this->getDB()->queryOneRecord($sql);
-            self::$daCache[md5($sql)] = (int) (isset($res['alias_cnt']) ? $res['alias_cnt'] : 0);
+            self::$daCache[$sql_md5] = (int) (isset($res['alias_cnt']) ? $res['alias_cnt'] : 0);
         }
-        return (int) self::$daCache[md5($sql)];
+        return (int) self::$daCache[$sql_md5];
     }
 
     /**
@@ -700,11 +732,12 @@ AND sc.`server_name` = s.`server_name";
         if (!in_array($active, array('n', 'y')))
             $active = 'y';
         $sql = "SELECT DISTINCT `destination`,  (SELECT COUNT(*) FROM `mail_forwarding` WHERE `destination`=mf.`destination` AND `type`='alias' AND `active`='{$active}') AS alias_cnt FROM `mail_forwarding` mf WHERE `destination` LIKE '%@{$domain_name}' AND `type`='alias' AND `active`='{$active}'";
-        if (!isset(self::$daCache[md5($sql)])) {
+        $sql_md5 = md5($sql);
+        if (!isset(self::$daCache[$sql_md5])) {
             $res = $this->getDB()->queryAllRecords($sql);
-            self::$daCache[md5($sql)] = $res;
+            self::$daCache[$sql_md5] = $res;
         }
-        return self::$daCache[md5($sql)];
+        return self::$daCache[$sql_md5];
     }
 
     /**
@@ -823,6 +856,7 @@ AND sc.`server_name` = s.`server_name";
             return '';
         if (preg_match('/^[0-9\.]+$/', $domain))
             return $domain; // may be an ip address - anyway does not need to bee encoded
+
 
 
             
