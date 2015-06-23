@@ -47,7 +47,7 @@ class tform_action extends tform_actions {
         global $app, $conf;
         if ($this->dataRecord['filetype'] == "download" && !file_exists("{$conf['sogo_plugins_upload_dir']}/{$this->dataRecord['file']}")) {
             $this->dataRecord['active'] = 'n'; //* deactivate if file is not found
-            $app->tpl->setVar('error', sprintf($app->tform->wordbook['download_file_missing'], "{$conf['sogo_plugins_upload_dir']}/{$this->dataRecord['file']}") . "{$conf['sogo_plugins_upload_dir']}/{$this->dataRecord['file']}");
+            $app->tpl->setVar('error', sprintf($app->tform->wordbook['download_file_missing'], "{$conf['sogo_plugins_upload_dir']}/{$this->dataRecord['file']}"));
         }
         parent::onShowEnd();
     }
