@@ -213,7 +213,7 @@ class sogo_plugin {
         if (isset($create_mail_domains) && is_array($create_mail_domains)) {
             foreach ($create_mail_domains as $value) {
                 if (!$app->sogo_helper->sogo_table_exists($value)) {
-                    $app->log("Creatign domain: " . $value, LOGLEVEL_DEBUG);
+                    $app->log("Creating domain: " . $value, LOGLEVEL_DEBUG);
                     $this->insert_sogo_mail_domain(mail_domain_insert, array(
                         'new' => array('domain' => $value),
                         'old' => array(),
@@ -550,6 +550,20 @@ class sogo_plugin {
         if ($event_name == 'mail_user_update') {
             list($old_user, $old_domain) = explode('@', $data['old']['email']);
             list($new_user, $new_domain) = explode('@', $data['new']['email']);
+            
+            // avoid annoying errors
+            if ($app->sogo_helper->idn_decode($data['old']['email']) == $data['new']['email']) {
+                //* OLD:user@xn--ber-xla.dk , NEW:user@æber.dk
+                $data['new']['email'] = $app->sogo_helper->idn_encode($data['new']['email']);
+                list($new_user, $new_domain) = explode('@', $data['new']['email']);
+            }
+            if ($app->sogo_helper->idn_encode($data['old']['email']) == $data['new']['email']) {
+                //* OLD:user@æber.dk , NEW:user@xn--ber-xla.dk
+                $data['old']['email'] = $app->sogo_helper->idn_decode($data['old']['email']);
+                list($old_user, $old_domain) = explode('@', $data['old']['email']);
+            }
+            
+            
             //* in reponse to user/domain changed
             if ($data['old']['email'] != $data['new']['email']) {
                 $app->log("sogo_plugin::update_sogo_mail_user(): change email, OLD:{$data['old']['email']} , NEW:{$data['new']['email']}", LOGLEVEL_DEBUG);
@@ -631,6 +645,12 @@ class sogo_plugin {
     public function update_sogo_mail_domain($event_name, $data) {
         global $app, $conf;
         if ($event_name == "mail_domain_update") {
+            
+            // avoid annoying errors
+            if ($app->sogo_helper->idn_decode($data['old']['domain']) == $data['new']['domain']) {
+                //* OLD: xn--ber-xla.dk , NEW: æber.dk
+                $data['new']['domain'] = $app->sogo_helper->idn_encode($data['new']['domain']);
+            }
 
             $change_domain = $change_server = FALSE;
             if ($data['old']['domain'] != $data['new']['domain']) {
@@ -775,7 +795,7 @@ class sogo_plugin {
         }
         return true;
     }
-    
+
     public function __destruct() {
         global $app;
         unset($app->sogo_helper);
