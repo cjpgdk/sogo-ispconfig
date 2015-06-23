@@ -55,9 +55,9 @@ $liste['item'][] = array(
     'suffix' => '',
     'datasource' => array(
         'type' => 'SQL',
-        'querystring' => 'SELECT client_id,contact_name FROM client WHERE {AUTHSQL} ORDER BY contact_name',
+        'querystring' => "SELECT client_id,CONCAT(contact_name, ' :: ', username) as name FROM client WHERE {AUTHSQL} ORDER BY contact_name",
         'keyfield' => 'client_id',
-        'valuefield' => 'contact_name'
+        'valuefield' => 'name'
     ),
     'width' => '',
     'value' => array(0 => 'All')
