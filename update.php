@@ -83,8 +83,8 @@ if ($sogo_interface_version_php < $sogo_interface_version_latest) {
     while ($phpupd_run == true) {
         $next_php_version = intval($sogo_interface_version_php + 1);
         if ($next_php_version <= 6){
-            continue; /* no php upgrade before v7 */
             $sogo_interface_version_php = $next_php_version;
+            continue; /* no php upgrade before v7 */
         }
         if ($next_php_version == 7){
             echo PHP_EOL . "[WARNING] ++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
