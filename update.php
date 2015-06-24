@@ -82,14 +82,17 @@ if ($sogo_interface_version_php < $sogo_interface_version_latest) {
     $phpupd_run = true;
     while ($phpupd_run == true) {
         $next_php_version = intval($sogo_interface_version_php + 1);
-        if ($next_php_version <= 6)
+        if ($next_php_version <= 6){
             continue; /* no php upgrade before v7 */
+            $sogo_interface_version_php = $next_php_version;
+        }
         if ($next_php_version == 7){
             echo PHP_EOL . "[WARNING] ++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
             echo "[WARNING] Update script for update 7, may run indefinitely " . PHP_EOL;
             echo "[WARNING] so please empty the table 'sogo_module' manually " . PHP_EOL;
             echo "[WARNING] and check the server config. that will fix this" . PHP_EOL;
             echo "[WARNING] ++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL . PHP_EOL;
+            $sogo_interface_version_php = $next_php_version;
             continue; 
         }
         $patch_filename = "_ins/php/{$next_php_version}.php";
