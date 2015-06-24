@@ -128,6 +128,14 @@ class sogo_module {
                             $MailFieldNames[] = array('MailFieldName' => 'alias_' . $i);
                         }
                         $tpl->setLoop('MailFieldNames', $MailFieldNames); //* set alias names loop
+                        
+                        //* @todo move this so the missing 'idn_mail' column is created when the domain is checked (sogo_helper::sogo_table_exists|create_sogo_table)
+                        $sqlObj = & $app->sogo_helper->sqlConnect();
+                        $has_idn_column_sql = "SELECT * FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME`='{$sqlObj->escape_string($app->sogo_helper->get_valid_sogo_table_name($value['domain']))}' AND `TABLE_SCHEMA`='{$conf['sogo_database_name']}' AND `COLUMN_NAME` = 'idn_mail'";
+                        $tmp = $sqlObj->query($has_idn_column_sql);
+                        $has_idn_column = (bool) (count($tmp->fetch_assoc()) > 0);
+                        $tpl->setVar('idn_mail', ($has_idn_column ? 1:0));
+                        unset($tmp);
                         $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array((isset($dconf['server_name_real']) ? $dconf['server_name_real'] : $dconf['server_name']), $value['domain']), $tpl->grab());
                     }
                 }

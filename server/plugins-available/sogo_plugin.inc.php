@@ -550,20 +550,21 @@ class sogo_plugin {
         if ($event_name == 'mail_user_update') {
             list($old_user, $old_domain) = explode('@', $data['old']['email']);
             list($new_user, $new_domain) = explode('@', $data['new']['email']);
-            
+
             // avoid annoying errors
-            if ($app->sogo_helper->idn_decode($data['old']['email']) == $data['new']['email']) {
+            if (($app->sogo_helper->idn_decode($data['old']['email']) == $data['new']['email']) &&
+                    ($app->sogo_helper->idn_encode($data['new']['email']) == $data['old']['email'])) {
                 //* OLD:user@xn--ber-xla.dk , NEW:user@æber.dk
                 $data['new']['email'] = $app->sogo_helper->idn_encode($data['new']['email']);
                 list($new_user, $new_domain) = explode('@', $data['new']['email']);
             }
-            if ($app->sogo_helper->idn_encode($data['old']['email']) == $data['new']['email']) {
+            if (($app->sogo_helper->idn_encode($data['old']['email']) == $data['new']['email']) &&
+                    ($app->sogo_helper->idn_decode($data['new']['email']) == $data['old']['email'])) {
                 //* OLD:user@æber.dk , NEW:user@xn--ber-xla.dk
                 $data['old']['email'] = $app->sogo_helper->idn_decode($data['old']['email']);
                 list($old_user, $old_domain) = explode('@', $data['old']['email']);
             }
-            
-            
+
             //* in reponse to user/domain changed
             if ($data['old']['email'] != $data['new']['email']) {
                 $app->log("sogo_plugin::update_sogo_mail_user(): change email, OLD:{$data['old']['email']} , NEW:{$data['new']['email']}", LOGLEVEL_DEBUG);
@@ -645,7 +646,7 @@ class sogo_plugin {
     public function update_sogo_mail_domain($event_name, $data) {
         global $app, $conf;
         if ($event_name == "mail_domain_update") {
-            
+
             // avoid annoying errors
             if ($app->sogo_helper->idn_decode($data['old']['domain']) == $data['new']['domain']) {
                 //* OLD: xn--ber-xla.dk , NEW: æber.dk

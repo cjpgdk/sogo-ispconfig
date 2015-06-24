@@ -83,6 +83,7 @@ class sogo_helper {
 
             $sogo_table_name = $this->get_valid_sogo_table_name($domain_name);
 
+            //* @todo move this so the missing 'idn_mail' column is created when the domain is checked (sogo_helper::sogo_table_exists|create_sogo_table)
             $has_idn_column_sql = "SELECT * FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME`='{$sqlres->escape_string($sogo_table_name)}' AND `TABLE_SCHEMA`='{$conf['sogo_database_name']}' AND `COLUMN_NAME` = 'idn_mail'";
             $tmp = $sqlres->query($has_idn_column_sql);
             $has_idn_column = (bool) (count($tmp->fetch_assoc()) > 0);

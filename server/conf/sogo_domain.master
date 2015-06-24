@@ -229,9 +229,11 @@
 {/tmpl_if}
                             <key>LoginFieldNames</key>
                             <array>
-                                <string>c_uid</string>
                                 <string>mail</string>
                                 <string>c_imaplogin</string>
+{tmpl_if name="idn_mail" op="==" value="1"}
+                                <string>idn_mail</string>
+{/tmpl_if}
                             </array>
                             <key>IMAPHostFieldName</key>
                             <string>c_imaphostname</string>
