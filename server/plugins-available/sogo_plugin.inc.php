@@ -83,10 +83,12 @@ class sogo_plugin {
             $app->plugins->registerEvent('sogo_module_insert', $this->plugin_name, 'insert_sogo_module_settings');
             $app->plugins->registerEvent('sogo_module_update', $this->plugin_name, 'update_sogo_module_settings');
 
-            //* Register for remote actions
-            $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
-            $app->plugins->registerAction('sogo_mail_user_alias', $this->plugin_name, 'action_mail_user_alias');
-            $app->plugins->registerAction('sogo_mail_domain_uid', $this->plugin_name, 'action_mail_domain');
+            if(version_compare($conf['app_version'], '3.0.4.6', ">")){
+                //* Register for remote actions
+                $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
+                $app->plugins->registerAction('sogo_mail_user_alias', $this->plugin_name, 'action_mail_user_alias');
+                $app->plugins->registerAction('sogo_mail_domain_uid', $this->plugin_name, 'action_mail_domain');
+            }
         }
     }
 
