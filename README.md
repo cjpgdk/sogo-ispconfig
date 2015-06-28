@@ -12,7 +12,7 @@ sogo-ispconfig is an attempt to integrate as much as possible of the configurati
 
 Installation
 --------------
-Simply run on the latest ispconfig version
+Simply run this, But ISPConfig version must be higher or equal to 3.0.5
 
 ```
 cd /tmp
