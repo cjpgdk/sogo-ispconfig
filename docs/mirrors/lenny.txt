@@ -1,0 +1,23 @@
+deb http://archive.debian.org/debian/ lenny main contrib non-free
+
+deb http://archive.debian.org/debian-security lenny/updates main contrib non-free
+
+deb http://archive.debian.org/backports.org lenny-backports-sloppy main contrib non-free
+deb http://archive.debian.org/backports.org lenny-backports main contrib non-free
+
+deb http://archive.debian.org/debian-backports lenny-backports-sloppy main contrib non-free
+deb http://archive.debian.org/debian-backports lenny-backports main contrib non-free
+
+deb http://archive.debian.org/debian-volatile lenny/volatile-sloppy main contrib non-free
+deb http://archive.debian.org/debian-volatile lenny/volatile main contrib non-free
+
+
+#
+# >> /etc/apt/preferences
+#        Package: *
+#        Pin: origin archive.debian.org
+#        Pin-Priority: 600
+#
+# apt-get update && apt-get install debian-archive-keyring 
+# apt-get upgrade
+
