@@ -609,8 +609,10 @@ class sogo_plugin {
      */
     public function remove_sogo_mail_user($event_name, $data) {
         global $app;
-        if ($event_name == 'mail_user_delete')
-            $app->sogo_helper->sync_mail_usersr($data['old']['login']);
+        if ($event_name == 'mail_user_delete') {
+            $dom = @explode("@", $data['old']['login']);
+            $app->sogo_helper->sync_mail_users(@$dom[1]);
+        }
     }
 
     //* #END# MAIL USERS (TB: mail_user)
