@@ -64,9 +64,12 @@ class SOGo {
 
             if (!Installer::isSOGoOnServer()) {
                 $this->echoMessage(PHP_EOL . "About to install SOGo");
-                $this->echoMessage("Shall i install sogo-activesync? (Y/N) [Y]: ", '');
                 $pkg = "sogo sope4.9-gdl1-mysql memcached rpl";
-                $pkg .= (strtolower(Installer::readInput("y")) == "y" ? " sogo-activesync" : "");
+                //* lenny do not have activesync
+                if($this->os_name != "lenny"){
+                    $this->echoMessage("Shall i install sogo-activesync? (Y/N) [Y]: ", '');
+                    $pkg .= (strtolower(Installer::readInput("y")) == "y" ? " sogo-activesync" : "");
+                }
                 echo exec('sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ' . $pkg);
                 unset($pkg);
             } else {
