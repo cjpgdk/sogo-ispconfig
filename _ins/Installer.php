@@ -232,6 +232,9 @@ class Installer {
             if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/')) {
                 @mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/');
             }
+            if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/admin/lib/menu.d/')) {
+                @mkdir(self::$ispc_home_dir . '/' . $index . '/web/admin/lib/menu.d/');
+            }
             foreach (self::$files_copy[$index] as $file) {
                 if (file_exists($index . '/' . $file)) {
                     if (!copy($index . '/' . $file, self::$ispc_home_dir . '/' . $index . '/' . $file)) {

@@ -117,7 +117,8 @@ server
    #include snippets/{SOGoHostPort}.conf;
 
    ## requirement to create new calendars in Thunderbird ##
-   proxy_http_version 1.1;
+   # Not supported on nginx/1.0.9
+   #proxy_http_version 1.1;
    #proxy_set_header Connection "";
 
    location = / {
