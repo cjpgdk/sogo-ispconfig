@@ -1,0 +1,17 @@
+#no|yes
+auth_verbose=yes
+#no|yes
+auth_debug=yes
+#no|yes
+auth_debug_passwords=yes
+#no|yes
+mail_debug=yes
+#no|yes
+verbose_ssl=yes
+#no|plain|sha1
+auth_verbose_passwords=plain
+log_path = /var/log/dovecot.log
+# If you want everything in one file, just don't specify info_log_path and debug_log_path
+info_log_path = /var/log/dovecot-info.log
+# Leave empty in order to send debug-level messages to info_log_path
+debug_log_path = /var/log/dovecot-debug.log
