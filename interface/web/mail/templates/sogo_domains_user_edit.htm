@@ -237,6 +237,8 @@
         <input name="server_id" id="server_id" value="{tmpl_var name='server_id'}" type="hidden" />
         <input name="server_name" id="server_name" value="{tmpl_var name='server_name'}" type="hidden" />
 
+        <input type="hidden" name="_csrf_key" value="{tmpl_var name='_csrf_key'}">
+        <input type="hidden" name="_csrf_id" value="{tmpl_var name='_csrf_id'}">
         <div class="buttonHolder buttons">
             <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'mail/sogo_mail_domains_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
             <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('mail/sogo_mail_domain_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>

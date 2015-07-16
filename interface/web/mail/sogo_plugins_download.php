@@ -40,7 +40,6 @@ require_once '../../lib/app.inc.php';
 if ($app->auth->get_user_id() > 0 && $app->auth->get_user_id() !== FALSE) {
     if (isset($_GET['pid']) && ((intval($_GET['pid']) > 0) && ((string) intval($_GET['pid']) == $_GET['pid']))) {
         require_once "list/sogo_plugins.list.php";
-        $app = new app;
         $result = $app->db->queryOneRecord("SELECT * FROM `{$liste["table"]}` WHERE `{$liste["table_idx"]}`='" . intval($_GET['pid']) . "' AND `active`='y'");
         if (
                 (isset($result['name']) && isset($result['file']) && isset($result['filetype'])) &&
