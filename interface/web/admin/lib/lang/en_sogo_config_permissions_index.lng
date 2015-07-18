@@ -1,0 +1,8 @@
+<?php
+$wb["scpi_clients_txt"] = 'Clients';
+$wb["tab_header_clients_txt"] = 'Clients';
+$wb["scpi_type_txt"] = 'Type';
+$wb["tab_header_type_txt"] = 'Type';
+$wb["scpi_type_client_help_txt"] = '<strong>Client</strong>: is the permissions granted to normal users in this this system';
+$wb["scpi_type_reseller_help_txt"] = '<strong>Reseller</strong>: is the permissions granted to reseller in this this system';
+$wb["scpi_type_select_disabled_txt"] = 'Disabled for global items';

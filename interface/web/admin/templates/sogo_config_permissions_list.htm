@@ -1,0 +1,93 @@
+<div class="panel panel_list_sogo_config_permissions">
+    <p><br><!-- SPACE --></p>
+    <div class="pnl_listarea">
+        <fieldset><legend>{tmpl_var name="list_head_txt"}</legend>
+            <table class="list">
+                <thead>
+                    <tr>
+                        <th>{tmpl_var name="scp_allow_txt"}</th>
+                        <th>{tmpl_var name="scp_name_txt"}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tmpl_loop name="records"}
+                    <tr class="trigger_allow_deny tbl_row_<tmpl_if name='__EVEN__'}even<tmpl_else>uneven</tmpl_if>">
+                        <td class="tbl_col_scp_allow"  
+                            data-permission_allowed="{tmpl_var name='scp_allowed'}"
+                            data-permission_id="{tmpl_var name='id'}" 
+                            data-permission_name='{tmpl_var name="scp_name"}'
+                            data-permission_index="{tmpl_var name='permission_index'}" 
+                            style="width: 80px !important">{tmpl_var name="scp_allow"}</td>
+                        <td class="tbl_col_scp_name" style="width: 230px !important">{tmpl_var name="scp_name_format_txt"}</td>
+                        <td class="tbl_col_scp_desc">{tmpl_var name="scp_name_desc_txt"}</td>
+                    </tr>
+                    {/tmpl_loop}
+                    {tmpl_unless name="records"}
+                    <tr class="tbl_row_noresults tbl_row_{<tmpl_if name='__EVEN__'}even{tmpl_else}uneven{/tmpl_if}"><td colspan="3">{tmpl_var name='globalsearch_noresults_text_txt'}</td></tr>
+                    {/tmpl_unless}
+                </tbody>
+                <tfoot><tr><td class="tbl_footer tbl_paging" colspan="3">{tmpl_var name="paging"}</td></tr></tfoot>
+            </table>
+        </fieldset>
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        jQuery('.trigger_allow_deny').click(function () {
+            var _this = $(this);
+            var _td = _this.find('.tbl_col_scp_allow');
+
+            var _id = _td.data('permission_id');
+            var _name = _td.data('permission_name');
+            var _index = _td.data('permission_index');
+            var _allowed = _td.data('permission_allowed');
+            if (parseInt(_index) <= 0) {
+                alert('{tmpl_var name="invalid_row_data_refresh_page"}');
+                return false;
+            }
+            if (_allowed === 'y') {
+                /* deny */
+                if (confirm('{tmpl_var name="are_you_sure_deny"}') === false) {
+                    return false;
+                }
+            } else {
+                /* allow */
+                if (confirm('{tmpl_var name="are_you_sure_allow"}') === false) {
+                    return false;
+                }
+            }
+            var _data = {
+                permission_id: _id,
+                permission_index: _index,
+                permission_name: _name,
+                permission_allowed: _allowed,
+                ajax_k: '{tmpl_var name="ajax_key"}'
+            }
+            dojQueryAjaxRequest(_data);
+            return false;
+        });
+    });
+
+    function dojQueryAjaxRequest(d) {
+        jQuery.ajax({
+            type: "POST",
+            url: 'admin/sogo_config_permissions_edit.php?ajax={tmpl_var name="ajax_key"}',
+            data: d,
+            dataType: "html",
+            beforeSend: function () {
+                showLoadIndicator();
+            },
+            success: function (data, textStatus, jqXHR) {
+                hideLoadIndicator();
+                /* reload this tab */
+                changeTab('permissions', 'admin/sogo_config_permissions_edit.php');
+            },
+            error: function () {
+                hideLoadIndicator();
+                alert("{tmpl_var name='save_server_change_error_txt'}");
+            }
+        });
+    }
+</script>

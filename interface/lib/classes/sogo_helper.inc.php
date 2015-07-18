@@ -22,6 +22,36 @@
  */
 class sogo_helper {
 
+    public function getResellerConfigPermissions($user_id) {
+        
+    }
+
+    public function getClientConfigPermissions($user_id) {
+        $user_id = intval($user_id);
+        $records = array();
+        $_tmp = $this->getDB()->queryAllRecords("SELECT scp.`scp_name` as name, scp.`scp_allow` as allow FROM `sogo_config_permissions_index` scpii, `sogo_config_permissions` scp WHERE scpii.`scpi_type`='client' AND scpii.`scpi_is_global`=1 AND scp.`scp_index`=scpii.`scpi`");
+        //* flatten the array
+        foreach ($_tmp as $value) {
+            $records['permission_' . $value['name']] = $value['allow'];
+        }
+        unset($_tmp);
+        if ($_records = $this->getDB()->queryAllRecords("SELECT * FROM `sogo_config_permissions_index`")) {
+            foreach ($_records as $key => $value) {
+                $c = explode(',', $value['scpi_clients']);
+                if ($c == $user_id) {
+                    $permissions_index = intval($value['scpi']);
+                    $_tmp = $this->getDB()->queryAllRecords("SELECT scp.`scp_allow` as allow, scp.`scp_name` as name FROM `sogo_config_permissions` scp WHERE scp.`scp_index`={$permissions_index}");
+                    //* override global
+                    foreach ($_tmp as $value) {
+                        $records['permission_' . $value['name']] = $value['allow'];
+                    }
+                }
+            }
+            unset($_records);
+        }
+        return $records;
+    }
+
     /**
      * get sogo module config field 
      * @param integer $server_id 

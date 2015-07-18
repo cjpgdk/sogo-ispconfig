@@ -1,0 +1,9 @@
+<?php
+$wb["list_head_txt"] = 'SOGo user configuration permissions';
+$wb["scpi_is_global_txt"] = 'Global';
+$wb["scpi_type_txt"] = 'Type';
+$wb["scpi_clients_txt"] = 'Clients (IDs)';
+$wb["TXT_ALL_RESELLERS"] = 'All Resellers';
+$wb["TXT_ALL_CLIENTS"] = 'All Clients';
+$wb["TXT_RESELLER"] = 'Reseller';
+$wb["TXT_CLIENT"] = 'Client';

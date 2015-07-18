@@ -1,0 +1,12 @@
+<h2><tmpl_var name="list_head_txt"></h2>
+<p><tmpl_var name="list_desc_txt"></p>
+
+<div class="panel panel_dns_soa">
+
+    {tmpl_var name='permission_records'}
+
+    <input type="hidden" name="id" value="{tmpl_var name='id'}">
+    <input type="hidden" name="scpi_type" value="{tmpl_var name='scpi_type'}">
+    <input type="hidden" name="_csrf_id" value="{tmpl_var name='_csrf_id'}">
+    <input type="hidden" name="_csrf_key" value="{tmpl_var name='_csrf_key'}">
+</div>

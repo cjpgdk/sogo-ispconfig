@@ -3,6 +3,9 @@ a few helper scripts, need exec permissions
 chmod +x script-name.sh
 
 
+-- download and install all helper scripts in /usr/local/bin/
+install-scripts-remote.sh
+
 -- initialize locale repository in /usr/local/src/sogo-ispconfig/
 sogo-ispconfig-clone.sh
 

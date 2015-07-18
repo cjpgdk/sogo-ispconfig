@@ -108,10 +108,10 @@ class tform_action extends tform_actions {
             if (isset($value['value']) && is_array($value['value'])) {
                 foreach ($value['value'] as $innerkey => & $innervalue) {
                     if (isset($app->tform->wordbook[$innerkey])) {
-                        //* using the key og the field to translate
+                        //* using the key of the field to translate
                         $innervalue = $app->tform->wordbook[$innerkey];
                     } else if (isset($app->tform->wordbook[$innervalue])) {
-                        //* using the value og the field to translate
+                        //* using the value of the field to translate
                         $innervalue = $app->tform->wordbook[$innervalue];
                     }
                 }
@@ -128,6 +128,68 @@ class tform_action extends tform_actions {
         $app->tpl->setVar('domain_name', $this->__domain_name);
         $app->tpl->setVar('server_id', $this->__server_id);
         $app->tpl->setVar('server_name', $this->__server_name);
+
+        if (!$app->auth->is_admin()) {
+            $_uid = $app->auth->get_user_id();
+            if ($app->auth->has_clients($_uid))
+                $edit_permissions = $app->sogo_helper->getResellerConfigPermissions($_uid);
+            else
+                $edit_permissions = $app->sogo_helper->getClientConfigPermissions($_uid);
+
+            if (isset($edit_permissions) & count($edit_permissions) > 0)
+                $app->tpl->setVar($edit_permissions);
+
+            //* imap stuff
+            $_imap_section = 0;
+            if (isset($edit_permissions['permission_imap_server']) && $edit_permissions['permission_imap_server'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_imap_conforms_imapext']) && $edit_permissions['permission_imap_conforms_imapext'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_imap_acl_style']) && $edit_permissions['permission_imap_acl_style'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_imap_folder_drafts']) && $edit_permissions['permission_imap_folder_drafts'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_imap_folder_trash']) && $edit_permissions['permission_imap_folder_trash'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_imap_folder_sent']) && $edit_permissions['permission_imap_folder_sent'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_subscription_folder_format']) && $edit_permissions['permission_subscription_folder_format'] == 'y')
+                $_imap_section = 1;
+            if (isset($edit_permissions['permission_mail_auxiliary_accounts']) && $edit_permissions['permission_mail_auxiliary_accounts'] == 'y')
+                $_imap_section = 1;
+            $app->tpl->setVar('show_imap_section', $_imap_section);
+
+
+            //* sieve stuff
+            $_sieve_section = 0;
+            if (isset($edit_permissions['permission_sieve_filter_forward']) && $edit_permissions['permission_sieve_filter_forward'] == 'y')
+                $_sieve_section = 1;
+            if (isset($edit_permissions['permission_sieve_filter_vacation']) && $edit_permissions['permission_sieve_filter_vacation'] == 'y')
+                $_sieve_section = 1;
+            if (isset($edit_permissions['permission_sieve_server']) && $edit_permissions['permission_sieve_server'] == 'y')
+                $_sieve_section = 1;
+            if (isset($edit_permissions['permission_sieve_filter_enable_disable']) && $edit_permissions['permission_sieve_filter_enable_disable'] == 'y')
+                $_sieve_section = 1;
+            if (isset($edit_permissions['permission_sieve_folder_encoding']) && $edit_permissions['permission_sieve_folder_encoding'] == 'y')
+                $_sieve_section = 1;
+            $app->tpl->setVar('show_sieve_section', $_sieve_section);
+
+            //* smtp stuff
+            $_smtp_section = 0;
+            if (isset($edit_permissions['permission_smtp_server']) && $edit_permissions['permission_smtp_server'] == 'y')
+                $_smtp_section = 1;
+            if (isset($edit_permissions['permission_mailing_mechanism']) && $edit_permissions['permission_mailing_mechanism'] == 'y')
+                $_smtp_section = 1;
+            if (isset($edit_permissions['permission_mail_spool_path']) && $edit_permissions['permission_mail_spool_path'] == 'y')
+                $_smtp_section = 1;
+            if (isset($edit_permissions['permission_mail_custom_from_enabled']) && $edit_permissions['permission_mail_custom_from_enabled'] == 'y')
+                $_smtp_section = 1;
+            if (isset($edit_permissions['permission_smtp_authentication_type']) && $edit_permissions['permission_smtp_authentication_type'] == 'y')
+                $_smtp_section = 1;
+            $app->tpl->setVar('show_smtp_section', $_smtp_section);
+        }
+
+
         parent::onShowEnd();
     }
 

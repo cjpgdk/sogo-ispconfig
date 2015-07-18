@@ -247,4 +247,9 @@ $old_files = array(
         'file'=>'interface/web/mail/mail_sogo_domain_list.php',
         'action' => 'delete',
     ),
+    array(
+        'type'=>'file',
+        'file'=>'interface/web/mail/templates/sogo_domains_reseller_edit.htm',
+        'action' => 'delete',
+    ),
 );

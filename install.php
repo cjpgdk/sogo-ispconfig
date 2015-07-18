@@ -8,13 +8,6 @@
   php install.php
  */
 
-/* create sogo user
-CREATE USER 'dbsogo'@'localhost' IDENTIFIED BY 'dbsogo';
-GRANT USAGE ON * . * TO 'dbsogo'@'localhost' IDENTIFIED BY 'dbsogo' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;
-CREATE DATABASE IF NOT EXISTS `dbsogo` ;
-GRANT ALL PRIVILEGES ON `dbsogo` . * TO 'dbsogo'@'localhost';
-*/
-
 require '_ins/copy_files.php';
 require '_ins/SOGo.php';
 require '_ins/ApacheVhost.php';

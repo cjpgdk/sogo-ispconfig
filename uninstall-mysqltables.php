@@ -2,8 +2,7 @@
 
 /*
  * uninstall ONLY mysql tables
- * requiered on all servers
-
+ * 
   cd /tmp
   wget https://github.com/cmjnisse/sogo-ispconfig/archive/master.tar.gz -O sogo-ispconfig.tar.gz
   tar -xvf sogo-ispconfig.tar.gz
@@ -19,7 +18,6 @@ function readInput($default = "") {
  
  
 $mysql_tables_dropispc = "_ins/drop_tables.sql";
-//* add mysql tables
 echo "MySQL Host? [127.0.0.1]: ";
 $mysql_host = readInput("127.0.0.1");
 echo PHP_EOL;

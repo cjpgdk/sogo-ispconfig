@@ -5,6 +5,7 @@ $files_copy = array(
         'lib/classes/sogo_helper.inc.php',
         'lib/plugins/sogo_plugin.inc.php',
         'lib/config.inc.local.sogo-sample.php',
+                'lib/classes/plugin_sogopermissionslistview.inc.php',
         //* #ADMIN#
         'web/admin/sogo_conifg_del.php',
         'web/admin/sogo_conifg_edit.php',
@@ -20,12 +21,19 @@ $files_copy = array(
         'web/admin/sogo_plugins_del.php',
         'web/admin/sogo_plugins_edit.php',
         'web/admin/sogo_plugins_list.php',
+                'web/admin/sogo_config_permissions_list.php',
+                'web/admin/sogo_config_permissions_edit.php',
+                'web/admin/sogo_config_permissions_del.php',
+                'web/admin/sogo_config_permissions_records_list.php',
+        //* misc
+                'web/admin/lib/sogo_config_permissions_records_names.php',
         //* form
         'web/admin/form/sogo_config.tform.php',
         'web/admin/form/sogo_domains.tform.php',
         'web/admin/form/sogo_domains_bulk.tform.php',
         'web/admin/form/sogo_module.tform.php',
         'web/admin/form/sogo_plugins.tform.php',
+                'web/admin/form/sogo_config_permissions.tform.php',
         //* lng
         'web/admin/lib/lang/en_sogo_config.lng',
         'web/admin/lib/lang/en_sogo_conifg_list.lng',
@@ -37,6 +45,9 @@ $files_copy = array(
         'web/admin/lib/lang/en_sogo_module_bulk_update_config.lng',
         'web/admin/lib/lang/en_sogo_plugins.lng',
         'web/admin/lib/lang/en_sogo_plugins_list.lng',
+                'web/admin/lib/lang/en_sogo_config_permissions_index.lng',
+                'web/admin/lib/lang/en_sogo_config_permissions_index_list.lng',
+                'web/admin/lib/lang/en_sogo_config_permissions_list.lng',
         //* menu
         'web/admin/lib/menu.d/sogo.menu.php',
         //* list
@@ -44,6 +55,8 @@ $files_copy = array(
         'web/admin/list/sogo_plugins.list.php',
         'web/admin/list/sogo_server.list.php',
         'web/admin/list/sogo_module.list.php',
+                'web/admin/list/sogo_config_permission_records.list.php',
+                'web/admin/list/sogo_config_permissions.list.php',
         //* templates
         'web/admin/templates/sogo_config_custom_edit.htm',
         'web/admin/templates/sogo_config_domain_edit.htm',
@@ -61,6 +74,11 @@ $files_copy = array(
         'web/admin/templates/sogo_module_list.htm',
         'web/admin/templates/sogo_plugins_edit.htm',
         'web/admin/templates/sogo_plugins_list.htm',
+                'web/admin/templates/sogo_config_permissions_index_list.htm',
+                'web/admin/templates/sogo_config_permissions_type_edit.htm',
+                'web/admin/templates/sogo_config_permissions_clients_edit.htm',
+                'web/admin/templates/sogo_config_permissions_permissions_edit.htm',
+                'web/admin/templates/sogo_config_permissions_list.htm',
         //* /#ADMIN#
         //* #MAIL#
         'web/mail/sogo_mail_domain_del.php',
@@ -86,7 +104,7 @@ $files_copy = array(
         //* templates
         'web/mail/templates/sogo_domains_edit.htm',
         'web/mail/templates/sogo_domains_list.htm',
-        'web/mail/templates/sogo_domains_reseller_edit.htm',
+        /*'web/mail/templates/sogo_domains_reseller_edit.htm',*/
         'web/mail/templates/sogo_domains_reseller_list.htm',
         'web/mail/templates/sogo_domains_user_edit.htm',
         'web/mail/templates/sogo_domains_user_list.htm',

@@ -30,7 +30,7 @@ $liste["edit_file"] = "sogo_domains_edit.php";
 $liste["delete_file"] = "sogo_domains_del.php";
 $liste["paging_tpl"] = "templates/paging.tpl.htm";
 $liste["auth"] = "yes";
-// see "sogo_domains_list.php" for join statement in use
+//* see "sogo_domains_list.php" for join statement in use
 //$liste['join_sql'] = "LEFT JOIN `sogo_domains` ON `mail_domain`.`domain_id`=`sogo_domains`.`domain_id`";
 $liste["item"][] = array(
     'field' => "active",

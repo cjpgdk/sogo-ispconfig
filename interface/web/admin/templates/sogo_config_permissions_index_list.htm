@@ -1,0 +1,58 @@
+<h2>{tmpl_var name="list_head_txt"}</h2>
+<div class="panel panel_list_sogo_config_permissions_index">
+    <div class="pnl_toolsarea">
+        <fieldset><legend>{tmpl_var name="toolsarea_head_txt"}</legend>
+            <div class="buttons">
+                <button class="iconstxt icoAdd" type="button" onclick="loadContent('admin/sogo_config_permissions_edit.php');">
+                    <span>{tmpl_var name="add_new_record_txt"}</span>
+                </button>
+            </div>
+        </fieldset>
+    </div>
+    <div class="pnl_listarea">
+        <fieldset><legend>{tmpl_var name="list_head_txt"}</legend>
+            <table class="list">
+                <thead>
+                    <tr>
+                        <th class="tbl_col_scpi_is_global" scope="col">{tmpl_var name="scpi_is_global_txt"}</th>
+                        <th class="tbl_col_scpi_type" scope="col">{tmpl_var name="scpi_type_txt"}</th>
+                        <th class="tbl_col_scpi_clients" scope="col">{tmpl_var name="scpi_clients_txt"}</th>
+                        <th class="tbl_col_buttons" scope="col">&nbsp;</th>
+                    </tr>
+                    <tr>
+                        <td class="tbl_col_scpi_is_global"><select name="search_scpi_is_global" onChange="submitForm('pageForm', 'admin/sogo_config_permissions_list.php');">{tmpl_var name='search_scpi_is_global'}</select></td>
+                        <td class="tbl_col_scpi_type"><select name="search_scpi_type" onChange="submitForm('pageForm', 'admin/sogo_config_permissions_list.php');">{tmpl_var name='search_scpi_type'}</select></td>
+                        <td class="tbl_col_scpi_clients"><input type="text" name="search_scpi_clients" value="{tmpl_var name='search_scpi_clients'}" /></td>
+                        <td class="tbl_col_buttons"><div class="buttons"><button type="button" class="icons16 icoFilter" name="Filter" id="Filter" value="{tmpl_var name="filter_txt"}" onclick="submitForm('pageForm','admin/sogo_config_permissions_list.php');"><span>{tmpl_var name="filter_txt"}</span></button></div></td>
+                    </tr>
+                </thead>
+                <tbody>
+                <tmpl_loop name="records">
+                    <tr class="tbl_row_{tmpl_if name='__EVEN__'}even{tmpl_else}uneven{/tmpl_if}">
+                        <td class="tbl_col_scpi_is_global"><a href="#" onclick="loadContent('admin/sogo_config_permissions_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="scpi_is_global"}</a></td>
+                        <td class="tbl_col_scpi_type"><a href="#" onclick="loadContent('admin/sogo_config_permissions_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="scpi_type"}</a></td>
+                        <td class="tbl_col_scpi_clients"><a href="#" onclick="loadContent('admin/sogo_config_permissions_edit.php?id={tmpl_var name='id'}');">{tmpl_var name="scpi_clients"}</a></td>
+                        <td class="tbl_col_buttons">
+                            {tmpl_if name="is_global" op="==" value="0"}
+                            <div class="buttons icons16">
+                                <a class="button icons16 icoDelete" href="javascript: del_record('admin/sogo_config_permissions_del.php?id={tmpl_var name='id'}&phpsessid={tmpl_var name='phpsessid'}','{tmpl_var name='delete_confirmation'}');"><span>{tmpl_var name='delete_txt'}</span></a>
+                            </div>
+                            {/tmpl_if}
+                        </td>
+                    </tr>
+                </tmpl_loop>
+                <tmpl_unless name="records">
+                    <tr class="tbl_row_noresults tbl_row_{tmpl_if name='__EVEN__'}even{tmpl_else}uneven{/tmpl_if}">
+                        <td colspan="4">{tmpl_var name='globalsearch_noresults_text_txt'}</td>
+                    </tr>
+                </tmpl_unless>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="tbl_footer tbl_paging" colspan="4">{tmpl_var name="paging"}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </fieldset>
+    </div>
+</div>

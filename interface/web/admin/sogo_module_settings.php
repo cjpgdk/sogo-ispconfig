@@ -29,11 +29,12 @@ require_once '../../lib/app.inc.php';
 $app->auth->check_module_permissions('admin');
 if (method_exists($app->auth, 'check_security_permissions')) {
     $app->auth->check_security_permissions('admin_allow_server_services');
+} else {
+    if (!$app->auth->is_admin())
+        die('only allowed for administrators.');
 }
 $app->uses('tpl,tform,functions');
 $app->load('tform_actions');
-
-//$_REQUEST['id'] = 1; //* always 1, no use for multi settings ?yet
 
 class tform_action extends tform_actions {
     /** @global app $app */

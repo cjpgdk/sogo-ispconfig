@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2014  Christian M. Jensen
+ * Copyright (C) 2015  Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2014-2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
 $module['nav'][] = array(
@@ -42,6 +42,12 @@ $module['nav'][] = array(
             'target' => 'content',
             'link' => 'admin/sogo_module_settings_list.php',
             'html_id' => 'sogo_module_settings'
+        ),
+        array(
+            'title' => 'Permissions',
+            'target' => 'content',
+            'link' => 'admin/sogo_config_permissions_list.php',
+            'html_id' => 'sogo_config_permissions'
         ),
         array(
             'title' => 'Plugins',

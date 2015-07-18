@@ -1,26 +1,26 @@
 <h2>{tmpl_var name="list_head_txt"}</h2>
 <p>{tmpl_var name="list_desc_txt"}</p>
-<div class="pnl_toolsarea">
-    <tmpl_if name='datalog_changes_count' op='>' value='0'>
-        <div>
-            <div class="systemmonitor-state state-info">
-                <div class="status"></div>
-                <div class="statusMsg">
-                    {tmpl_var name="datalog_changes_txt"}
-                    <ul>
-                        <tmpl_loop name="datalog_changes">
-                            <li><strong>{tmpl_var name="text"}:</strong> {tmpl_var name="count"}</li>
-                        </tmpl_loop>
-                    </ul>
-                    {tmpl_var name="datalog_changes_end_txt"}
-                </div>
-            </div><br />
-        </div>
-    </tmpl_if>
-</div>
 
 <div class="panel panel_list_sogo_domains_user">
 
+    <tmpl_if name='datalog_changes_count' op='>' value='0'>
+        <div class="pnl_toolsarea">
+            <fieldset>
+                <div class="systemmonitor-state state-info">
+                    <div class="status"></div>
+                    <div class="statusMsg">
+                        {tmpl_var name="datalog_changes_txt"}
+                        <ul>
+                            <tmpl_loop name="datalog_changes">
+                                <li><strong>{tmpl_var name="text"}:</strong> {tmpl_var name="count"}</li>
+                            </tmpl_loop>
+                        </ul>
+                        {tmpl_var name="datalog_changes_end_txt"}
+                    </div>
+                </div><br />
+            </fieldset>
+        </div>
+    </tmpl_if>
     <div class="pnl_listarea">
         <fieldset><legend>{tmpl_var name="list_head_txt"}</legend>
             <table class="list">
@@ -46,7 +46,7 @@
                         <td class="tbl_col_domain"><a href="#" onclick="loadContent('mail/sogo_mail_domains_edit.php?domain_id={tmpl_var name='id'}');">{tmpl_var name="domain"}</a></td>
                         <td class="tbl_col_buttons">
                             <div class="buttons icons16">    
-                                <a class="button icons16 icoDelete" href="javascript: del_record('mail/sogo_mail_domain_del.php?domain_id={tmpl_var name='id'}&phpsessid={tmpl_var name='phpsessid'}','{tmpl_var name='delete_confirmation'}');"><span>{tmpl_var name='delete_txt'}</span></a>
+                                <a class="button icons16 icoDelete" data-domainid='{tmpl_var name='id'}' href="javascript: del_record('mail/sogo_mail_domain_del.php?domain_id={tmpl_var name='id'}&phpsessid={tmpl_var name='phpsessid'}','{tmpl_var name='delete_confirmation'}');"><span>{tmpl_var name='delete_txt'}</span></a>
                             </div>
                         </td>
                     </tr>
@@ -67,3 +67,17 @@
     </div>
 
 </div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+        var sogoDomains = [];
+        {tmpl_loop name = "sogo_domains"}
+        sogoDomains.push({tmpl_var name = "domain_id"});
+        {/tmpl_loop}
+        $('.icoDelete').each(function(index) {
+            if (sogoDomains.indexOf($(this).data('domainid')) === - 1) {
+                $(this).remove();
+            }
+        });
+    });
+</script>

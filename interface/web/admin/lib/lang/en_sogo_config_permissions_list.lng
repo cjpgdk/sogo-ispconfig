@@ -1,0 +1,68 @@
+<?php
+
+$wb["scp_allow_txt"] = 'Allowed';
+$wb["scp_name_txt"] = 'Name';
+$wb["toolsarea_head_txt"] = 'Tools';
+$wb["add_new_record_txt"] = 'Add new record';
+$wb["invalid_row_data_refresh_page"] = 'The data colloected from the selected item is invalid, please reload the page and try again';
+$wb["are_you_sure_allow"] = 'Are your sure you whant to allow this?';
+$wb["are_you_sure_deny"] = 'Are your sure you whant to deny this?';
+
+$wb["sieve_filter_enable_disable_txt"] = 'Sieve: Enabled/Disabled';
+$wb["sieve_filter_enable_disable_desc_txt"] = 'Allow the client to enable or disable sieve filters';
+
+$wb["sieve_filter_forward_txt"] = 'Sieve: Forward';
+$wb["sieve_filter_forward_desc_txt"] = 'Allow the client to enable or disable the forward option within SOGo, requires Sieve filter support on imap host';
+
+$wb["sieve_filter_vacation_txt"] = 'Sieve: Vacation';
+$wb["sieve_filter_vacation_desc_txt"] = 'Allow the client to enable or disable the vacation option (Out of office) within SOGo, requires Sieve filter support on imap host';
+
+$wb["sieve_folder_encoding_txt"] = 'Sieve: Folder Encoding';
+$wb["sieve_folder_encoding_desc_txt"] = 'Allow the client to set the sieve folder encoding, this option is used by SOGo to encode the folder names before saving the the sieve scripts';
+
+$wb["sieve_server_txt"] = 'Sieve: Server';
+$wb["sieve_server_desc_txt"] = 'Allow the client to set the sieve server';
+
+$wb["imap_server_txt"] = "IMAP: Server";
+$wb["imap_server_desc_txt"] = 'Allow the client to set the imap server';
+
+$wb["imap_acl_style_txt"] = "IMAP: Acl Style";
+$wb["imap_acl_style_desc_txt"] = 'Allow the client to specify which RFC the IMAP server implements with respect to ACLs.';
+
+$wb["imap_conforms_imapext_txt"] = "IMAP: Acl Conforms To IMAPExt";
+$wb["imap_conforms_imapext_desc_txt"] = 'Allow the client to specify if the IMAP server implements the Internet Message Access Protocol Extension.';
+
+$wb["imap_folder_drafts_txt"] = "IMAP: Drafts Folder Name";
+$wb["imap_folder_drafts_desc_txt"] = 'Allow the client to specify the IMAP folder name used to store drafts messages.';
+
+$wb["imap_folder_sent_txt"] = "IMAP: Sent Folder Name";
+$wb["imap_folder_sent_desc_txt"] = 'Allow the client to specify the IMAP folder name used to store sent messages.';
+
+$wb["imap_folder_trash_txt"] = "IMAP: Trash Folder Name";
+$wb["imap_folder_trash_desc_txt"] = 'Allow the client to specify the IMAP folder name used to store deleted messages.';
+
+$wb["subscription_folder_format_txt"] = "Subscription Folder Format";
+$wb["subscription_folder_format_desc_txt"] = 'Allow the client to set the subscription folder format';
+
+$wb["mail_auxiliary_accounts_txt"] = "Mail: Auxiliary User Accounts Enabled";
+$wb["mail_auxiliary_accounts_desc_txt"] = 'Allow the client to enable or disable external imap accounts, keep in mind while this is a fine service to offer your clients the external mail accounts will use your smtp for outgoing messages';
+
+$wb["smtp_server_txt"] = "SMTP: Server";
+$wb["smtp_server_desc_txt"] = 'Allow the client to set the smtp server';
+
+$wb["mailing_mechanism_txt"] = "Mailing Mechanism";
+$wb["mailing_mechanism_desc_txt"] = 'Allow the client to set what mailing mechanism to (sendmail or smtp)';
+
+$wb["mail_spool_path_txt"] = "Mail: Spool Path";
+$wb["mail_spool_path_desc_txt"] = 'Allow the client to set the mail spool path';
+
+$wb["mail_custom_from_enabled_txt"] = "Mail: Custom From Enabled";
+$wb["mail_custom_from_enabled_desc_txt"] = 'Allow the client to set a custom from email address and name';
+
+$wb["smtp_authentication_type_txt"] = "SMTP: Authentication Type";
+$wb["smtp_authentication_type_desc_txt"] = 'Allow the client to set the SMTP authentication type is to use, or diable it. (this only affects the way SOGo authenticates with the SMTP server)';
+
+$wb["custom_xml_txt"] = "Custom XML";
+$wb["custom_xml_desc_txt"] = 'Allow clients to append custom configuration to domain configuration, THIS CAN HAVE SERIOUS SECURITY ISSUES, (sensitive and should not be enabled to users OR resellers)';
+
+

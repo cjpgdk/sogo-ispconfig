@@ -50,7 +50,9 @@ $form["auth_preset"]["perm_other"] = ''; //r = read, i = insert, u = update, d =
 $form["tabs"]['domain'] = array(
     'title' => "SOGo Domain",
     'width' => 70,
-    'template' => ($app->auth->is_admin() ? "templates/sogo_domains_edit.htm" : ($app->auth->has_clients($app->auth->get_user_id()) ? "templates/sogo_domains_reseller_edit.htm" : "templates/sogo_domains_user_edit.htm")),
+    'template' => ($app->auth->is_admin() ? "templates/sogo_domains_edit.htm" : "templates/sogo_domains_user_edit.htm"),
+    /* started using permission objects so not needed any more
+     'template' => ($app->auth->is_admin() ? "templates/sogo_domains_edit.htm" : ($app->auth->has_clients($app->auth->get_user_id()) ? "templates/sogo_domains_reseller_edit.htm" : "templates/sogo_domains_user_edit.htm")),*/
     'fields' => array(
         'domain_id' => array(
             'datatype' => 'INTEGER',
@@ -602,7 +604,7 @@ $form["tabs"]['domain'] = array(
     )
 );
 //* admin and resellers
-if ($app->auth->is_admin() || $app->auth->has_clients($app->auth->get_user_id())) {
+//if ($app->auth->is_admin() || $app->auth->has_clients($app->auth->get_user_id())) {
 
     //* IMAP
     $form["tabs"]['domain']['fields']['SOGoDraftsFolderName'] = array(
@@ -632,9 +634,9 @@ if ($app->auth->is_admin() || $app->auth->has_clients($app->auth->get_user_id())
         'required' => 0,
         'width' => 100,
     );
-}
+//}
 //* Admins only
-if ($app->auth->is_admin()) {
+//if ($app->auth->is_admin()) {
     $form["tabs"]['domain']['fields']['SOGoSMTPAuthenticationType'] = array(
         'datatype' => 'VARCHAR',
         'formtype' => 'SELECT',
@@ -768,4 +770,4 @@ if ($app->auth->is_admin()) {
         'required' => 0,
         'width' => 100,
     );
-}
+//}
