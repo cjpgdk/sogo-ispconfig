@@ -20,6 +20,15 @@
             </fieldset>
         </div>
     </tmpl_if>
+    <tmpl_if name='err_message'>
+        <div class="pnl_toolsarea">
+            <fieldset>
+                <div class="systemmonitor-state state-info">
+                    <div class="status"></div>
+                    <div class="statusMsg"><p>{tmpl_var name="err_message"}</p></div></div><br />
+            </fieldset>
+        </div>
+    </tmpl_if>
     <div class="pnl_listarea">
         <fieldset><legend>{tmpl_var name="list_head_txt"}</legend>
             <table class="list">
