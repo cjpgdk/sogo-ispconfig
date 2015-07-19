@@ -35,7 +35,7 @@ class sogo_helper {
             $records['permission_' . $value['name']] = $value['allow'];
         }
         unset($_tmp);
-        if ($_records = $this->getDB()->queryAllRecords("SELECT * FROM `sogo_config_permissions_index`")) {
+        if ($_records = $this->getDB()->queryAllRecords("SELECT * FROM `sogo_config_permissions_index` WHERE `scpi_is_global`=0 AND `scpi_type`='client'")) {
             foreach ($_records as $key => $value) {
                 $clients = explode(',', $value['scpi_clients']);
                 foreach ($clients as $client) {

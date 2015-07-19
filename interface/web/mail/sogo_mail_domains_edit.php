@@ -44,22 +44,37 @@ class tform_action extends tform_actions {
         $this->_load_domain_id();
         self::$domain_config_exists = $app->sogo_helper->domainSOGoConfigExists(self::$load_domain_id);
         self::$domain_config_index = (int) $app->sogo_helper->getDomainConfigIndex(self::$load_domain_id);
+        
+        // @todo add check if auto create domain is allowed?
+        // @todo create setting to set auto create allowed or not
+        // @todo in multi server setups maybe use domain to SOGo server map
+        // @todo ¿¿maybe allow dedicated SOGo server like ISPConfig do with web and dns, will make the auto create config more doable??
 
+        if (!isset($_SESSION['s']['module']['sogo_tmp']['domain_id']) ||
+                (isset($_SESSION['s']['module']['sogo_tmp']['domain_id']) && (
+                $_SESSION['s']['module']["sogo_conifg_domain_id"] != $_SESSION['s']['module']['sogo_tmp']['domain_id'] ||
+                $_SESSION['s']['module']['sogo_tmp']['domain_id'] != intval(self::$load_domain_id)))) {
+
+            $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval(self::$load_domain_id));
+            // $this->__domain_id
+            $_SESSION['s']['module']['sogo_tmp']['domain_id'] = $result['domain_id'];
+            // $this->__domain_name
+            $_SESSION['s']['module']['sogo_tmp']['domain'] = $result['domain'];
+            // $this->__server_id
+            $_SESSION['s']['module']['sogo_tmp']['server_id'] = $result['server_id'];
+            $result2 = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($result['server_id']));
+            // $this->__server_name
+            $_SESSION['s']['module']['sogo_tmp']['server_name'] = $result2['server_name'];
+        }
+        //die('<pre>'. print_r($_SESSION['s']['module']['sogo_tmp'], true));
         //* if no config for domain exists set id = 0 to create a new
         if (self::$load_domain_id != 0 && !self::$domain_config_exists) {
-            $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval(self::$load_domain_id));
-            if (!isset($result['domain_id']) && !isset($result['server_id'])) {
+            if (!isset($_SESSION['s']['module']['sogo_tmp']['domain_id']) && !isset($_SESSION['s']['module']['sogo_tmp']['server_id'])) {
                 //* domain do not exists.!
                 die("HEADER_REDIRECT:mail/sogo_mail_domain_list.php?msg=DOMAINNOTFOUND");
             } else {
                 //* domain exists but no config exists yet
-                $result2 = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($result['server_id']));
                 $_REQUEST["id"] = 0;
-                //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
-                $this->__domain_id = $result['domain_id'];
-                $this->__domain_name = $result['domain'];
-                $this->__server_id = $result['server_id'];
-                $this->__server_name = $result2['server_name'];
             }
         } else if (self::$load_domain_id != 0 && self::$domain_config_index != 0 && self::$domain_config_exists) {
             //* server config found, redirect to get correct vars page loaded
@@ -71,13 +86,13 @@ class tform_action extends tform_actions {
             die("HEADER_REDIRECT:mail/sogo_mail_domain_list.php?msg=INVALIDDATA");
         }
         $_SESSION['s']['module']["sogo_conifg_domain_id"] = self::$load_domain_id;
-        if (!$app->sogo_helper->configExists($this->__server_id) && !$app->sogo_helper->configExistsByDomain(self::$load_domain_id)) {
+        if (!$app->sogo_helper->configExists($_SESSION['s']['module']['sogo_tmp']['server_id']) && !$app->sogo_helper->configExistsByDomain(self::$load_domain_id)) {
             global $tform_def_file;
             $app->tform->loadFormDef($tform_def_file);
             if (!$app->auth->is_admin()) {
                 //* none admin, show general error message, log actual error as warning 
                 $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
-                $app->log("SOGo server configuration is missing on server: #" . $this->__server_id
+                $app->log("SOGo server configuration is missing on server: #" . $_SESSION['s']['module']['sogo_tmp']['server_id']
                         . ', User: #' . $app->auth->get_user_id()
                         . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_WARN);
             } else {
@@ -102,10 +117,16 @@ class tform_action extends tform_actions {
         global $app;
         $this->_load_domain_id();
 
-        $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . self::$load_domain_id);
-        //* replace var "{DOMAINNAME}" in query string
-        if (isset($result['domain'])) {
-            $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
+        if (!isset($_SESSION['s']['module']['sogo_tmp']['domain'])) {
+            $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . self::$load_domain_id);
+            //* replace var "{DOMAINNAME}" in query string
+            if (isset($result['domain'])) {
+                $_SESSION['s']['module']['sogo_tmp']['domain'] = $result['domain'];
+                $_SESSION['s']['module']['sogo_tmp']['domain_id'] = $result['domain_id'];
+                $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
+            }
+        } else {
+            $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $_SESSION['s']['module']['sogo_tmp']['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
         }
 
         //* i like this to be translated WHY IS THIS NOT DONE IN CORE FILES..!..! :-(
@@ -129,11 +150,6 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShowEnd() {
         global $app;
-        //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
-        $app->tpl->setVar('domain_id', $this->__domain_id);
-        $app->tpl->setVar('domain_name', $this->__domain_name);
-        $app->tpl->setVar('server_id', $this->__server_id);
-        $app->tpl->setVar('server_name', $this->__server_name);
         if (!$app->auth->is_admin()) {
             if (isset(self::$edit_permissions) & count(self::$edit_permissions) > 0)
                 $app->tpl->setVar(self::$edit_permissions);
@@ -151,18 +167,26 @@ class tform_action extends tform_actions {
         global $app;
         //* if not admin.
         if (!$app->auth->is_admin()) {
-            //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
-            $this->__domain_id = $this->dataRecord['domain_id'];
-            $this->__domain_name = $this->dataRecord['domain_name'];
-            $this->__server_id = $this->dataRecord['server_id'];
-            $this->__server_name = $this->dataRecord['server_name'];
+            if (!isset($_SESSION['s']['module']['sogo_tmp']['domain_id']) ||
+                    !isset($_SESSION['s']['module']['sogo_tmp']['domain']) ||
+                    !isset($_SESSION['s']['module']['sogo_tmp']['server_id']) ||
+                    !isset($_SESSION['s']['module']['sogo_tmp']['server_name'])) {
+                //* something whent wrong, session is not isset
+                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+                $app->log("SOGo:Mail:onInsert: Session values missing.", LOGLEVEL_WARN);
+                $app->error($msg);
+                exit;
+            }
+            $this->dataRecord['domain_id'] = $_SESSION['s']['module']['sogo_tmp']['domain_id'];
+            $this->dataRecord['domain_name'] = $_SESSION['s']['module']['sogo_tmp']['domain'];
+            $this->dataRecord['server_id'] = $_SESSION['s']['module']['sogo_tmp']['server_id'];
+            $this->dataRecord['server_name'] = $_SESSION['s']['module']['sogo_tmp']['server_name'];
 
-            //echo "<pre>BEFORE(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>";
-            if ($app->sogo_helper->configExists($this->__server_id)) {
+            //echo "<pre>BEFORE(" . $_SESSION['s']['module']['sogo_tmp']['server_id'] . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>";
+            if ($app->sogo_helper->configExists($_SESSION['s']['module']['sogo_tmp']['server_id'])) {
                 //* get server defaults
                 $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
-
-                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id)))
+                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($_SESSION['s']['module']['sogo_tmp']['server_id'])))
                     foreach ($domain_config_fileds as $key => $value)
                         if (!isset($this->dataRecord[$key]) && isset($server_config[$key])) {
                             if ($key == "SOGoCustomXML")
@@ -172,13 +196,13 @@ class tform_action extends tform_actions {
             }else {
                 $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
                 //* if we get here as user it's an error as this check is done in onLoad()
-                $app->log("SOGo server configuration is missing on server: #" . $this->__server_id
+                $app->log("SOGo server configuration is missing on server: #" . $_SESSION['s']['module']['sogo_tmp']['server_id']
                         . ', User: #' . $app->auth->get_user_id()
-                        . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_ERROR);
+                        . " Tried to load domain: #" . $_SESSION['s']['module']['sogo_tmp']['domain_id'], LOGLEVEL_ERROR);
                 $app->error($msg);
                 exit;
             }
-            //die("<pre>AFTER(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>");
+            //die("<pre>AFTER(" . $_SESSION['s']['module']['sogo_tmp']['server_id'] . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>");
         }
         parent::onInsert();
         //parent::onBeforeInsert();
@@ -188,18 +212,26 @@ class tform_action extends tform_actions {
         global $app;
         //* if not admin.
         if (!$app->auth->is_admin()) {
-            //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
-            $this->__domain_id = $this->dataRecord['domain_id'];
-            $this->__domain_name = $this->dataRecord['domain_name'];
-            $this->__server_id = $this->dataRecord['server_id'];
-            $this->__server_name = $this->dataRecord['server_name'];
+            if (!isset($_SESSION['s']['module']['sogo_tmp']['domain_id']) ||
+                    !isset($_SESSION['s']['module']['sogo_tmp']['domain']) ||
+                    !isset($_SESSION['s']['module']['sogo_tmp']['server_id']) ||
+                    !isset($_SESSION['s']['module']['sogo_tmp']['server_name'])) {
+                //* something whent wrong, session is not isset
+                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+                $app->log("SOGo:Mail:onUpdate: Session values missing :: sogo_tmp = " . print_r($_SESSION['s']['module']['sogo_tmp'], true), LOGLEVEL_WARN);
+                $app->error($msg);
+                exit;
+            }
+            $this->dataRecord['domain_id'] = $_SESSION['s']['module']['sogo_tmp']['domain_id'];
+            $this->dataRecord['domain_name'] = $_SESSION['s']['module']['sogo_tmp']['domain'];
+            $this->dataRecord['server_id'] = $_SESSION['s']['module']['sogo_tmp']['server_id'];
+            $this->dataRecord['server_name'] = $_SESSION['s']['module']['sogo_tmp']['server_name'];
 
-            //echo "<pre>BEFORE(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>";
-            if ($app->sogo_helper->configExists($this->__server_id)) {
+            //echo "<pre>BEFORE(" . $_SESSION['s']['module']['sogo_tmp']['server_id'] . "):Count:(" . count($this->dataRecord) . ")::\n\n" . print_r($this->dataRecord, true) . "</pre>";
+            if ($app->sogo_helper->configExists($_SESSION['s']['module']['sogo_tmp']['server_id'])) {
                 //* get server defaults
                 $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
-
-                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id)))
+                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($_SESSION['s']['module']['sogo_tmp']['server_id'])))
                     foreach ($domain_config_fileds as $key => $value)
                         if (!isset($this->dataRecord[$key]) && isset($server_config[$key])) {
                             if ($key == "SOGoCustomXML")
@@ -209,13 +241,13 @@ class tform_action extends tform_actions {
             }else {
                 $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
                 //* if we get here as user it's an error as this check is done in onLoad()
-                $app->log("SOGo server configuration is missing on server: #" . $this->__server_id
+                $app->log("SOGo server configuration is missing on server: #" . $_SESSION['s']['module']['sogo_tmp']['server_id']
                         . ', User: #' . $app->auth->get_user_id()
-                        . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_ERROR);
+                        . " Tried to load domain: #" . $_SESSION['s']['module']['sogo_tmp']['domain'], LOGLEVEL_ERROR);
                 $app->error($msg);
                 exit;
             }
-            //die("<pre>AFTER(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>");
+            //die("<pre>AFTER(" . $_SESSION['s']['module']['sogo_tmp']['server_id'] . "):Count:(" . count($this->dataRecord) . ")::\n\n" . print_r($this->dataRecord, true) . "</pre>");
         }
         parent::onUpdate();
         //parent::onBeforeUpdate();
@@ -224,11 +256,8 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShowNew() {
         global $app;
-        //* @todo change this to insert new row with server default then show edit..
-        if ($app->sogo_helper->configExists($this->__server_id)) {
-
-            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
-
+        if ($app->sogo_helper->configExists($_SESSION['s']['module']['sogo_tmp']['server_id'])) {
+            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($_SESSION['s']['module']['sogo_tmp']['server_id']));
             //* on new copy all default values from server config if exists
             foreach ($app->tform->formDef["tabs"] as $key => & $value) {
                 foreach ($value['fields'] as $key => & $value) {
@@ -245,36 +274,6 @@ class tform_action extends tform_actions {
 
     public function onAfterInsert() {
         global $app;
-        // testing if this can be set fully in onUpdate() && onInsert()
-//        //* if reseller or client fix missing server default values..!
-//        if (!$app->auth->is_admin()) {
-//            $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
-//            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
-//            $server_id = @$this->dataRecord['server_id'];
-//            $domain_id = @$this->dataRecord['domain_id'];
-//            $missing_values = array();
-//            foreach ($domain_config_fileds as $key => $value) {
-//                if (!isset($this->dataRecord[$key])) {
-//                    if ($key == "SOGoCustomXML")
-//                        continue;
-//                    $value['default'] = isset($server_config[$key]) ? $server_config[$key] : $value['default'];
-//                    $missing_values[$key] = $value;
-//                }
-//            }
-//            unset($domain_config_fileds, $server_config);
-//            $sql = " UPDATE `sogo_domains` ";
-//            $sql_where = " WHERE `domain_id`=" . intval($domain_id) . " AND `server_id`=" . intval($server_id); //* domain_name server_name
-//            $sql_set = " SET ";
-//
-//            if (!empty($missing_values) && count($missing_values) > 1) {
-//                foreach ($missing_values as $key => $value) {
-//                    $sql_set .= " `{$key}`='{$value['default']}',";
-//                }
-//            }
-//            $sql .= trim($sql_set, ',') . " {$sql_where}";
-//            $app->db->query($sql);
-//            unset($sql, $sql_set, $sql_where, $missing_values, $key, $value, $domain_id, $server_id);
-//        }
         $this->__fixDomainOwner();
         parent::onAfterInsert();
     }
@@ -304,10 +303,13 @@ class tform_action extends tform_actions {
 
     private function _load_domain_id() {
         if (self::$load_domain_id == NULL || self::$load_domain_id <= 0) {
-            self::$load_domain_id = (int) (
-                    isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) :
-                            (isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ? intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
-                    );
+            self::$load_domain_id = (isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) : NULL);
+            if (self::$load_domain_id == NULL || self::$load_domain_id <= 0) {
+                self::$load_domain_id = (isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ? intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : NULL);
+            }
+            if (self::$load_domain_id == NULL || self::$load_domain_id <= 0) {
+                self::$load_domain_id = (isset($_SESSION['s']['module']['sogo_tmp']['domain_id']) ? intval($_SESSION['s']['module']['sogo_tmp']['domain_id']) : 0);
+            }
         }
     }
 

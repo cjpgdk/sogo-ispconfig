@@ -458,7 +458,6 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
-        //* field is created in sogo_config_edit.php
         'SOGoMailListViewColumnsOrder' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'CUSTOM',

@@ -1,3 +1,10 @@
+@todo add check if auto create domain is allowed?
+@todo create setting to set auto create allowed or not
+@todo in multi server setups maybe use domain to SOGo server map
+@todo ¿¿maybe allow dedicated SOGo server like ISPConfig do with web and dns, will make the auto create config more doable??
+
+
+
 TODO list with low very low priority
 *****
 
@@ -16,4 +23,5 @@ On SOGo config insert..?
 run rebuild SOGO config.. not sure if you install this and create the configs you are properply 
 going over all options and checking your domains, and in the end you trigger and update that will call the rebuild
 -------------
+
 
