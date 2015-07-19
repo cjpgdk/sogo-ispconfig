@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2014  Christian M. Jensen
+ * Copyright (C) 2015 Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2014-2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
 $tform_def_file = "form/sogo_domains.tform.php";
@@ -33,71 +33,76 @@ $app->load('tform_actions');
 
 class tform_action extends tform_actions {
 
+    static private $edit_permissions = array();
+    static private $load_domain_id = null;
+    static private $domain_config_exists = null;
+    static private $domain_config_index = null;
+
     /** @global app $app */
     public function onLoad() {
         global $app;
-        $dId = (int) (
-                isset($_REQUEST["domain_id"]) ?
-                        intval($_REQUEST["domain_id"]) :
-                        (
-                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
-                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
-                );
-        $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+        $this->_load_domain_id();
+        self::$domain_config_exists = $app->sogo_helper->domainSOGoConfigExists(self::$load_domain_id);
+        self::$domain_config_index = (int) $app->sogo_helper->getDomainConfigIndex(self::$load_domain_id);
 
         //* if no config for domain exists set id = 0 to create a new
-        if ($dId != 0 && !$app->sogo_helper->configDomainExists($dId)) {
-            $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
+        if (self::$load_domain_id != 0 && !self::$domain_config_exists) {
+            $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . intval(self::$load_domain_id));
             if (!isset($result['domain_id']) && !isset($result['server_id'])) {
                 //* domain do not exists.!
-                echo "HEADER_REDIRECT:mail/sogo_mail_domain_list.php";
-                exit;
+                die("HEADER_REDIRECT:mail/sogo_mail_domain_list.php?msg=DOMAINNOTFOUND");
             } else {
                 //* domain exists but no config exists yet
                 $result2 = $app->db->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($result['server_id']));
                 $_REQUEST["id"] = 0;
+                //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
                 $this->__domain_id = $result['domain_id'];
                 $this->__domain_name = $result['domain'];
                 $this->__server_id = $result['server_id'];
                 $this->__server_name = $result2['server_name'];
             }
-        } else if ($dId != 0 && $dConfId != 0 && $app->sogo_helper->configDomainExists($dId)) {
+        } else if (self::$load_domain_id != 0 && self::$domain_config_index != 0 && self::$domain_config_exists) {
             //* server config found, redirect to get correct vars page loaded
             if (!isset($_REQUEST["id"])) {
-                echo "HEADER_REDIRECT:mail/sogo_mail_domains_edit.php?id=" . $dConfId . '&domain_id=' . $dId;
-                exit;
+                die("HEADER_REDIRECT:mail/sogo_mail_domains_edit.php?id=" . self::$domain_config_index . '&domain_id=' . self::$load_domain_id);
             }
         } else {
             //* nothing is valid
-            echo "HEADER_REDIRECT:mail/sogo_mail_domain_list.php";
-            exit;
+            die("HEADER_REDIRECT:mail/sogo_mail_domain_list.php?msg=INVALIDDATA");
         }
-        $_SESSION['s']['module']["sogo_conifg_domain_id"] = $dId;
-        if (!$app->sogo_helper->configExists($this->__server_id) && !$app->sogo_helper->configExistsByDomain($dId)) {
+        $_SESSION['s']['module']["sogo_conifg_domain_id"] = self::$load_domain_id;
+        if (!$app->sogo_helper->configExists($this->__server_id) && !$app->sogo_helper->configExistsByDomain(self::$load_domain_id)) {
             global $tform_def_file;
             $app->tform->loadFormDef($tform_def_file);
             if (!$app->auth->is_admin()) {
+                //* none admin, show general error message, log actual error as warning 
                 $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+                $app->log("SOGo server configuration is missing on server: #" . $this->__server_id
+                        . ', User: #' . $app->auth->get_user_id()
+                        . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_WARN);
             } else {
+                //* is admin show actual error, NO sogo configuration
                 $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND'];
             }
             $app->error($msg);
-        } else
+        } else {
+            $_uid = $app->auth->get_user_id();
+            $_cid = $app->sogo_helper->get_client_id();
+            if ($app->auth->has_clients($_uid))
+                self::$edit_permissions = $app->sogo_helper->getResellerConfigPermissions($_cid);
+            else
+                self::$edit_permissions = $app->sogo_helper->getClientConfigPermissions($_cid);
+
             parent::onLoad();
+        }
     }
 
     /** @global app $app */
     public function onShow() {
         global $app;
+        $this->_load_domain_id();
 
-        $dId = (int) (
-                isset($_REQUEST["domain_id"]) ?
-                        intval($_REQUEST["domain_id"]) :
-                        (
-                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
-                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
-                );
-        $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . $dId);
+        $result = $app->db->queryOneRecord('SELECT `domain_id`,`server_id`,`domain` FROM `mail_domain` WHERE `domain_id`=' . self::$load_domain_id);
         //* replace var "{DOMAINNAME}" in query string
         if (isset($result['domain'])) {
             $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', $result['domain'], $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
@@ -124,73 +129,96 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShowEnd() {
         global $app;
+        //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
         $app->tpl->setVar('domain_id', $this->__domain_id);
         $app->tpl->setVar('domain_name', $this->__domain_name);
         $app->tpl->setVar('server_id', $this->__server_id);
         $app->tpl->setVar('server_name', $this->__server_name);
-
         if (!$app->auth->is_admin()) {
-            $_uid = $app->auth->get_user_id();
-            if ($app->auth->has_clients($_uid))
-                $edit_permissions = $app->sogo_helper->getResellerConfigPermissions($_uid);
-            else
-                $edit_permissions = $app->sogo_helper->getClientConfigPermissions($_uid);
-
-            if (isset($edit_permissions) & count($edit_permissions) > 0)
-                $app->tpl->setVar($edit_permissions);
-
+            if (isset(self::$edit_permissions) & count(self::$edit_permissions) > 0)
+                $app->tpl->setVar(self::$edit_permissions);
             //* imap stuff
-            $_imap_section = 0;
-            if (isset($edit_permissions['permission_imap_server']) && $edit_permissions['permission_imap_server'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_imap_conforms_imapext']) && $edit_permissions['permission_imap_conforms_imapext'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_imap_acl_style']) && $edit_permissions['permission_imap_acl_style'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_imap_folder_drafts']) && $edit_permissions['permission_imap_folder_drafts'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_imap_folder_trash']) && $edit_permissions['permission_imap_folder_trash'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_imap_folder_sent']) && $edit_permissions['permission_imap_folder_sent'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_subscription_folder_format']) && $edit_permissions['permission_subscription_folder_format'] == 'y')
-                $_imap_section = 1;
-            if (isset($edit_permissions['permission_mail_auxiliary_accounts']) && $edit_permissions['permission_mail_auxiliary_accounts'] == 'y')
-                $_imap_section = 1;
-            $app->tpl->setVar('show_imap_section', $_imap_section);
-
-
+            $app->tpl->setVar('show_imap_section', $this->_show_imap_section());
             //* sieve stuff
-            $_sieve_section = 0;
-            if (isset($edit_permissions['permission_sieve_filter_forward']) && $edit_permissions['permission_sieve_filter_forward'] == 'y')
-                $_sieve_section = 1;
-            if (isset($edit_permissions['permission_sieve_filter_vacation']) && $edit_permissions['permission_sieve_filter_vacation'] == 'y')
-                $_sieve_section = 1;
-            if (isset($edit_permissions['permission_sieve_server']) && $edit_permissions['permission_sieve_server'] == 'y')
-                $_sieve_section = 1;
-            if (isset($edit_permissions['permission_sieve_filter_enable_disable']) && $edit_permissions['permission_sieve_filter_enable_disable'] == 'y')
-                $_sieve_section = 1;
-            if (isset($edit_permissions['permission_sieve_folder_encoding']) && $edit_permissions['permission_sieve_folder_encoding'] == 'y')
-                $_sieve_section = 1;
-            $app->tpl->setVar('show_sieve_section', $_sieve_section);
-
+            $app->tpl->setVar('show_sieve_section', $this->_show_sieve_section());
             //* smtp stuff
-            $_smtp_section = 0;
-            if (isset($edit_permissions['permission_smtp_server']) && $edit_permissions['permission_smtp_server'] == 'y')
-                $_smtp_section = 1;
-            if (isset($edit_permissions['permission_mailing_mechanism']) && $edit_permissions['permission_mailing_mechanism'] == 'y')
-                $_smtp_section = 1;
-            if (isset($edit_permissions['permission_mail_spool_path']) && $edit_permissions['permission_mail_spool_path'] == 'y')
-                $_smtp_section = 1;
-            if (isset($edit_permissions['permission_mail_custom_from_enabled']) && $edit_permissions['permission_mail_custom_from_enabled'] == 'y')
-                $_smtp_section = 1;
-            if (isset($edit_permissions['permission_smtp_authentication_type']) && $edit_permissions['permission_smtp_authentication_type'] == 'y')
-                $_smtp_section = 1;
-            $app->tpl->setVar('show_smtp_section', $_smtp_section);
+            $app->tpl->setVar('show_smtp_section', $this->_show_smtp_section());
         }
-
-
         parent::onShowEnd();
+    }
+
+    public function onInsert() /* onBeforeInsert() */ {
+        global $app;
+        //* if not admin.
+        if (!$app->auth->is_admin()) {
+            //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
+            $this->__domain_id = $this->dataRecord['domain_id'];
+            $this->__domain_name = $this->dataRecord['domain_name'];
+            $this->__server_id = $this->dataRecord['server_id'];
+            $this->__server_name = $this->dataRecord['server_name'];
+
+            //echo "<pre>BEFORE(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>";
+            if ($app->sogo_helper->configExists($this->__server_id)) {
+                //* get server defaults
+                $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
+
+                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id)))
+                    foreach ($domain_config_fileds as $key => $value)
+                        if (!isset($this->dataRecord[$key]) && isset($server_config[$key])) {
+                            if ($key == "SOGoCustomXML")
+                                continue;
+                            $this->dataRecord[$key] = $server_config[$key];
+                        }
+            }else {
+                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+                //* if we get here as user it's an error as this check is done in onLoad()
+                $app->log("SOGo server configuration is missing on server: #" . $this->__server_id
+                        . ', User: #' . $app->auth->get_user_id()
+                        . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_ERROR);
+                $app->error($msg);
+                exit;
+            }
+            //die("<pre>AFTER(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>");
+        }
+        parent::onInsert();
+        //parent::onBeforeInsert();
+    }
+
+    public function onUpdate()/* onBeforeUpdate() */ {
+        global $app;
+        //* if not admin.
+        if (!$app->auth->is_admin()) {
+            //* @todo BAD BAD BAD. relaying on user not to inject html valus change to use session values
+            $this->__domain_id = $this->dataRecord['domain_id'];
+            $this->__domain_name = $this->dataRecord['domain_name'];
+            $this->__server_id = $this->dataRecord['server_id'];
+            $this->__server_name = $this->dataRecord['server_name'];
+
+            //echo "<pre>BEFORE(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>";
+            if ($app->sogo_helper->configExists($this->__server_id)) {
+                //* get server defaults
+                $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
+
+                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id)))
+                    foreach ($domain_config_fileds as $key => $value)
+                        if (!isset($this->dataRecord[$key]) && isset($server_config[$key])) {
+                            if ($key == "SOGoCustomXML")
+                                continue;
+                            $this->dataRecord[$key] = $server_config[$key];
+                        }
+            }else {
+                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+                //* if we get here as user it's an error as this check is done in onLoad()
+                $app->log("SOGo server configuration is missing on server: #" . $this->__server_id
+                        . ', User: #' . $app->auth->get_user_id()
+                        . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_ERROR);
+                $app->error($msg);
+                exit;
+            }
+            //die("<pre>AFTER(" . $this->__server_id . "):Count:(".count($this->dataRecord).")::\n\n" . print_r($this->dataRecord, true) . "</pre>");
+        }
+        parent::onUpdate();
+        //parent::onBeforeUpdate();
     }
 
     /** @global app $app */
@@ -217,35 +245,36 @@ class tform_action extends tform_actions {
 
     public function onAfterInsert() {
         global $app;
-        //* if reseller or client fix missing server default values..!
-        if (!$app->auth->is_admin()) {
-            $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
-            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
-            $server_id = @$this->dataRecord['server_id'];
-            $domain_id = @$this->dataRecord['domain_id'];
-            $missing_values = array();
-            foreach ($domain_config_fileds as $key => $value) {
-                if (!isset($this->dataRecord[$key])) {
-                    if ($key == "SOGoCustomXML")
-                        continue;
-                    $value['default'] = isset($server_config[$key]) ? $server_config[$key] : $value['default'];
-                    $missing_values[$key] = $value;
-                }
-            }
-            unset($domain_config_fileds, $server_config);
-            $sql = " UPDATE `sogo_domains` ";
-            $sql_where = " WHERE `domain_id`=" . intval($domain_id) . " AND `server_id`=" . intval($server_id); //* domain_name server_name
-            $sql_set = " SET ";
-
-            if (!empty($missing_values) && count($missing_values) > 1) {
-                foreach ($missing_values as $key => $value) {
-                    $sql_set .= " `{$key}`='{$value['default']}',";
-                }
-            }
-            $sql .= trim($sql_set, ',') . " {$sql_where}";
-            $app->db->query($sql);
-            unset($sql, $sql_set, $sql_where, $missing_values, $key, $value, $domain_id, $server_id);
-        }
+        // testing if this can be set fully in onUpdate() && onInsert()
+//        //* if reseller or client fix missing server default values..!
+//        if (!$app->auth->is_admin()) {
+//            $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
+//            $server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex($this->__server_id));
+//            $server_id = @$this->dataRecord['server_id'];
+//            $domain_id = @$this->dataRecord['domain_id'];
+//            $missing_values = array();
+//            foreach ($domain_config_fileds as $key => $value) {
+//                if (!isset($this->dataRecord[$key])) {
+//                    if ($key == "SOGoCustomXML")
+//                        continue;
+//                    $value['default'] = isset($server_config[$key]) ? $server_config[$key] : $value['default'];
+//                    $missing_values[$key] = $value;
+//                }
+//            }
+//            unset($domain_config_fileds, $server_config);
+//            $sql = " UPDATE `sogo_domains` ";
+//            $sql_where = " WHERE `domain_id`=" . intval($domain_id) . " AND `server_id`=" . intval($server_id); //* domain_name server_name
+//            $sql_set = " SET ";
+//
+//            if (!empty($missing_values) && count($missing_values) > 1) {
+//                foreach ($missing_values as $key => $value) {
+//                    $sql_set .= " `{$key}`='{$value['default']}',";
+//                }
+//            }
+//            $sql .= trim($sql_set, ',') . " {$sql_where}";
+//            $app->db->query($sql);
+//            unset($sql, $sql_set, $sql_where, $missing_values, $key, $value, $domain_id, $server_id);
+//        }
         $this->__fixDomainOwner();
         parent::onAfterInsert();
     }
@@ -258,24 +287,76 @@ class tform_action extends tform_actions {
     /** @global app $app */
     private function __fixDomainOwner() {
         global $app;
-        $dId = (int) (
-                isset($_REQUEST["domain_id"]) ?
-                        intval($_REQUEST["domain_id"]) :
-                        (
-                        isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ?
-                                intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
-                );
-        $result = $app->db->queryOneRecord('SELECT `sys_userid`,`sys_groupid`,`sys_perm_user`,`sys_perm_group`,`sys_perm_other` FROM `mail_domain` WHERE `domain_id`=' . intval($dId));
+        $this->_load_domain_id();
+
+        $result = $app->db->queryOneRecord('SELECT `sys_userid`,`sys_groupid`,`sys_perm_user`,`sys_perm_group`,`sys_perm_other` FROM `mail_domain` WHERE `domain_id`=' . intval(self::$load_domain_id));
         if (isset($result['sys_userid']) && isset($result['sys_groupid']) && isset($result['sys_perm_user']) && isset($result['sys_perm_group']) && isset($result['sys_perm_other'])) {
-            $dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+            self::$domain_config_index = (int) $app->sogo_helper->getDomainConfigIndex(self::$load_domain_id);
             $app->db->query("UPDATE `sogo_domains` SET "
                     . "`sys_userid` = '" . intval($result['sys_userid']) . "', "
                     . "`sys_groupid` = '" . intval($result['sys_groupid']) . "', "
                     . "`sys_perm_user` = '{$result['sys_perm_user']}', "
                     . "`sys_perm_group` = '{$result['sys_perm_group']}', "
                     . "`sys_perm_other` = '{$result['sys_perm_other']}' "
-                    . "WHERE `sogo_id` ='{$dConfId}' AND `domain_id` ='{$dId}';");
+                    . "WHERE `sogo_id` ='" . self::$domain_config_index . "' AND `domain_id` ='" . self::$load_domain_id . "';");
         }
+    }
+
+    private function _load_domain_id() {
+        if (self::$load_domain_id == NULL || self::$load_domain_id <= 0) {
+            self::$load_domain_id = (int) (
+                    isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) :
+                            (isset($_SESSION['s']['module']["sogo_conifg_domain_id"]) ? intval($_SESSION['s']['module']["sogo_conifg_domain_id"]) : 0)
+                    );
+        }
+    }
+
+    private function _show_smtp_section() {
+        if (isset(self::$edit_permissions['permission_smtp_server']) && self::$edit_permissions['permission_smtp_server'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_mailing_mechanism']) && self::$edit_permissions['permission_mailing_mechanism'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_mail_spool_path']) && self::$edit_permissions['permission_mail_spool_path'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_mail_custom_from_enabled']) && self::$edit_permissions['permission_mail_custom_from_enabled'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_smtp_authentication_type']) && self::$edit_permissions['permission_smtp_authentication_type'] == 'y')
+            return 1;
+        return 0;
+    }
+
+    private function _show_sieve_section() {
+        if (isset(self::$edit_permissions['permission_sieve_filter_forward']) && self::$edit_permissions['permission_sieve_filter_forward'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_sieve_filter_vacation']) && self::$edit_permissions['permission_sieve_filter_vacation'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_sieve_server']) && self::$edit_permissions['permission_sieve_server'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_sieve_filter_enable_disable']) && self::$edit_permissions['permission_sieve_filter_enable_disable'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_sieve_folder_encoding']) && self::$edit_permissions['permission_sieve_folder_encoding'] == 'y')
+            return 1;
+        return 0;
+    }
+
+    private function _show_imap_section() {
+        if (isset(self::$edit_permissions['permission_imap_server']) && self::$edit_permissions['permission_imap_server'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_imap_conforms_imapext']) && self::$edit_permissions['permission_imap_conforms_imapext'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_imap_acl_style']) && self::$edit_permissions['permission_imap_acl_style'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_imap_folder_drafts']) && self::$edit_permissions['permission_imap_folder_drafts'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_imap_folder_trash']) && self::$edit_permissions['permission_imap_folder_trash'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_imap_folder_sent']) && self::$edit_permissions['permission_imap_folder_sent'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_subscription_folder_format']) && self::$edit_permissions['permission_subscription_folder_format'] == 'y')
+            return 1;
+        if (isset(self::$edit_permissions['permission_mail_auxiliary_accounts']) && self::$edit_permissions['permission_mail_auxiliary_accounts'] == 'y')
+            return 1;
+        return 0;
     }
 
 }

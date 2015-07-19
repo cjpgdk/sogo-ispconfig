@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2014  Christian M. Jensen
+ * Copyright (C) 2015 Christian M. Jensen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  @author Christian M. Jensen <christian@cmjscripter.net>
- *  @copyright 2014 Christian M. Jensen
- *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
+ * @author Christian M. Jensen <christian@cmjscripter.net>
+ * @copyright 2014-2015 Christian M. Jensen
+ * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
+
 
 
 require_once '../../lib/config.inc.php';
@@ -34,7 +35,7 @@ unset($_SESSION['s']['module']["sogo_conifg_domain_id"]);
 class listform_action extends listform_actions {
 
     /** @global app $app */
-    public function onLoad() {
+    public function onShow() /* onLoad() -- moved we need translations loaded  */ {
         global $app;
         $app->uses('tpl,listform,tform,sogo_helper');
 
@@ -50,7 +51,15 @@ class listform_action extends listform_actions {
         $app->tpl->setLoop('sogo_domains', $sogo_domains);
         unset($sogo_domains, $_sogo_domains);
 
-        parent::onLoad();
+        $app->tpl->setLoop('err_message', '');
+        if (isset($_REQUEST['msg'])) {
+            // DOMAINNOTFOUND
+            // INVALIDDATA
+            $app->tpl->setVar('err_message', $_REQUEST['msg']);
+        } else
+            $app->tpl->setVar('err_message', '');
+
+        parent::onShow();
     }
 
 }

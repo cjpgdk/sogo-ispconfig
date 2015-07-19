@@ -37,19 +37,33 @@ class sogo_helper {
         unset($_tmp);
         if ($_records = $this->getDB()->queryAllRecords("SELECT * FROM `sogo_config_permissions_index`")) {
             foreach ($_records as $key => $value) {
-                $c = explode(',', $value['scpi_clients']);
-                if ($c == $user_id) {
-                    $permissions_index = intval($value['scpi']);
-                    $_tmp = $this->getDB()->queryAllRecords("SELECT scp.`scp_allow` as allow, scp.`scp_name` as name FROM `sogo_config_permissions` scp WHERE scp.`scp_index`={$permissions_index}");
-                    //* override global
-                    foreach ($_tmp as $value) {
-                        $records['permission_' . $value['name']] = $value['allow'];
+                $clients = explode(',', $value['scpi_clients']);
+                foreach ($clients as $client) {
+                    if ($client == $user_id) {
+                        $permissions_index = intval($value['scpi']);
+                        $_tmp = $this->getDB()->queryAllRecords("SELECT scp.`scp_allow` as allow, scp.`scp_name` as name FROM `sogo_config_permissions` scp WHERE scp.`scp_index`={$permissions_index}");
+                        //* override global
+                        foreach ($_tmp as $value) {
+                            $records['permission_' . $value['name']] = $value['allow'];
+                        }
+                        break;
                     }
                 }
             }
             unset($_records);
         }
         return $records;
+    }
+
+    public function get_client_id() {
+        global $app;
+        return $app->functions->intval($_SESSION['s']['user']['client_id']);
+    }
+
+    //* FROM: auth.inc.php ($app->auth->get_user_id())
+    public function get_user_id() {
+        global $app;
+        return $app->functions->intval($_SESSION['s']['user']['userid']);
     }
 
     /**
@@ -121,14 +135,14 @@ class sogo_helper {
         return (boolean) ($result['domain_id'] == $domain_id);
     }
 
-    /**
-     * alias of domainSOGoConfigExists
-     * @see sogo_helper::domainSOGoConfigExists($domain_id)
-     * @deprecated since version pre.u10
-     */
-    public function configDomainExists($domain_id) {
-        return $this->domainSOGoConfigExists($domain_id);
-    }
+//    /**
+//     * alias of domainSOGoConfigExists
+//     * @see sogo_helper::domainSOGoConfigExists($domain_id)
+//     * @deprecated since version pre.u10
+//     */
+//    public function configDomainExists($domain_id) {
+//        return $this->domainSOGoConfigExists($domain_id);
+//    }
 
     /**
      * get domain SOGo configuration id
