@@ -114,7 +114,7 @@ server
    # Don't use them in a production server!
    #include snippets/snakeoil.conf
 
-   #include snippets/{SOGoHostPort}.conf;
+   #include snippets/{SOGoHostname}.conf;
 
    ## requirement to create new calendars in Thunderbird ##
    # Not supported on nginx/1.0.9
@@ -179,12 +179,12 @@ server
    }
    ###################################################################################
    # ocsmanager &  rpcproxy # NOTE*                                                  #
-   # forwarded to Apache on # This section i just something i'm playing around with  #
-   #    176.16.0.2:9000     # don't use unless you know exactly what you're doing    #
+   # forwarded to Apache on # This section is just something i'm playing around with #
+   #    172.16.0.2:9000     # don't use unless you know exactly what you're doing    #
    ###################################################################################
    #location ~* ^/autodiscover {
-   #   proxy_pass http://176.16.0.2:9000;
-   #   proxy_redirect http://176.16.0.2:9000 default;
+   #   proxy_pass http://172.16.0.2:9000;
+   #   proxy_redirect http://172.16.0.2:9000 default;
    #   # forward user's IP address
    #   proxy_set_header X-Real-IP \$remote_addr;
    #   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -206,8 +206,8 @@ server
    #   break;
    #}
    #location ^~ews {
-   #   proxy_pass http://176.16.0.2:9000;
-   #   proxy_redirect http://176.16.0.2:9000 default;
+   #   proxy_pass http://172.16.0.2:9000;
+   #   proxy_redirect http://172.16.0.2:9000 default;
    #   # forward user's IP address
    #   proxy_set_header X-Real-IP \$remote_addr;
    #   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -229,8 +229,8 @@ server
    #   break;
    #}
    #location ~* ^/_debug {
-   #   proxy_pass http://176.16.0.2:9000;
-   #   proxy_redirect http://176.16.0.2:9000 default;
+   #   proxy_pass http://172.16.0.2:9000;
+   #   proxy_redirect http://172.16.0.2:9000 default;
    #   # forward user's IP address
    #   proxy_set_header X-Real-IP \$remote_addr;
    #   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;

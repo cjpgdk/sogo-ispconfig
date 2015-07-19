@@ -23,7 +23,6 @@
  * 
  * @todo Add ask for sogo system user and group name
  */
-
 class Installer {
 
     /**
@@ -120,44 +119,44 @@ class Installer {
         unset($insSoGo, $SOGo);
 
         self::$isError = FALSE;
-		
+
         echo "Do you intend to run SOGo from this server? (Y/N) [Y]: ";
-		if(strtolower(self::readInput("y")) == "y"){
-			//* get init script for sogo
-			self::$sogo_init_script = Installer::getSOGoInitScript();
-			//* locate sogo-tool binary
-			self::$sogo_tool_binary = Installer::getSOGoToolBinary();
-			//* get sogo home dir
-			self::$sogo_home_dir = Installer::getSOGoHomeDir();
-			self::$_server_config_local = str_replace('{SOGOTOOLBIN}', self::$sogo_tool_binary, self::$_server_config_local);
-			self::$_server_config_local = str_replace('{SOGOHOMEDIR}', self::$sogo_home_dir, self::$_server_config_local);
-			//* SOGo init script ?
-			if (empty(self::$sogo_init_script)) {
-				self::$error = "[FAIL]: Unable to locate SOGo init script";
-				self::$errors['step1'][] = self::$error;
-				self::$isError = TRUE;
-				self::$have_signs_of_sogo = FALSE;
-			} else if (file_exists(self::$sogo_init_script)) {
-				self::$have_signs_of_sogo = TRUE;
-			}
-			//* sogo-tool binary?
-			if (empty(self::$sogo_tool_binary)) {
-				self::$error = "[FAIL]: Unable to locate sogo-tool";
-				self::$errors['step1'][] = self::$error;
-				self::$have_signs_of_sogo &= FALSE;
-			} else if (file_exists(self::$sogo_tool_binary)) {
-				self::$have_signs_of_sogo &= TRUE;
-			}
-			//* SOGo home dir ?s
-			if (empty(self::$sogo_home_dir)) {
-				self::$error = "[FAIL]: Unable to locate sogo home dir";
-				self::$errors['step1'][] = self::$error;
-				self::$isError = TRUE;
-				self::$have_signs_of_sogo &= FALSE;
-			} else if (file_exists(self::$sogo_home_dir) && is_dir(self::$sogo_home_dir)) {
-				self::$have_signs_of_sogo &= TRUE;
-			}
-		}
+        if (strtolower(self::readInput("y")) == "y") {
+            //* get init script for sogo
+            self::$sogo_init_script = Installer::getSOGoInitScript();
+            //* locate sogo-tool binary
+            self::$sogo_tool_binary = Installer::getSOGoToolBinary();
+            //* get sogo home dir
+            self::$sogo_home_dir = Installer::getSOGoHomeDir();
+            self::$_server_config_local = str_replace('{SOGOTOOLBIN}', self::$sogo_tool_binary, self::$_server_config_local);
+            self::$_server_config_local = str_replace('{SOGOHOMEDIR}', self::$sogo_home_dir, self::$_server_config_local);
+            //* SOGo init script ?
+            if (empty(self::$sogo_init_script)) {
+                self::$error = "[FAIL]: Unable to locate SOGo init script";
+                self::$errors['step1'][] = self::$error;
+                self::$isError = TRUE;
+                self::$have_signs_of_sogo = FALSE;
+            } else if (file_exists(self::$sogo_init_script)) {
+                self::$have_signs_of_sogo = TRUE;
+            }
+            //* sogo-tool binary?
+            if (empty(self::$sogo_tool_binary)) {
+                self::$error = "[FAIL]: Unable to locate sogo-tool";
+                self::$errors['step1'][] = self::$error;
+                self::$have_signs_of_sogo &= FALSE;
+            } else if (file_exists(self::$sogo_tool_binary)) {
+                self::$have_signs_of_sogo &= TRUE;
+            }
+            //* SOGo home dir ?s
+            if (empty(self::$sogo_home_dir)) {
+                self::$error = "[FAIL]: Unable to locate sogo home dir";
+                self::$errors['step1'][] = self::$error;
+                self::$isError = TRUE;
+                self::$have_signs_of_sogo &= FALSE;
+            } else if (file_exists(self::$sogo_home_dir) && is_dir(self::$sogo_home_dir)) {
+                self::$have_signs_of_sogo &= TRUE;
+            }
+        }
     }
 
     public function run() {
@@ -230,7 +229,6 @@ class Installer {
         }
     }
 
-    //* quick lazy alias
     public static function copyFiles($index) {
         if (isset(self::$files_copy[$index])) {
             if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/')) {
@@ -405,7 +403,7 @@ class Installer {
     public static function getSOGoInitScript() {
         if (file_exists("/etc/init.d/sogo"))
             $sogo_init_script = "/etc/init.d/sogo";
-        else if (file_exists("/etc/init.d/sogo"))
+        else if (file_exists("/etc/init.d/sogod"))
             $sogo_init_script = "/etc/init.d/sogod";
         else
             $sogo_init_script = "";
@@ -498,10 +496,6 @@ if not isset md5 is used
 
 //* template to use for table names in sogo db
 \$conf['sogo_domain_table_tpl'] = "{domain}_users";
-/*
-SOGoEncryptionKey ?? if password change shall be enabled.!
-*/
-
 EOF;
 
 }
