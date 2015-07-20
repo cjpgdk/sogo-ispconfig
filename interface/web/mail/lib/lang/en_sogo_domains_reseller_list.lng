@@ -5,3 +5,5 @@ $wb["sys_groupid_txt"] = 'Client';
 $wb["server_id_txt"] = 'Server';
 $wb["domain_txt"] = 'Domain';
 $wb["list_desc_txt"] = 'Only the domains you have permission to edit by your system administrator is listed here<br>by clicking on delete icon, you only reset the configuration to it\'s default configuration';
+$wb["reset_config_confirmation"] = 'Are you sure you want to reset the configuration for this domain';
+$wb["reset_txt"] = 'Reaset configuration';

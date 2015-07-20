@@ -52,44 +52,46 @@ $form["tabs"]['domain'] = array(
     'width' => 70,
     'template' => ($app->auth->is_admin() ? "templates/sogo_domains_edit.htm" : "templates/sogo_domains_user_edit.htm"),
     /* started using permission objects so not needed any more
-     'template' => ($app->auth->is_admin() ? "templates/sogo_domains_edit.htm" : ($app->auth->has_clients($app->auth->get_user_id()) ? "templates/sogo_domains_reseller_edit.htm" : "templates/sogo_domains_user_edit.htm")),*/
+      'template' => ($app->auth->is_admin() ? "templates/sogo_domains_edit.htm" : ($app->auth->has_clients($app->auth->get_user_id()) ? "templates/sogo_domains_reseller_edit.htm" : "templates/sogo_domains_user_edit.htm")), */
     'fields' => array(
-        'domain_id' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 0,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 1,
-            'width' => 100,
-        ),
-        'domain_name' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 1,
-            'width' => 100,
-        ),
-        'server_id' => array(
-            'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
-            'default' => 0,
-            'value' => '',
-            'maxlength' => '',
-            'required' => 1,
-            'width' => 100,
-        ),
-        'server_name' => array(
-            'datatype' => 'VARCHAR',
-            'formtype' => 'TEXT',
-            'default' => '',
-            'value' => '',
-            'maxlength' => '',
-            'required' => 1,
-            'width' => 100,
-        ),
+        /*
+          'domain_id' => array(
+          'datatype' => 'INTEGER',
+          'formtype' => 'TEXT',
+          'default' => 0,
+          'value' => '',
+          'maxlength' => '',
+          'required' => 1,
+          'width' => 100,
+          ),
+          'domain_name' => array(
+          'datatype' => 'VARCHAR',
+          'formtype' => 'TEXT',
+          'default' => '',
+          'value' => '',
+          'maxlength' => '',
+          'required' => 1,
+          'width' => 100,
+          ),
+          'server_id' => array(
+          'datatype' => 'INTEGER',
+          'formtype' => 'TEXT',
+          'default' => 0,
+          'value' => '',
+          'maxlength' => '',
+          'required' => 1,
+          'width' => 100,
+          ),
+          'server_name' => array(
+          'datatype' => 'VARCHAR',
+          'formtype' => 'TEXT',
+          'default' => '',
+          'value' => '',
+          'maxlength' => '',
+          'required' => 1,
+          'width' => 100,
+          ),
+         */
         'SOGoSieveScriptsEnabled' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'SELECT',
@@ -132,18 +134,6 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
-        /*
-         * ::: http://www.sogo.nu/files/docs/SOGo%20Installation%20Guide.pdf
-         * Parameter used to set a default time zone for users. 
-         * The default timezone is set to UTC. The Olson database is a standard 
-         * database that takes all the time zones around the world into account 
-         * and represents them along with their history. On GNU/Linux systems, 
-         * time zone definition files are available under /usr/share/zoneinfo. 
-         * Listing the available files will give you the name of the available 
-         * time zones. This could be America/New_York, Europe/Berlin, 
-         * Asia/Tokyo or Africa/Lubumbashi. 
-         * In our example, we set the time zone to America/Montreal
-         */
         'SOGoTimeZone' => array(
             'datatype' => 'VARCHAR',
             'formtype' => 'TEXT',
@@ -213,20 +203,6 @@ $form["tabs"]['domain'] = array(
             'required' => 0,
             'width' => 100,
         ),
-        /* use system tab for this settings
-          'SOGoForceExternalLoginWithEmail' => array(
-          'datatype' => 'VARCHAR',
-          'formtype' => 'SELECT',
-          'default' => 'YES',
-          'value' => array(
-          'NO' => 'No',
-          'YES' => 'Yes',
-          ),
-          'maxlength' => '',
-          'required' => 0,
-          'width' => 100,
-          ),
-         */
         'SOGoCalendarDefaultRoles' => array(
             'value' => array(
                 'PublicViewer' => 'PublicViewer',
@@ -602,171 +578,164 @@ $form["tabs"]['domain'] = array(
         ),
     )
 );
-//* admin and resellers
-//if ($app->auth->is_admin() || $app->auth->has_clients($app->auth->get_user_id())) {
-
-    //* IMAP
-    $form["tabs"]['domain']['fields']['SOGoDraftsFolderName'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => 'Drafts',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoSentFolderName'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => 'Sent',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoTrashFolderName'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => 'Trash',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-//}
-//* Admins only
-//if ($app->auth->is_admin()) {
-    $form["tabs"]['domain']['fields']['SOGoSMTPAuthenticationType'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'YES',
-        'value' => array(
-            'NO' => $app->lng('No'),
-            'PLAIN' => $app->lng('Plain'),
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoCustomXML'] = array(
-        'datatype' => 'TEXT',
-        'formtype' => 'TEXTAREA',
-        'default' => '',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-        'rows' => 20,
-        'cols' => 30,
-    );
-    //* SIEVE
-    $form["tabs"]['domain']['fields']['SOGoSieveServer'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => 'sieve://{SERVERNAME}:4190',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoSieveFolderEncoding'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'UTF-7',
-        'value' => array(
-            'UTF-7' => 'UTF-7',
-            'UTF-8' => 'UTF-8',
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    //* SMTP
-    $form["tabs"]['domain']['fields']['SOGoMailCustomFromEnabled'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'NO',
-        'value' => array(
-            'NO' => 'No',
-            'YES' => 'Yes',
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoMailSpoolPath'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => '/var/spool/sogo',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoMailingMechanism'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'smtp',
-        'value' => array(
-            'smtp' => 'SMTP',
-            'sendmail' => 'SendMail',
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoSMTPServer'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => '{SERVERNAME}',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    //* IMAP
-    $form["tabs"]['domain']['fields']['SOGoMailAuxiliaryUserAccountsEnabled'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'NO',
-        'value' => array(
-            'NO' => 'No',
-            'YES' => 'Yes',
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoIMAPServer'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'TEXT',
-        'default' => 'imaps://{SERVERNAME}:143/?tls=YES',
-        'value' => '',
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoIMAPAclConformsToIMAPExt'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'YES',
-        'value' => array(
-            'NO' => 'No',
-            'YES' => 'Yes',
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-    $form["tabs"]['domain']['fields']['SOGoIMAPAclStyle'] = array(
-        'datatype' => 'VARCHAR',
-        'formtype' => 'SELECT',
-        'default' => 'rfc4314',
-        'value' => array(
-            'rfc2086' => 'RFC 2086', 'rfc4314' => 'RFC 4314',
-        ),
-        'maxlength' => '',
-        'required' => 0,
-        'width' => 100,
-    );
-//}
+//* IMAP
+$form["tabs"]['domain']['fields']['SOGoDraftsFolderName'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => 'Drafts',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoSentFolderName'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => 'Sent',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoTrashFolderName'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => 'Trash',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoSMTPAuthenticationType'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'YES',
+    'value' => array(
+        'NO' => $app->lng('No'),
+        'PLAIN' => $app->lng('Plain'),
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoCustomXML'] = array(
+    'datatype' => 'TEXT',
+    'formtype' => 'TEXTAREA',
+    'default' => '',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+    'rows' => 20,
+    'cols' => 30,
+);
+//* SIEVE
+$form["tabs"]['domain']['fields']['SOGoSieveServer'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => 'sieve://{SERVERNAME}:4190',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoSieveFolderEncoding'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'UTF-7',
+    'value' => array(
+        'UTF-7' => 'UTF-7',
+        'UTF-8' => 'UTF-8',
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+//* SMTP
+$form["tabs"]['domain']['fields']['SOGoMailCustomFromEnabled'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'NO',
+    'value' => array(
+        'NO' => 'No',
+        'YES' => 'Yes',
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoMailSpoolPath'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => '/var/spool/sogo',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoMailingMechanism'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'smtp',
+    'value' => array(
+        'smtp' => 'SMTP',
+        'sendmail' => 'SendMail',
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoSMTPServer'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => '{SERVERNAME}',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+//* IMAP
+$form["tabs"]['domain']['fields']['SOGoMailAuxiliaryUserAccountsEnabled'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'NO',
+    'value' => array(
+        'NO' => 'No',
+        'YES' => 'Yes',
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoIMAPServer'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'TEXT',
+    'default' => 'imaps://{SERVERNAME}:143/?tls=YES',
+    'value' => '',
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoIMAPAclConformsToIMAPExt'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'YES',
+    'value' => array(
+        'NO' => 'No',
+        'YES' => 'Yes',
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);
+$form["tabs"]['domain']['fields']['SOGoIMAPAclStyle'] = array(
+    'datatype' => 'VARCHAR',
+    'formtype' => 'SELECT',
+    'default' => 'rfc4314',
+    'value' => array(
+        'rfc2086' => 'RFC 2086', 'rfc4314' => 'RFC 4314',
+    ),
+    'maxlength' => '',
+    'required' => 0,
+    'width' => 100,
+);

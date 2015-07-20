@@ -38,21 +38,6 @@ $liste["delete_file"] = "sogo_mail_domain_del.php";
 $liste["paging_tpl"] = "templates/paging.tpl.htm";
 $liste["auth"] = "yes";
 
-
-//$liste["item"][] = array(
-//    'field' => "active",
-//    'datatype' => "VARCHAR",
-//    'formtype' => "SELECT",
-//    'op' => "=",
-//    'prefix' => "",
-//    'suffix' => "",
-//    'width' => "",
-//    'value' => array(
-//        'y' => "<div id=\"ir-Yes\" class=\"swap\"><span>Yes</span></div>",
-//        'n' => "<div class=\"swap\" id=\"ir-No\"><span>No</span></div>"
-//    )
-//);
-
 if ($app->auth->is_admin()) {
     $liste["item"][] = array(
         'field' => "sys_groupid",
