@@ -62,7 +62,7 @@ class tform_action extends tform_actions {
     /** @global app $app */
     public function onShow() {
         global $app;
-        
+
         $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring'] = str_replace('{DOMAINNAME}', self::$load_domain_name, $app->tform->formDef["tabs"]['domain']['fields']['SOGoSuperUsernames']['datasource']['querystring']);
         //* i like this to be translated WHY IS THIS NOT DONE IN CORE FILES..!..! :-(
         foreach ($app->tform->formDef["tabs"]['domain']['fields'] as $key => & $value) {
@@ -100,30 +100,9 @@ class tform_action extends tform_actions {
 
     public function onInsert() /* onBeforeInsert() */ {
         global $app;
-        //* if not admin.
-        if (!$app->auth->is_admin()) {
-            if ($app->sogo_helper->configExists(self::$load_server_id)) {
-                //* get server defaults
-                $domain_config_fileds = $app->sogo_helper->getDomainConfigFields();
-                if ($server_config = $app->db->queryOneRecord("SELECT * FROM `sogo_config` WHERE `sogo_id`=" . $app->sogo_helper->getConfigIndex(self::$load_server_id)))
-                    foreach ($domain_config_fileds as $key => $value)
-                        if (!isset($this->dataRecord[$key]) && isset($server_config[$key])) {
-                            if ($key == "SOGoCustomXML")
-                                continue;
-                            $this->dataRecord[$key] = $server_config[$key];
-                        }
-            } else {
-                $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
-                //* if we get here as user it's an error as this check is done in onLoad()
-                $app->log("SOGo server configuration is missing on server: #" . self::$load_server_id
-                        . ', User: #' . $app->auth->get_user_id()
-                        . " Tried to load domain: #" . self::$load_domain_id, LOGLEVEL_ERROR);
-                $app->error($msg);
-                exit;
-            }
-        }
-        parent::onInsert();
-        //parent::onBeforeInsert();
+        $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
+        $app->error($msg);
+        exit;
     }
 
     public function onUpdate()/* onBeforeUpdate() */ {
