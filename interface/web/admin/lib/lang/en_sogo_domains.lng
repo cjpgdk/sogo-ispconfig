@@ -1,4 +1,5 @@
 <?php
+
 $wb["domain_id_txt"] = 'Domain Id';
 $wb["domain_name_txt"] = 'Domain Name';
 $wb["server_id_txt"] = 'SOGo Server';
@@ -63,5 +64,20 @@ $wb["SOGoDraftsFolderName_courier"] = 'Default for courier imap';
 $wb["SOGoDraftsFolderName_dovecot"] = 'Default for dovecot imap';
 $wb["SOGoSMTPAuthenticationType_txt"] = 'SMTP Authentication Type';
 $wb["SOGoSMTPAuthenticationType_ttip_txt"] = 'Activate SMTP authentication and specifies which type is in use. Current, only PLAIN is sup-ported and other values will be ignored.<br>Set to NO to disable';
+$wb["errmsg_domain_id_empty"] =  "You must select a domain";
+$wb["errmsg_domain_id_null"] = "The selected value for domain is not a valid domain id";
+$wb["errmsg_domain_id_not_found"] = "The selected domain is not found.!";
+$wb["errmsg_domain_id_unique"] = "The selected domain name already has a SOGo configuration";
+$wb["errmsg_server_id_empty"] = "You must select a server";
+$wb["errmsg_server_id_null"] = "The selected value for server is not a valid server id";
+$wb["errmsg_server_id_not_found"] = "The selected server is not found.!";
+$wb["errmsg_sogo_server_not_found"] = "No SOGo server found for the selected server";
+$wb["btn_save_server_defaults_txt"] = "Save and set all values to server default";
+
+
+
+
+
+
 
 

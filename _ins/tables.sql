@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `sogo_config` (
 -- Table structure for table `sogo_domains`
 --
 CREATE TABLE IF NOT EXISTS `sogo_domains` (
-  `sogo_id` bigint(20) NOT NULL AUTO_INCREMENT,
+`sogo_id` bigint(20) NOT NULL,
   `sys_userid` int(11) NOT NULL DEFAULT '0',
   `sys_groupid` int(11) NOT NULL DEFAULT '0',
   `sys_perm_user` varchar(5) DEFAULT NULL,
@@ -107,43 +107,43 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `domain_name` varchar(255) DEFAULT NULL,
   `server_id` int(11) NOT NULL DEFAULT '0',
   `server_name` varchar(255) DEFAULT NULL,
-  `SOGoSieveScriptsEnabled` varchar(255) NOT NULL DEFAULT 'NO',
+  `SOGoSieveScriptsEnabled` enum('NO','YES') NOT NULL DEFAULT 'NO',
   `SOGoSieveServer` varchar(255) NOT NULL DEFAULT 'sieve://{SERVERNAME}:4190',
-  `SOGoVacationEnabled` varchar(255) NOT NULL DEFAULT 'NO',
-  `SOGoDraftsFolderName` varchar(255) NOT NULL DEFAULT 'Drafts',
-  `SOGoSentFolderName` varchar(255) NOT NULL DEFAULT 'Sent',
-  `SOGoTrashFolderName` varchar(255) NOT NULL DEFAULT 'Trash',
+  `SOGoVacationEnabled` enum('NO','YES') NOT NULL DEFAULT 'NO',
+  `SOGoDraftsFolderName` varchar(50) NOT NULL DEFAULT 'Drafts',
+  `SOGoSentFolderName` varchar(50) NOT NULL DEFAULT 'Sent',
+  `SOGoTrashFolderName` varchar(50) NOT NULL DEFAULT 'Trash',
   `SOGoIMAPServer` varchar(255) NOT NULL DEFAULT 'imaps://{SERVERNAME}:143/?tls=YES',
   `SOGoSMTPServer` varchar(255) NOT NULL DEFAULT '{SERVERNAME}',
-  `SOGoMailingMechanism` varchar(255) NOT NULL DEFAULT 'below',
+  `SOGoMailingMechanism` enum('smtp','sendmail') NOT NULL DEFAULT 'smtp',
   `SOGoMailSpoolPath` varchar(255) NOT NULL DEFAULT '/var/spool/sogo',
   `SOGoSearchMinimumWordLength` int(11) NOT NULL DEFAULT '2',
-  `SOGoSieveFolderEncoding` varchar(255) NOT NULL DEFAULT 'UTF-7',
+  `SOGoSieveFolderEncoding` enum('UTF-7','UTF-8') NOT NULL DEFAULT 'UTF-7',
   `SOGoSubscriptionFolderFormat` varchar(255) NOT NULL DEFAULT '%{FolderName} (%{UserName} <%{Email}>)',
   `SOGoTimeZone` varchar(255) NOT NULL DEFAULT 'Europe/Berlin',
-  `SOGoACLsSendEMailNotifications` varchar(255) NOT NULL DEFAULT 'YES',
-  `SOGoAppointmentSendEMailNotifications` varchar(255) NOT NULL DEFAULT 'YES',
-  `SOGoFoldersSendEMailNotifications` varchar(255) NOT NULL DEFAULT 'NO',
-  `SOGoNotifyOnPersonalModifications` varchar(255) NOT NULL DEFAULT 'NO',
-  `SOGoNotifyOnExternalModifications` varchar(255) NOT NULL DEFAULT 'NO',
-  `SOGoForceExternalLoginWithEmail` varchar(255) NOT NULL DEFAULT 'YES',
-  `SOGoMailAuxiliaryUserAccountsEnabled` varchar(255) NOT NULL DEFAULT 'NO',
-  `SOGoMailCustomFromEnabled` varchar(255) NOT NULL DEFAULT 'NO',
+  `SOGoACLsSendEMailNotifications` enum('NO','YES') NOT NULL DEFAULT 'YES',
+  `SOGoAppointmentSendEMailNotifications` enum('NO','YES') NOT NULL DEFAULT 'YES',
+  `SOGoFoldersSendEMailNotifications` enum('NO','YES') NOT NULL DEFAULT 'NO',
+  `SOGoNotifyOnPersonalModifications` enum('NO','YES') NOT NULL DEFAULT 'NO',
+  `SOGoNotifyOnExternalModifications` enum('NO','YES') NOT NULL DEFAULT 'NO',
+  `SOGoForceExternalLoginWithEmail` enum('NO','YES') NOT NULL DEFAULT 'YES',
+  `SOGoMailAuxiliaryUserAccountsEnabled` enum('NO','YES') NOT NULL DEFAULT 'NO',
+  `SOGoMailCustomFromEnabled` enum('NO','YES') NOT NULL DEFAULT 'NO',
   `SOGoCalendarDefaultRoles` varchar(255) NOT NULL DEFAULT 'PublicViewer,ConfidentialDAndTViewer',
   `SOGoContactsDefaultRoles` varchar(255) NOT NULL DEFAULT 'ObjectEditor',
   `SOGoSuperUsernames` varchar(255) NOT NULL DEFAULT 'postmaster@{domain}',
-  `SOGoIMAPAclConformsToIMAPExt` varchar(255) NOT NULL DEFAULT 'YES',
-  `SOGoCalendarDefaultReminder` varchar(255) NOT NULL DEFAULT '-PT5M',
+  `SOGoIMAPAclConformsToIMAPExt` enum('NO','YES') NOT NULL DEFAULT 'YES',
+  `SOGoCalendarDefaultReminder` enum('-PT5M','-PT10M','-PT15M','-PT30M','-PT45M','-PT1H','-PT2H','-PT5H','-PT15H','-P1D','-P2D','-P1W') NOT NULL DEFAULT '-PT5M',
   `SOGoCalendarEventsDefaultClassification` varchar(255) NOT NULL DEFAULT 'PUBLIC',
   `SOGoCalendarTasksDefaultClassification` varchar(255) NOT NULL DEFAULT 'PUBLIC',
-  `SOGoCalendarShouldDisplayWeekend` varchar(255) NOT NULL DEFAULT 'YES',
+  `SOGoCalendarShouldDisplayWeekend` enum('NO','YES') NOT NULL DEFAULT 'YES',
   `SOGoDayStartTime` int(11) NOT NULL DEFAULT '8',
   `SOGoDayEndTime` int(11) NOT NULL DEFAULT '18',
   `SOGoFirstDayOfWeek` int(11) NOT NULL DEFAULT '1',
-  `SOGoFirstWeekOfYear` varchar(255) NOT NULL DEFAULT 'FirstFullWeek',
+  `SOGoFirstWeekOfYear` enum('January1','First4DayWeek','FirstFullWeek') NOT NULL DEFAULT 'FirstFullWeek',
   `SOGoLanguage` varchar(255) NOT NULL DEFAULT 'English',
-  `SOGoLoginModule` varchar(255) NOT NULL DEFAULT 'Mail',
-  `SOGoMailComposeMessageType` varchar(255) NOT NULL DEFAULT 'text',
+  `SOGoLoginModule` enum('Calendar','Mail','Contacts') NOT NULL DEFAULT 'Mail',
+  `SOGoMailComposeMessageType` enum('text','html') NOT NULL DEFAULT 'text',
   `SOGoMailListViewColumnsOrder` varchar(255) NOT NULL DEFAULT 'Flagged,Attachment,Priority,From,Subject,Unread,Date,Size',
   `SOGoRefreshViewCheck` varchar(75) NOT NULL DEFAULT 'every_minute',
   `SOGoMailMessageForwarding` varchar(255) NOT NULL DEFAULT 'inline',
@@ -157,9 +157,19 @@ CREATE TABLE IF NOT EXISTS `sogo_domains` (
   `SOGoIMAPAclStyle` enum('rfc2086','rfc4314') NOT NULL DEFAULT 'rfc4314',
   `SOGoForwardEnabled` enum('YES','NO') NOT NULL DEFAULT 'NO',
   `SOGoMailShowSubscribedFoldersOnly` enum('YES','NO') NOT NULL DEFAULT 'NO',
-  `SOGoSMTPAuthenticationType` enum('PLAIN','NO') NOT NULL DEFAULT 'PLAIN',
-  PRIMARY KEY (`sogo_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+  `SOGoSMTPAuthenticationType` enum('PLAIN','NO') NOT NULL DEFAULT 'PLAIN'
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+--
+-- Indexes for table `sogo_domains`
+--
+ALTER TABLE `sogo_domains`
+ ADD PRIMARY KEY (`sogo_id`);
+
+--
+-- AUTO_INCREMENT for table `sogo_domains`
+--
+ALTER TABLE `sogo_domains`
+MODIFY `sogo_id` bigint(20) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
 
 --
 -- Table structure for table `sogo_module`
@@ -263,43 +273,24 @@ MODIFY `scp` int(11) NOT NULL AUTO_INCREMENT;
 --  Default records
 --
 INSERT INTO `sogo_config_permissions` (`sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `scp`, `scp_index`, `scp_name`, `scp_allow`) VALUES
-(0, 0, 'ru', 'ru', '', 1, 1, 'sieve_filter_forward', 'y'),
-(0, 0, 'ru', 'ru', '', 2, 1, 'sieve_filter_vacation', 'y'),
-(0, 0, 'ru', 'ru', '', 3, 1, 'sieve_server', 'n'),
-(0, 0, 'ru', 'ru', '', 4, 1, 'sieve_filter_enable_disable', 'n'),
-(0, 0, 'ru', 'ru', '', 5, 1, 'imap_folder_drafts', 'y'),
-(0, 0, 'ru', 'ru', '', 6, 1, 'imap_folder_sent', 'y'),
-(0, 0, 'ru', 'ru', '', 7, 1, 'imap_folder_trash', 'y'),
-(0, 0, 'ru', 'ru', '', 8, 1, 'sieve_folder_encoding', 'n'),
-(0, 0, 'ru', 'ru', '', 9, 1, 'imap_server', 'y'),
-(0, 0, 'ru', 'ru', '', 10, 1, 'imap_acl_style', 'n'),
-(0, 0, 'ru', 'ru', '', 11, 1, 'custom_xml', 'n'),
-(0, 0, 'ru', 'ru', '', 12, 1, 'smtp_authentication_type', 'n'),
-(0, 0, 'ru', 'ru', '', 13, 1, 'mail_custom_from_enabled', 'n'),
-(0, 0, 'ru', 'ru', '', 14, 1, 'mail_spool_path', 'n'),
-(0, 0, 'ru', 'ru', '', 15, 1, 'mailing_mechanism', 'n'),
-(0, 0, 'ru', 'ru', '', 16, 1, 'smtp_server', 'n'),
-(0, 0, 'ru', 'ru', '', 17, 1, 'mail_auxiliary_accounts', 'n'),
-(0, 0, 'ru', 'ru', '', 18, 1, 'imap_conforms_imapext', 'n'),
-(0, 0, 'ru', 'ru', '', 19, 1, 'subscription_folder_format', 'n'),
-(0, 0, 'ru', 'ru', '', 20, 2, 'sieve_filter_forward', 'y'),
-(0, 0, 'ru', 'ru', '', 21, 2, 'sieve_filter_vacation', 'y'),
-(0, 0, 'ru', 'ru', '', 22, 2, 'sieve_filter_enable_disable', 'y'),
-(0, 0, 'ru', 'ru', '', 23, 2, 'sieve_folder_encoding', 'y'),
-(0, 0, 'ru', 'ru', '', 24, 2, 'imap_acl_style', 'y'),
-(0, 0, 'ru', 'ru', '', 25, 2, 'imap_conforms_imapext', 'y'),
-(0, 0, 'ru', 'ru', '', 26, 2, 'imap_folder_drafts', 'y'),
-(0, 0, 'ru', 'ru', '', 27, 2, 'imap_folder_sent', 'y'),
-(0, 0, 'ru', 'ru', '', 28, 2, 'imap_folder_trash', 'y'),
-(0, 0, 'ru', 'ru', '', 29, 2, 'mail_custom_from_enabled', 'n'),
-(0, 0, 'ru', 'ru', '', 30, 2, 'sieve_server', 'n'),
-(0, 0, 'ru', 'ru', '', 31, 2, 'imap_server', 'n'),
-(0, 0, 'ru', 'ru', '', 32, 2, 'subscription_folder_format', 'n'),
-(0, 0, 'ru', 'ru', '', 33, 2, 'mail_auxiliary_accounts', 'n'),
-(0, 0, 'ru', 'ru', '', 34, 2, 'smtp_server', 'n'),
-(0, 0, 'ru', 'ru', '', 35, 2, 'mailing_mechanism', 'n'),
-(0, 0, 'ru', 'ru', '', 36, 2, 'mail_spool_path', 'n'),
-(0, 0, 'ru', 'ru', '', 37, 2, 'smtp_authentication_type', 'n'),
-(0, 0, 'ru', 'ru', '', 38, 2, 'custom_xml', 'n');
+(0, 0, 'ru', 'ru', '', 1, 1, 'sieve_filter_forward', 'y'),(0, 0, 'ru', 'ru', '', 2, 1, 'sieve_filter_vacation', 'y'),
+(0, 0, 'ru', 'ru', '', 3, 1, 'sieve_server', 'n'),(0, 0, 'ru', 'ru', '', 4, 1, 'sieve_filter_enable_disable', 'n'),
+(0, 0, 'ru', 'ru', '', 5, 1, 'imap_folder_drafts', 'y'),(0, 0, 'ru', 'ru', '', 6, 1, 'imap_folder_sent', 'y'),
+(0, 0, 'ru', 'ru', '', 7, 1, 'imap_folder_trash', 'y'),(0, 0, 'ru', 'ru', '', 8, 1, 'sieve_folder_encoding', 'n'),
+(0, 0, 'ru', 'ru', '', 9, 1, 'imap_server', 'y'),(0, 0, 'ru', 'ru', '', 10, 1, 'imap_acl_style', 'n'),
+(0, 0, 'ru', 'ru', '', 11, 1, 'custom_xml', 'n'),(0, 0, 'ru', 'ru', '', 12, 1, 'smtp_authentication_type', 'n'),
+(0, 0, 'ru', 'ru', '', 13, 1, 'mail_custom_from_enabled', 'n'),(0, 0, 'ru', 'ru', '', 14, 1, 'mail_spool_path', 'n'),
+(0, 0, 'ru', 'ru', '', 15, 1, 'mailing_mechanism', 'n'),(0, 0, 'ru', 'ru', '', 16, 1, 'smtp_server', 'n'),
+(0, 0, 'ru', 'ru', '', 17, 1, 'mail_auxiliary_accounts', 'n'),(0, 0, 'ru', 'ru', '', 18, 1, 'imap_conforms_imapext', 'n'),
+(0, 0, 'ru', 'ru', '', 19, 1, 'subscription_folder_format', 'n'),(0, 0, 'ru', 'ru', '', 20, 2, 'sieve_filter_forward', 'y'),
+(0, 0, 'ru', 'ru', '', 21, 2, 'sieve_filter_vacation', 'y'),(0, 0, 'ru', 'ru', '', 22, 2, 'sieve_filter_enable_disable', 'y'),
+(0, 0, 'ru', 'ru', '', 23, 2, 'sieve_folder_encoding', 'y'),(0, 0, 'ru', 'ru', '', 24, 2, 'imap_acl_style', 'y'),
+(0, 0, 'ru', 'ru', '', 25, 2, 'imap_conforms_imapext', 'y'),(0, 0, 'ru', 'ru', '', 26, 2, 'imap_folder_drafts', 'y'),
+(0, 0, 'ru', 'ru', '', 27, 2, 'imap_folder_sent', 'y'),(0, 0, 'ru', 'ru', '', 28, 2, 'imap_folder_trash', 'y'),
+(0, 0, 'ru', 'ru', '', 29, 2, 'mail_custom_from_enabled', 'n'),(0, 0, 'ru', 'ru', '', 30, 2, 'sieve_server', 'n'),
+(0, 0, 'ru', 'ru', '', 31, 2, 'imap_server', 'n'),(0, 0, 'ru', 'ru', '', 32, 2, 'subscription_folder_format', 'n'),
+(0, 0, 'ru', 'ru', '', 33, 2, 'mail_auxiliary_accounts', 'n'),(0, 0, 'ru', 'ru', '', 34, 2, 'smtp_server', 'n'),
+(0, 0, 'ru', 'ru', '', 35, 2, 'mailing_mechanism', 'n'),(0, 0, 'ru', 'ru', '', 36, 2, 'mail_spool_path', 'n'),
+(0, 0, 'ru', 'ru', '', 37, 2, 'smtp_authentication_type', 'n'),(0, 0, 'ru', 'ru', '', 38, 2, 'custom_xml', 'n');
 
 INSERT INTO `sys_config` (`group`, `name`, `value`) VALUES ('interface', 'sogo_interface', '9');

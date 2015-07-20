@@ -28,8 +28,8 @@ if ($app->auth->is_admin()) {
 } else {
     $liste["name"] = "sogo_domains_user";
 }
-$liste["table"] = "mail_domain";
-$liste["table_idx"] = "domain_id";
+$liste["table"] = "sogo_domains";
+$liste["table_idx"] = "sogo_id";
 $liste["search_prefix"] = "search_";
 $liste["records_per_page"] = "15";
 $liste["file"] = "sogo_mail_domain_list.php";
@@ -39,19 +39,19 @@ $liste["paging_tpl"] = "templates/paging.tpl.htm";
 $liste["auth"] = "yes";
 
 
-$liste["item"][] = array(
-    'field' => "active",
-    'datatype' => "VARCHAR",
-    'formtype' => "SELECT",
-    'op' => "=",
-    'prefix' => "",
-    'suffix' => "",
-    'width' => "",
-    'value' => array(
-        'y' => "<div id=\"ir-Yes\" class=\"swap\"><span>Yes</span></div>",
-        'n' => "<div class=\"swap\" id=\"ir-No\"><span>No</span></div>"
-    )
-);
+//$liste["item"][] = array(
+//    'field' => "active",
+//    'datatype' => "VARCHAR",
+//    'formtype' => "SELECT",
+//    'op' => "=",
+//    'prefix' => "",
+//    'suffix' => "",
+//    'width' => "",
+//    'value' => array(
+//        'y' => "<div id=\"ir-Yes\" class=\"swap\"><span>Yes</span></div>",
+//        'n' => "<div class=\"swap\" id=\"ir-No\"><span>No</span></div>"
+//    )
+//);
 
 if ($app->auth->is_admin()) {
     $liste["item"][] = array(
@@ -110,7 +110,7 @@ $liste["item"][] = array(
 );
 
 $liste["item"][] = array(
-    'field' => "domain",
+    'field' => "domain_name",
     'datatype' => "VARCHAR",
     'filters' => array(
         0 => array('event' => 'SHOW',

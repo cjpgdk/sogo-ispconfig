@@ -145,15 +145,15 @@
         </fieldset>
 
         <input type="hidden" name="id" value="{tmpl_var name='id'}">
-        <input name="domain_id" id="domain_id" value="{tmpl_var name='domain_id'}" type="hidden"/>
+        <input name="domain_id" id="domain_id" value="{tmpl_var name='domain_id_disabled'}" type="hidden"/>
         <input name="domain_name" id="domain_name" value="{tmpl_var name='domain_name'}" type="hidden" />
-        <input name="server_id" id="server_id" value="{tmpl_var name='server_id'}" type="hidden" />
+        <input name="server_id" id="server_id" value="{tmpl_var name='server_id_disabled'}" type="hidden" />
         <input name="server_name" id="server_name" value="{tmpl_var name='server_name'}" type="hidden" />
         <input type="hidden" name="_csrf_key" value="{tmpl_var name='_csrf_key'}">
         <input type="hidden" name="_csrf_id" value="{tmpl_var name='_csrf_id'}">
 
         <div class="buttonHolder buttons">
-            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_domains_edit.php?domain_id=1');"><span>{tmpl_var name='btn_save_txt'}</span></button>
+            <button class="positive iconstxt icoPositive" type="button" value="{tmpl_var name='btn_save_txt'}" onclick="submitForm('pageForm', 'admin/sogo_domains_edit.php');"><span>{tmpl_var name='btn_save_txt'}</span></button>
             <button class="negative iconstxt icoNegative" type="button" value="{tmpl_var name='btn_cancel_txt'}" onclick="loadContent('admin/sogo_domains_list.php');"><span>{tmpl_var name='btn_cancel_txt'}</span></button>
         </div>
     </div>

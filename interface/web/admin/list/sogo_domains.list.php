@@ -21,8 +21,10 @@
  */
 
 $liste["name"] = "sogo_domains";
-$liste["table"] = "mail_domain";
-$liste["table_idx"] = "domain_id";
+#$liste["table"] = "mail_domain";
+$liste["table"] = "sogo_domains";
+#$liste["table_idx"] = "domain_id";
+$liste["table_idx"] = "sogo_id";
 $liste["search_prefix"] = "search_";
 $liste["records_per_page"] = "15";
 $liste["file"] = "sogo_domains_list.php";
@@ -30,23 +32,6 @@ $liste["edit_file"] = "sogo_domains_edit.php";
 $liste["delete_file"] = "sogo_domains_del.php";
 $liste["paging_tpl"] = "templates/paging.tpl.htm";
 $liste["auth"] = "yes";
-//* see "sogo_domains_list.php" for join statement in use
-//$liste['join_sql'] = "LEFT JOIN `sogo_domains` ON `mail_domain`.`domain_id`=`sogo_domains`.`domain_id`";
-$liste["item"][] = array(
-    'field' => "active",
-    'datatype' => "VARCHAR",
-    'formtype' => "SELECT",
-    'op' => "=",
-    'prefix' => "",
-    'suffix' => "",
-    'width' => "",
-    'value' => array(
-        'y' => "<div id=\"ir-Yes\" class=\"swap\"><span>Yes</span></div>",
-        'n' => "<div class=\"swap\" id=\"ir-No\"><span>No</span></div>"
-    )
-);
-
-
 $liste["item"][] = array(
     'field' => "sys_groupid",
     'datatype' => "INTEGER",
@@ -81,26 +66,9 @@ $liste["item"][] = array(
     'value' => ""
 );
 
-//* isset using join
-$liste["item"][] = array(
-    'field' => "sogo_server_id",
-    'datatype' => "INTEGER",
-    'formtype' => "SELECT",
-    'op' => "like",
-    'prefix' => "",
-    'suffix' => "",
-    'datasource' => array(
-        'type' => 'SQL',
-        'querystring' => 'SELECT `server_id`,`server_name` FROM `sogo_config` WHERE ({AUTHSQL-B}) ORDER BY server_name',
-        'keyfield' => 'server_id',
-        'valuefield' => 'server_name'
-    ),
-    'width' => "",
-    'value' => ""
-);
 
 $liste["item"][] = array(
-    'field' => "domain",
+    'field' => "domain_name",
     'datatype' => "VARCHAR",
     'filters' => array(
         0 => array('event' => 'SHOW',

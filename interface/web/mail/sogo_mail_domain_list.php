@@ -29,38 +29,38 @@ $list_def_file = "list/sogo_domain.list.php";
 $app->auth->check_module_permissions('mail');
 $app->load('listform_actions');
 
-//* remove old saved domain id
-unset($_SESSION['s']['module']["sogo_conifg_domain_id"]);
+////* remove old saved domain id
+//unset($_SESSION['s']['module']["sogo_conifg_domain_id"]);
 
 class listform_action extends listform_actions {
 
     /** @global app $app */
-    public function onShow() /* onLoad() -- moved we need translations loaded  */ {
-        global $app;
-        $app->uses('tpl,listform,tform,sogo_helper');
-
-        if ($app->auth->is_admin()) {
-            $_sogo_domains = $app->sogo_helper->listDomains();
-        } else {
-            $_sogo_domains = $app->sogo_helper->listDomains($app->tform->getAuthSQL('r', ''));
-        }
-        $sogo_domains = array();
-        foreach ($_sogo_domains as $value) {
-            $sogo_domains[] = array('sogo_domain_id' => $value->id, 'domain_id' => $value->domain_id, 'sogo_server_id' => $value->server_id);
-        }
-        $app->tpl->setLoop('sogo_domains', $sogo_domains);
-        unset($sogo_domains, $_sogo_domains);
-
-        $app->tpl->setLoop('err_message', '');
-        if (isset($_REQUEST['msg'])) {
-            // DOMAINNOTFOUND
-            // INVALIDDATA
-            $app->tpl->setVar('err_message', $_REQUEST['msg']);
-        } else
-            $app->tpl->setVar('err_message', '');
-
-        parent::onShow();
-    }
+//    public function onShow() /* onLoad() -- moved we need translations loaded  */ {
+//        global $app;
+//        $app->uses('tpl,listform,tform,sogo_helper');
+//
+//        if ($app->auth->is_admin()) {
+//            $_sogo_domains = $app->sogo_helper->listDomains();
+//        } else {
+//            $_sogo_domains = $app->sogo_helper->listDomains($app->tform->getAuthSQL('r', ''));
+//        }
+//        $sogo_domains = array();
+//        foreach ($_sogo_domains as $value) {
+//            $sogo_domains[] = array('sogo_domain_id' => $value->id, 'domain_id' => $value->domain_id, 'sogo_server_id' => $value->server_id);
+//        }
+//        $app->tpl->setLoop('sogo_domains', $sogo_domains);
+//        unset($sogo_domains, $_sogo_domains);
+//
+//        $app->tpl->setLoop('err_message', '');
+//        if (isset($_REQUEST['msg'])) {
+//            // DOMAINNOTFOUND
+//            // INVALIDDATA
+//            $app->tpl->setVar('err_message', $_REQUEST['msg']);
+//        } else
+//            $app->tpl->setVar('err_message', '');
+//
+//        parent::onShow();
+//    }
 
 }
 

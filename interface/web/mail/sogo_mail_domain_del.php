@@ -33,12 +33,14 @@ if ($conf['demo_mode'] == true)
 //* Check permissions for module
 $app->auth->check_module_permissions('mail');
 
-$app->uses("tform_actions,sogo_helper");
+//$app->uses("tform_actions,sogo_helper");
+//
+////* get domain config id from domain id
+//$dId = (int) (isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) : 0);
+//$dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+//
+//$_REQUEST['id'] = $dConfId;
+//$app->tform_actions->onDelete();
 
-//* get domain config id from domain id
-$dId = (int) (isset($_REQUEST["domain_id"]) ? intval($_REQUEST["domain_id"]) : 0);
-$dConfId = (int) $app->sogo_helper->getDomainConfigIndex($dId);
+//* don't allow delete inmail module only reset
 
-$_REQUEST['id'] = $dConfId;
-
-$app->tform_actions->onDelete();

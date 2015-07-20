@@ -55,12 +55,33 @@ $form["tabs"]['domain'] = array(
     'fields' => array(
         'domain_id' => array(
             'datatype' => 'INTEGER',
-            'formtype' => 'TEXT',
+            'formtype' => 'SELECT',
             'default' => 0,
-            'value' => '',
             'maxlength' => '',
             'required' => 1,
             'width' => 100,
+            'value' => array(0 => $app->lng('Select domain name')),
+            'datasource' => array(
+                'type' => 'SQL',
+                'querystring' => 'SELECT `domain_id`,`domain` FROM `mail_domain`' . (!isset($_REQUEST['id']) || $_REQUEST['id'] <= 0 ? '  WHERE `domain_id` NOT IN (SELECT `domain_id` FROM `sogo_domains`)' : ''),
+                'keyfield' => 'domain_id',
+                'valuefield' => 'domain'
+            ),
+            'validators' => array(
+                array(
+                    'type' => 'NOTEMPTY',
+                    'errmsg' => 'errmsg_domain_id_empty'
+                ),
+                array(
+                    'type' => 'ISPOSITIVE',
+                    'errmsg' => 'errmsg_domain_id_null'
+                ),
+                array(
+                    'type' => 'UNIQUE',
+                    'errmsg' => 'errmsg_domain_id_unique',
+                    'allowempty' => 'n'
+                )
+            ),
         ),
         'domain_name' => array(
             'datatype' => 'VARCHAR',
@@ -75,7 +96,7 @@ $form["tabs"]['domain'] = array(
             'datatype' => 'INTEGER',
             'formtype' => 'SELECT',
             'default' => 0,
-            'value' => array(0=>$app->lng('Select Server')),
+            'value' => array(0 => $app->lng('Select Server')),
             'datasource' => array(
                 'type' => 'SQL',
                 'querystring' => 'SELECT a.`server_id`,a.`server_name` FROM `server` a, `sogo_config` b WHERE b.`server_id`=a.`server_id`',
@@ -83,6 +104,16 @@ $form["tabs"]['domain'] = array(
                 'valuefield' => 'server_name'
             ),
             'required' => 1,
+            'validators' => array(
+                array(
+                    'type' => 'NOTEMPTY',
+                    'errmsg' => 'errmsg_server_id_empty'
+                ),
+                array(
+                    'type' => 'ISPOSITIVE',
+                    'errmsg' => 'errmsg_server_id_null'
+                ),
+            ),
         ),
         'server_name' => array(
             'datatype' => 'VARCHAR',
@@ -421,7 +452,7 @@ $form["tabs"]['domain'] = array(
             'value' => '',
             'datasource' => array(
                 'type' => 'SQL',
-                'querystring' => 'SELECT `email` FROM `mail_user` WHERE `email` LIKE \'%@{DOMAINNAME}\' AND {AUTHSQL} ORDER BY email',
+                'querystring' => 'SELECT `email` FROM `mail_user` WHERE `email` LIKE \'%@{DOMAINNAME}\'', /* AND {AUTHSQL} ORDER BY email', */
                 'keyfield' => 'email',
                 'valuefield' => 'email'
             ),
