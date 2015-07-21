@@ -556,13 +556,11 @@ class sogo_plugin {
             // avoid annoying errors
             if (($app->sogo_helper->idn_decode($data['old']['email']) == $data['new']['email']) &&
                     ($app->sogo_helper->idn_encode($data['new']['email']) == $data['old']['email'])) {
-                //* OLD:user@xn--ber-xla.dk , NEW:user@æber.dk
                 $data['new']['email'] = $app->sogo_helper->idn_encode($data['new']['email']);
                 list($new_user, $new_domain) = explode('@', $data['new']['email']);
             }
             if (($app->sogo_helper->idn_encode($data['old']['email']) == $data['new']['email']) &&
                     ($app->sogo_helper->idn_decode($data['new']['email']) == $data['old']['email'])) {
-                //* OLD:user@æber.dk , NEW:user@xn--ber-xla.dk
                 $data['old']['email'] = $app->sogo_helper->idn_decode($data['old']['email']);
                 list($old_user, $old_domain) = explode('@', $data['old']['email']);
             }
@@ -653,7 +651,6 @@ class sogo_plugin {
 
             // avoid annoying errors
             if ($app->sogo_helper->idn_decode($data['old']['domain']) == $data['new']['domain']) {
-                //* OLD: xn--ber-xla.dk , NEW: æber.dk
                 $data['new']['domain'] = $app->sogo_helper->idn_encode($data['new']['domain']);
             }
 
