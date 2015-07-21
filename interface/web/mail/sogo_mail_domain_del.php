@@ -109,7 +109,6 @@ if ($_grant_access) {
                     }
                 }
             }
-
             parent::onBeforeUpdate();
         }
 
@@ -141,6 +140,7 @@ if ($_grant_access) {
     if ($_config = $app->db->queryOneRecord("SELECT * FROM `sogo_domains` WHERE `sogo_id`=" . $app->tform_action->id)) {
         $app->tform_action->dataRecord = $_config;
         $app->tform_action->dataRecord['SOGoCustomXML'] = '';
+        $app->tform_action->dataRecord['SOGoSuperUsernames'] = '';
     }
     if (method_exists($app->auth, 'csrf_token_get')) {
         $csrf_token = $app->auth->csrf_token_get('sogo_domains');
@@ -154,4 +154,4 @@ if ($_grant_access) {
 
 
 
-//header("Location: " . $liste["file"]);
+header("Location: " . $liste["file"]);

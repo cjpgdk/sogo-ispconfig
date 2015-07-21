@@ -22,10 +22,47 @@
  */
 class sogo_helper {
 
+    /**
+     * get edit permissions for a reseller by client_id<br>
+     * gets the global reseller edit permissions and if found overrides them with the reseller specific permissions
+     * @param integer $user_id
+     * @return array
+     */
     public function getResellerConfigPermissions($user_id) {
-        
+        $user_id = intval($user_id);
+        $records = array();
+        $_tmp = $this->getDB()->queryAllRecords("SELECT scp.`scp_name` as name, scp.`scp_allow` as allow FROM `sogo_config_permissions_index` scpii, `sogo_config_permissions` scp WHERE scpii.`scpi_type`='reseller' AND scpii.`scpi_is_global`=1 AND scp.`scp_index`=scpii.`scpi`");
+        //* flatten the array
+        foreach ($_tmp as $value) {
+            $records['permission_' . $value['name']] = $value['allow'];
+        }
+        unset($_tmp);
+        if ($_records = $this->getDB()->queryAllRecords("SELECT * FROM `sogo_config_permissions_index` WHERE `scpi_is_global`=0 AND `scpi_type`='reseller'")) {
+            foreach ($_records as $key => $value) {
+                $clients = explode(',', $value['scpi_clients']);
+                foreach ($clients as $client) {
+                    if ($client == $user_id) {
+                        $permissions_index = intval($value['scpi']);
+                        $_tmp = $this->getDB()->queryAllRecords("SELECT scp.`scp_allow` as allow, scp.`scp_name` as name FROM `sogo_config_permissions` scp WHERE scp.`scp_index`={$permissions_index}");
+                        //* override global
+                        foreach ($_tmp as $value) {
+                            $records['permission_' . $value['name']] = $value['allow'];
+                        }
+                        break;
+                    }
+                }
+            }
+            unset($_records);
+        }
+        return $records;
     }
 
+    /**
+     * get edit permissions for a client by client_id<br>
+     * gets the global client edit permissions and if found overrides them with the client specific permissions
+     * @param integer $user_id
+     * @return array
+     */
     public function getClientConfigPermissions($user_id) {
         $user_id = intval($user_id);
         $records = array();
@@ -55,15 +92,12 @@ class sogo_helper {
         return $records;
     }
 
+    /**
+     * get the client id from session of current user
+     * @return integer
+     */
     public function get_client_id() {
-        global $app;
-        return $app->functions->intval($_SESSION['s']['user']['client_id']);
-    }
-
-    //* FROM: auth.inc.php ($app->auth->get_user_id())
-    public function get_user_id() {
-        global $app;
-        return $app->functions->intval($_SESSION['s']['user']['userid']);
+        return intval($_SESSION['s']['user']['client_id']);
     }
 
     /**
@@ -134,15 +168,6 @@ class sogo_helper {
         $result = $this->getDB()->queryOneRecord('SELECT `domain_id` FROM `sogo_domains` WHERE `domain_id`=' . intval($domain_id));
         return (boolean) ($result['domain_id'] == $domain_id);
     }
-
-//    /**
-//     * alias of domainSOGoConfigExists
-//     * @see sogo_helper::domainSOGoConfigExists($domain_id)
-//     * @deprecated since version pre.u10
-//     */
-//    public function configDomainExists($domain_id) {
-//        return $this->domainSOGoConfigExists($domain_id);
-//    }
 
     /**
      * get domain SOGo configuration id

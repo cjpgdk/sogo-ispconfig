@@ -3,7 +3,7 @@
 # Impact: 4 | Tags: xss, csrf, id, rfe
 # Description: Detects JavaScript object properties and methods | Tags: xss, csrf, id, rfe | ID 17
 
-admin:/admin/sogo_domains_edit.php:POST.SOGoMailListViewColumnsOrder
+admin:/admin/sogo_conifg_edit.php:POST.SOGoMailListViewColumnsOrder
 
 # --------------------------------------------------------------------------- #
 
@@ -14,7 +14,7 @@ admin:/admin/sogo_domains_edit.php:POST.SOGoMailListViewColumnsOrder
 # Description: Detects code injection attempts 1/3 | Tags: id, rfe, lfi | ID 58
 # Description: Detects unknown attack vectors based on PHPIDS Centrifuge detection | Tags: xss, csrf, id, rfe, lfi | ID 67
 
-admin:/admin/sogo_domains_edit.php:POST.SOGoSubscriptionFolderFormat
+admin:/admin/sogo_conifg_edit.php:POST.SOGoSubscriptionFolderFormat
 
 # --------------------------------------------------------------------------- #
 
@@ -29,6 +29,6 @@ admin:/admin/sogo_domains_edit.php:POST.SOGoSubscriptionFolderFormat
 # Description: Detects MySQL comment-/space-obfuscated injections and backtick termination | Tags: sqli, id | ID 57
 # Description: Detects unknown attack vectors based on PHPIDS Centrifuge detection | Tags: xss, csrf, id, rfe, lfi | ID 67
 
-admin:/admin/sogo_mail_domains_edit.php:POST.SOGoCustomXML
+admin:/admin/sogo_conifg_edit.php:POST.SOGoCustomXML
 
 

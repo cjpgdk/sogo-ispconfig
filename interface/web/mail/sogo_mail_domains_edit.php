@@ -98,14 +98,14 @@ class tform_action extends tform_actions {
         parent::onShowEnd();
     }
 
-    public function onInsert() /* onBeforeInsert() */ {
+    public function onInsert() {
         global $app;
         $msg = $app->tform->wordbook['SOGO_SERVER_CONFIG_NOT_FOUND2'];
         $app->error($msg);
         exit;
     }
 
-    public function onUpdate()/* onBeforeUpdate() */ {
+    public function onUpdate(){
         global $app;
         //* if not admin.
         if (!$app->auth->is_admin()) {
@@ -148,7 +148,7 @@ class tform_action extends tform_actions {
                     . "`sys_perm_user` = '{$result['sys_perm_user']}', "
                     . "`sys_perm_group` = '{$result['sys_perm_group']}', "
                     . "`sys_perm_other` = '{$result['sys_perm_other']}' "
-                    . "WHERE `sogo_id` ='" . /* self::$domain_config_index */ $this->id . "' AND `domain_id` ='" . self::$load_domain_id . "';");
+                    . "WHERE `sogo_id` ='" . $this->id . "' AND `domain_id` ='" . self::$load_domain_id . "';");
         }
     }
 
