@@ -9,8 +9,7 @@
             <div class="ctrlHolder">
                 <label for="server_id">{tmpl_var name='server_id_txt'}</label>
                 {tmpl_if name="is_edit" op="==" value="1"}
-                <input name="server_id" id="server_id" value="{tmpl_var name='server_id_disabled'}" type="hidden" /> {tmpl_var name='server_name'} 
-                {tmpl_var name='server_name'}
+                <input name="server_id" id="server_id" value="{tmpl_var name='server_id_disabled'}" type="hidden" /> {tmpl_var name='server_name'}
                 {tmpl_else}
                 <select name="server_id" id="server_id" class="selectInput">
                     {tmpl_var name='server_id'}
