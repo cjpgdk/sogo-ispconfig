@@ -1,8 +1,11 @@
 new REQUIRED user source setting "ISPConfigUrlPassword", 
 if not isset after change in SQLSource.* no one will be able to login
 
-**** NOTE ****
-the patch may not work since i just copied the important stuff from my own private changes, so!!
+SQLSource.patch								: runs on the latest versions
+SOGo-v2.3.0.ISPConfigUrlPassword.patch.diff	: runs on SOGo v2.3.0
+SOGo-v2.3.1.ISPConfigUrlPassword.patch.diff	: runs on SOGo v2.3.1
+
+patch -p1 < ../SQLSource.patch
 
 [..]
 viewURL = "mysql://..._users";
@@ -30,10 +33,12 @@ edit "server/conf/sogo_domain.master"
 <key>SOGoUserSources</key>
 <array>
     <dict>
+        [..]
 {tmpl_if name='ISPConfigUrlPassword'}
         <key>ISPConfigUrlPassword</key>
         <string>{tmpl_var name='ISPConfigUrlPassword'}</string>
 {/tmpl_if}
+        [..]
     </dict>
 </array>
 [..]

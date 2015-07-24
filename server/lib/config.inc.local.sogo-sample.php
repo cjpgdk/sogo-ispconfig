@@ -62,6 +62,15 @@ $conf['sogo_domain_extra_vars'] = array(
     'prependPasswordScheme' => 'NO',
     //* human identification name of the address book
     'displayName' => 'Users in {domain}',
+    /*
+      needs patched SOGo.
+      allows the users to change password from SOGo Web Interface
+      i created a patch for sogo located in the doc/extra/pwchange 
+      folder, the patch will add this setting to SOGo config users 
+      source directive this will allow SOGo to update the password
+      in ISPConfig and SOGo, no pasword sync needed.
+    */
+    /*'ISPConfigUrlPassword'=>"{$conf['db_type']}://{$conf['db_user']}:{$conf['db_password']}@{$conf['db_host']}:3306/{$conf['db_database']}/mail_user"*/
 );
 //* sogo default configuration file(s)
 $conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
@@ -70,6 +79,3 @@ $conf['sogo_system_default_conf'] = '/etc/sogo/sogo.conf';
 
 //* template to use for table names in sogo db
 $conf['sogo_domain_table_tpl'] = "{domain}_users";
-/*
-SOGoEncryptionKey ?? if password change shall be enabled.!
-*/

@@ -1,15 +1,5 @@
---- sogo-2.3.0.orig/SoObjects/SOGo/SQLSource.h
-+++ sogo-2.3.0/SoObjects/SOGo/SQLSource.h
-@@ -46,6 +46,7 @@
-   NSString *_sieveHostField;
-   NSString *_userPasswordAlgorithm;
-   NSURL *_viewURL;
-+  NSURL *_ispcPWURL;
-   BOOL _prependPasswordScheme;
-
-   /* resources handling */
---- sogo-2.3.0.orig/SoObjects/SOGo/SQLSource.m
-+++ sogo-2.3.0/SoObjects/SOGo/SQLSource.m
+--- sogo-2.3.1.orig/SoObjects/SOGo/SQLSource.m
++++ sogo-2.3.1/SoObjects/SOGo/SQLSource.m
 @@ -97,6 +97,7 @@
        _mailFields = nil;
        _userPasswordAlgorithm = nil;
@@ -49,26 +39,35 @@
    BOOL didChange;
    BOOL isOldPwdOk;
 
-@@ -345,6 +353,22 @@
+@@ -345,6 +353,21 @@
           if (!ex)
             {
               didChange = YES;
 +
-+
-+              channelispc = [cm acquireOpenChannelForURL: _ispcPWURL];
-+              if(channelispc)
-+              {
++             channelispc = [cm acquireOpenChannelForURL: _ispcPWURL];
++             if(channelispc)
++             {
 +                 sqlstrispc = [NSString stringWithFormat: (@"UPDATE %@"
 +                          @" SET password = '%@'"
 +                          @" WHERE login = '%@'"),
 +                          [_ispcPWURL gcsTableName], encryptedPassword, login];
-+                  exispc = [channelispc evaluateExpressionX: sqlstrispc];
-+                  if (exispc)
-+                  {
-+                      [self errorWithFormat: @"could not run SQL '%@': %@", sqlstrispc, exispc];
-+                  }
-+                  [cm releaseChannel: channelispc];
-+              }
++                 exispc = [channelispc evaluateExpressionX: sqlstrispc];
++                 if (exispc)
++                 {
++                     [self errorWithFormat: @"could not run SQL '%@': %@", sqlstrispc, exispc];
++                 }
++                 [cm releaseChannel: channelispc];
++             }
             }
           else
             {
+--- sogo-2.3.1.orig/SoObjects/SOGo/SQLSource.h
++++ sogo-2.3.1/SoObjects/SOGo/SQLSource.h
+@@ -46,6 +46,7 @@
+   NSString *_sieveHostField;
+   NSString *_userPasswordAlgorithm;
+   NSURL *_viewURL;
++  NSURL *_ispcPWURL;
+   BOOL _prependPasswordScheme;
+
+   /* resources handling */
