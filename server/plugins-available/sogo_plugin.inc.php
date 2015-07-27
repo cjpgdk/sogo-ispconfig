@@ -83,7 +83,7 @@ class sogo_plugin {
             $app->plugins->registerEvent('sogo_module_insert', $this->plugin_name, 'insert_sogo_module_settings');
             $app->plugins->registerEvent('sogo_module_update', $this->plugin_name, 'update_sogo_module_settings');
 
-            if(version_compare($conf['app_version'], '3.0.4.6', ">")){
+            if (version_compare($conf['app_version'], '3.0.4.6', ">")) {
                 //* Register for remote actions
                 $app->plugins->registerAction('sogo_mail_user_sync', $this->plugin_name, 'action_mail_user_sync');
                 $app->plugins->registerAction('sogo_mail_user_alias', $this->plugin_name, 'action_mail_user_alias');
@@ -342,8 +342,30 @@ class sogo_plugin {
             return;
         }
         if ($event_name == 'sogo_domains_delete') {
+            $keep_table = true;
+            if ($app->sogo_helper->module_settings->all_domains && $app->sogo_helper->module_settings->allow_same_instance) {
+                //* allow all domains + same instance
+                $keep_table = true;
+            } else if (!$app->sogo_helper->module_settings->all_domains && $app->sogo_helper->module_settings->allow_same_instance) {
+                //* allow only domains with sogo domain config + same instance
+                $keep_table = false;
+                if ($app->sogo_helper->get_domain_config($event_name) !== false)
+                    $keep_table = true;
+            } else if ($app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
+                //* allow all domains but only for this server
+                $keep_table = false;
+                if ($data['old']['domain']['server_id'] == $conf['server_id'])
+                    $keep_table = true;
+            } else if (!$app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
+                //* allow only domains with sogo domain config and located on this server
+                $keep_table = false;
+                if ($app->sogo_helper->get_domain_config($event_name) !== false && ($data['old']['domain']['server_id'] == $conf['server_id']))
+                    $keep_table = true;
+            }
+
             if ($app->sogo_helper->sogo_table_exists($domain_name)) {
-                if ($app->sogo_helper->has_mail_users($domain_name, true)) {
+
+                if ($app->sogo_helper->has_mail_users($domain_name, true) && $keep_table) {
                     //* if users still exists for domain this is only a sogo domain config removal/reset
                     $app->sogo_helper->sync_mail_users($domain_name);
                 } else {
@@ -361,7 +383,7 @@ class sogo_plugin {
 
                     $app->sogo_helper->drop_sogo_users_table($domain_name, $data['old']['domain_id']);
                 }
-            } else if ($app->sogo_helper->has_mail_users($domain_name, true)) {
+            } else if ($app->sogo_helper->has_mail_users($domain_name, true) && $keep_table) {
                 //* if users still exists for domain this is only a sogo domain config removal/reset
                 $app->sogo_helper->create_sogo_table($domain_name);
             }
