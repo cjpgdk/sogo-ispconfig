@@ -476,9 +476,11 @@ if not isset md5 is used
 \$conf['sogo_database_port'] = '3306';
 //* vars added to the domain template
 \$conf['sogo_domain_extra_vars'] = array(
-    //* password algorithm default is crypt
-    //* Possible algorithms are: plain, md5, crypt-md5, sha, ssha (including 256/512 variants),
-    'userPasswordAlgorithm' => 'crypt',
+    /*
+      password algorithm default is CRYPT
+      Possible algorithms are: plain, MD5, CRYPT-MD5, SHA, SSHA (including 256/512 variants)
+     */
+    'userPasswordAlgorithm' => 'CRYPT',
     /*
       The default behaviour is to store newly set
       passwords with out the scheme (default: NO). 
@@ -496,6 +498,9 @@ if not isset md5 is used
 
 //* template to use for table names in sogo db
 \$conf['sogo_domain_table_tpl'] = "{domain}_users";
+
+//* define if we use the old way for domain tables.
+\$conf['sogo_tb_compatibility'] = false;
 EOF;
 
 }

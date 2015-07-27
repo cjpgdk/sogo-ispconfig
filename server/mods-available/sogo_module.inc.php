@@ -268,7 +268,6 @@ class sogo_module {
     function _save_sogo_config_to_system_default() {
         global $app, $conf;
         if (isset($conf['sogo_system_default_conf']) && file_exists($conf['sogo_system_default_conf'])) {
-            // sudo -u sogo sogo-tool 
             $cmd_arg = escapeshellarg("{$conf['sogo_tool_binary']}") . " dump-defaults > " . escapeshellarg("{$conf['sogo_system_default_conf']}");
             $cmd = str_replace('{command}', $cmd_arg, $conf['sogo_su_command']);
             $app->log("sogo_module: CALL:{$cmd}", LOGLEVEL_DEBUG);

@@ -20,7 +20,7 @@
 
   if not isset md5 is used
 
- **** side note the resulting string is used with sogo-integrator to identify the domain 
+ * *** side note the resulting string is used with sogo-integrator to identify the domain 
  */
 $conf['sogo_unique_id_method'] = 'md5';
 
@@ -33,7 +33,7 @@ $conf['sogo_system_group'] = 'sogo';
   eg.
   su -p -c '{command}' sogo
   sudo -u sogo {command}
- **** if you must quote the command ONLY USE ' (Single quote) NOT " (Double quote)
+ * *** if you must quote the command ONLY USE ' (Single quote) NOT " (Double quote)
  */
 $conf['sogo_su_command'] = 'sudo -u ' . $conf['sogo_system_user'] . ' {command}';
 //* full path to sogo-tool binary 
@@ -50,9 +50,11 @@ $conf['sogo_database_host'] = '127.0.0.1';
 $conf['sogo_database_port'] = '3306';
 //* vars added to the domain template
 $conf['sogo_domain_extra_vars'] = array(
-    //* password algorithm default is crypt
-    //* Possible algorithms are: plain, md5, crypt-md5, sha, ssha (including 256/512 variants),
-    'userPasswordAlgorithm' => 'crypt',
+    /*
+      password algorithm default is CRYPT
+      Possible algorithms are: plain, MD5, CRYPT-MD5, SHA, SSHA (including 256/512 variants)
+     */
+    'userPasswordAlgorithm' => 'CRYPT',
     /*
       The default behaviour is to store newly set
       passwords with out the scheme (default: NO).
@@ -65,12 +67,12 @@ $conf['sogo_domain_extra_vars'] = array(
     /*
       needs patched SOGo.
       allows the users to change password from SOGo Web Interface
-      i created a patch for sogo located in the doc/extra/pwchange 
-      folder, the patch will add this setting to SOGo config users 
+      i created a patch for sogo located in the doc/extra/pwchange
+      folder, the patch will add this setting to SOGo config users
       source directive this will allow SOGo to update the password
       in ISPConfig and SOGo, no pasword sync needed.
-    */
-    /*'ISPConfigUrlPassword'=>"{$conf['db_type']}://{$conf['db_user']}:{$conf['db_password']}@{$conf['db_host']}:3306/{$conf['db_database']}/mail_user"*/
+     */
+    /* 'ISPConfigUrlPassword'=>"{$conf['db_type']}://{$conf['db_user']}:{$conf['db_password']}@{$conf['db_host']}:3306/{$conf['db_database']}/mail_user" */
 );
 //* sogo default configuration file(s)
 $conf['sogo_gnu_step_defaults'] = '/var/lib/sogo/GNUstep/Defaults/.GNUstepDefaults';
@@ -79,3 +81,6 @@ $conf['sogo_system_default_conf'] = '/etc/sogo/sogo.conf';
 
 //* template to use for table names in sogo db
 $conf['sogo_domain_table_tpl'] = "{domain}_users";
+
+//* define if we use the old way for domain tables.
+$conf['sogo_tb_compatibility'] = false;

@@ -28,22 +28,32 @@ class sogo_helper {
 
     /** @var array */
     static private $daCache = array();
-
-    /** @var array */
     static private $dnCache = array();
-
-    /** @var array */
     static private $sCache = array();
+    static private $sogo_server = array();
 
     /** @var sogo_module_settings */
     public $module_settings;
-    static private $sogo_server = array();
 
     /**
      * used to avoid duplicate queries on multi data updates in one session
      * @var array 
      */
     static private $_queryHash = array();
+
+    /**
+     * define if we use the old way for domain tables.
+     * @var boolean 
+     */
+    public $sogo_tb_compatibility = false;
+
+    public function __construct() {
+        global $conf;
+        $this->sogo_tb_compatibility = false;
+        if (isset($conf['sogo_tb_compatibility'])) {
+            $this->sogo_tb_compatibility = (bool) $conf['sogo_tb_compatibility'];
+        }
+    }
 
     /**
      * sync all mail users and aliases for a given domain name
@@ -72,12 +82,14 @@ class sogo_helper {
         }
         if (!empty($emails)) {
             $domain_config = $this->get_domain_config($domain_name, true);
+            $app->log(print_r($domain_config, true), LOGLEVEL_DEBUG);
             if (!$domain_config || !is_array($domain_config)) {
                 $app->log("SOGo Sync Mail Users - Unable to fetch the domain config for domain [{$domain_name}]", LOGLEVEL_ERROR);
                 return false;
             }
-            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoSieveServer']);
-            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']), $domain_config['SOGoIMAPServer']);
+            $_REPLACE_SERVERNAME = (isset($domain_config['server_name_real']) ? $domain_config['server_name_real'] : $domain_config['server_name']);
+            $domain_config['SOGoSieveServer'] = str_replace('{SERVERNAME}', $_REPLACE_SERVERNAME, $domain_config['SOGoSieveServer']);
+            $domain_config['SOGoIMAPServer'] = str_replace('{SERVERNAME}', $_REPLACE_SERVERNAME, $domain_config['SOGoIMAPServer']);
             $_tmpSQL = array('users' => array(), 'alias' => array());
             $good_mails = array();
 
@@ -94,7 +106,7 @@ class sogo_helper {
                     $append_sql = "";
                     if ($has_idn_column)
                         $append_sql = "   `idn_mail` = '{$sqlres->escape_string($this->idn_decode($email['email']))}' ,   ";
-                    
+
                     $_tmpSQL['users'][] = "UPDATE `{$sogo_table_name}` SET "
                             . " `c_uid` = '{$sqlres->escape_string($email['login'])}' ,"
                             . " `c_cn` = '{$sqlres->escape_string($email['name'])}' ,"
@@ -108,14 +120,14 @@ class sogo_helper {
                             . " `c_password` = '{$sqlres->escape_string($email['password'])}' "
                             . " WHERE `c_uid`='{$sqlres->escape_string($email['login'])}';";
                 } else {
-                    
+
                     $append_sql = "";
                     $append_sql2 = "";
-                    if ($has_idn_column){
+                    if ($has_idn_column) {
                         $append_sql = " `idn_mail`,";
                         $append_sql2 = "'{$sqlres->escape_string($this->idn_decode($email['email']))}', ";
                     }
-                        
+
                     $_tmpSQL['users'][] = "INSERT INTO `{$sogo_table_name}` "
                             . "(`c_uid`, `c_cn`, `c_name`, `mail`,{$append_sql} `c_imaplogin`, `c_sievehostname`, `c_imaphostname`, `c_domain`, `c_password`) "
                             . "VALUES "
@@ -303,9 +315,8 @@ class sogo_helper {
             else
                 return true;
         }
-        
+
         // ALTER TABLE `xyz_users` ADD `idn_mail` VARCHAR( 500 ) NOT NULL AFTER `mail`
-        
         //* @todo optimize table to reduce the space requirements (varchar(500) too much in most cases)
         //* @todo use mysql charset from config file.!
         $sql = "
@@ -673,8 +684,9 @@ AND sc.`server_name` = s.`server_name";
      */
     public function get_valid_sogo_table_name($domain_name) {
         global $conf;
-        //* @todo remove all double "_", but it will have a major effect on existing setups
         $domain_name = str_replace(array('-', '.'), '_', $domain_name);
+        if (!$this->sogo_tb_compatibility)
+            $domain_name = str_replace('__', '_', $domain_name); //* replace double '_'
         return str_replace('{domain}', $domain_name, $conf['sogo_domain_table_tpl']);
     }
 
@@ -857,6 +869,9 @@ AND sc.`server_name` = s.`server_name";
             return '';
         if (preg_match('/^[0-9\.]+$/', $domain))
             return $domain; // may be an ip address - anyway does not need to bee encoded
+
+
+
 
 
 
