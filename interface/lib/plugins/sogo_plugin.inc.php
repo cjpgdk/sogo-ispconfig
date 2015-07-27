@@ -26,7 +26,7 @@ class sogo_plugin {
     var $class_name = 'sogo_plugin';
 
     function onLoad() {
-        global $app;
+        global $app, $conf;
         //Register for the events
         /*
           [MODULE]:[FORM NAME]:on_insert_save
@@ -60,10 +60,11 @@ class sogo_plugin {
     function register_change_for_sogo($event_name, $page_form) {
         global $app, $conf;
         $app->uses('sogo_helper');
+
         //* get vars for mail user events
         if (strpos($event_name, 'mail_user') !== false) {
             //* get mail domain.
-            $email_domain = explode('@', $page_form->dataRecord['email']);
+            $email_domain = explode('@', isset($page_form->dataRecord['email']) ? $page_form->dataRecord['email'] : $page_form->oldDataRecord['email']);
             if (isset($email_domain[1]))
                 $email_domain = $email_domain[1];
             else {
@@ -109,8 +110,22 @@ class sogo_plugin {
 
         //* check if SOGo is handled by this server and $sogo_servers is empty
         if (isset($data['server_id']) && $data['server_id'] == $conf['server_id'] && empty($sogo_servers)) {
-            $app->log('Data server is the same as this server.!', LOGLEVEL_DEBUG);
-            return;
+            if ($server_cnf = $app->sogo_helper->getDB()->queryOneRecord('SELECT mail_server FROM server WHERE server_id = ' . intval($conf['server_id']))) {
+                if (intval($server_cnf['mail_server']) < 1) {
+                    //* 
+                    /*
+                      not a mail server
+                      this is a fix to issue #30
+                      @todo rewrite this file
+                     */
+                    $sogo_servers[] = $data['server_id'];
+                } else {
+                    return;
+                }
+            } else {
+                $app->log('SOGo Plugin: Data server is the same as this server.!', LOGLEVEL_DEBUG);
+                return;
+            }
         }
 
         //* handle events for remote SOGo server

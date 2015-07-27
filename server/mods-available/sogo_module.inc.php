@@ -42,8 +42,13 @@ class sogo_module {
         return true;
     }
 
+    /**
+     * 
+     * @global app $app
+     * @global type $conf
+     */
     function onLoad() {
-        global $app;
+        global $app, $conf;
 
         $app->plugins->announceEvents($this->module_name, $this->actions_available);
 
@@ -58,6 +63,7 @@ class sogo_module {
         $app->services->registerService('sogoForeceRestart', $this->module_name, 'foreceRestart');
 
         $app->services->registerService('sogoConfigRebuild', $this->module_name, 'rebuildConfig');
+        
     }
 
     /**
