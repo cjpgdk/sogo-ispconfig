@@ -349,7 +349,7 @@ class sogo_plugin {
             } else if (!$app->sogo_helper->module_settings->all_domains && $app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow only domains with sogo domain config + same instance
                 $keep_table = false;
-                if ($app->sogo_helper->get_domain_config($event_name) !== false)
+                if ($app->sogo_helper->get_domain_config($domain_name) !== false)
                     $keep_table = true;
             } else if ($app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow all domains but only for this server
@@ -364,7 +364,6 @@ class sogo_plugin {
             }
 
             if ($app->sogo_helper->sogo_table_exists($domain_name)) {
-
                 if ($app->sogo_helper->has_mail_users($domain_name, true) && $keep_table) {
                     //* if users still exists for domain this is only a sogo domain config removal/reset
                     $app->sogo_helper->sync_mail_users($domain_name);
