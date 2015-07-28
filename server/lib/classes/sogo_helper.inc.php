@@ -31,15 +31,10 @@ class sogo_helper {
     static private $dnCache = array();
     static private $sCache = array();
     static private $sogo_server = array();
+    static private $queryHash = array();
 
     /** @var sogo_module_settings */
     public $module_settings;
-
-    /**
-     * used to avoid duplicate queries on multi data updates in one session
-     * @var array 
-     */
-    static private $_queryHash = array();
 
     /**
      * define if we use the old way for domain tables.
@@ -195,21 +190,21 @@ class sogo_helper {
             }
             foreach ($_tmpSQL['users'] as $value) {
                 $_queryHash = md5($value); //* avoid multiple of the same query
-                if (in_array($_queryHash, self::$_queryHash))
+                if (in_array($_queryHash, self::$queryHash))
                     continue;
                 if (!$sqlres->query($value)) {
                     $app->log("sogo_plugin::sync_mail_users(): sync users failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1), LOGLEVEL_ERROR);
                 }
-                self::$_queryHash[] = $_queryHash;
+                self::$queryHash[] = $_queryHash;
             }
             foreach ($_tmpSQL['alias'] as $value) {
-                $_queryHash = md5($value); //* avoid multiple of the same query
-                if (in_array($_queryHash, self::$_queryHash))
+                $_queryHash = md5($value);
+                if (in_array($_queryHash, self::$queryHash))
                     continue;
                 if (!$sqlres->query($value)) {
                     $app->log("sogo_plugin::sync_mail_users(): sync users aliases failed for domain [{$domain_name}]." . PHP_EOL . "SQL: {$value}" . PHP_EOL . "SQL Error: " . $sqlres->error . PHP_EOL . "FILE:" . __FILE__ . ":" . (__LINE__ - 1), LOGLEVEL_ERROR);
                 }
-                self::$_queryHash[] = $_queryHash;
+                self::$queryHash[] = $_queryHash;
             }
 
             //* for SOGo on other server than mail server, make sure delete users gets removed

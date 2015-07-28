@@ -86,7 +86,7 @@ $liste["item"][] = array(
     'suffix' => "",
     'datasource' => array(
         'type' => 'SQL',
-        'querystring' => 'SELECT a.server_id, a.server_name FROM server a, mail_domain b WHERE (a.server_id = b.server_id) AND ({AUTHSQL-B}) ORDER BY a.server_name',
+        'querystring' => 'SELECT server_id, server_name FROM sogo_config ORDER BY server_name',
         'keyfield' => 'server_id',
         'valuefield' => 'server_name'
     ),

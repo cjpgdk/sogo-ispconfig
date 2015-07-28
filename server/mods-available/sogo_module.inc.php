@@ -38,8 +38,7 @@ class sogo_module {
     );
 
     function onInstall() {
-        global $conf;
-        return true;
+        return false;
     }
 
     /**
@@ -63,7 +62,6 @@ class sogo_module {
         $app->services->registerService('sogoForeceRestart', $this->module_name, 'foreceRestart');
 
         $app->services->registerService('sogoConfigRebuild', $this->module_name, 'rebuildConfig');
-        
     }
 
     /**
@@ -118,7 +116,7 @@ class sogo_module {
                         //* END: loop domain config
                         $tpl->setVar('domain', $value['domain']);
 
-                        if (!isset($conf['sogo_unique_id_method']) || (!function_exists($conf['sogo_unique_id_method']) && $conf['sogo_unique_id_method']!="plain"))
+                        if (!isset($conf['sogo_unique_id_method']) || (!function_exists($conf['sogo_unique_id_method']) && $conf['sogo_unique_id_method'] != "plain"))
                             $conf['sogo_unique_id_method'] = "md5";
                         $conf['sogo_unique_id_method'] = strtolower($conf['sogo_unique_id_method']);
                         if ($conf['sogo_unique_id_method'] == "plain")
@@ -134,13 +132,12 @@ class sogo_module {
                             $MailFieldNames[] = array('MailFieldName' => 'alias_' . $i);
                         }
                         $tpl->setLoop('MailFieldNames', $MailFieldNames); //* set alias names loop
-                        
                         //* @todo move this so the missing 'idn_mail' column is created when the domain is checked (sogo_helper::sogo_table_exists|create_sogo_table)
                         $sqlObj = & $app->sogo_helper->sqlConnect();
                         $has_idn_column_sql = "SELECT * FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME`='{$sqlObj->escape_string($app->sogo_helper->get_valid_sogo_table_name($value['domain']))}' AND `TABLE_SCHEMA`='{$conf['sogo_database_name']}' AND `COLUMN_NAME` = 'idn_mail'";
                         $tmp = $sqlObj->query($has_idn_column_sql);
                         $has_idn_column = (bool) (count($tmp->fetch_assoc()) > 0);
-                        $tpl->setVar('idn_mail', ($has_idn_column ? 1:0));
+                        $tpl->setVar('idn_mail', ($has_idn_column ? 1 : 0));
                         unset($tmp);
                         $sogodomsconf .= str_replace(array('{SERVERNAME}', '{domain}'), array((isset($dconf['server_name_real']) ? $dconf['server_name_real'] : $dconf['server_name']), $value['domain']), $tpl->grab());
                     }
@@ -246,9 +243,9 @@ class sogo_module {
                             $error_string .= "Fatal Error $error->code: ";
                             break;
                     }
-                    $error_string .= trim($error->message) . PHP_EOL;
-                    "\tLine: $error->line" . PHP_EOL;
-                    "\tColumn: $error->column" . PHP_EOL;
+                    $error_string .= trim($error->message) . PHP_EOL .
+                            "\tLine: $error->line" . PHP_EOL .
+                            "\tColumn: $error->column" . PHP_EOL;
                     $error_string .= str_repeat('-', $error->column) . PHP_EOL;
                 }
                 unset($xml);
@@ -264,7 +261,7 @@ class sogo_module {
         }
         libxml_clear_errors();
     }
-    
+
     function _save_sogo_config_to_system_default() {
         global $app, $conf;
         if (isset($conf['sogo_system_default_conf']) && file_exists($conf['sogo_system_default_conf'])) {
@@ -272,7 +269,7 @@ class sogo_module {
             $cmd = str_replace('{command}', $cmd_arg, $conf['sogo_su_command']);
             $app->log("sogo_module: CALL:{$cmd}", LOGLEVEL_DEBUG);
             exec($cmd);
-        }  else {
+        } else {
             $app->log("sogo_module: Config variable 'sogo_system_default_conf' not isset, not saving configuration to system default", LOGLEVEL_DEBUG);
         }
     }
