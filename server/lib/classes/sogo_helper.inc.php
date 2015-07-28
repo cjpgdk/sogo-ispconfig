@@ -49,7 +49,9 @@ class sogo_helper {
 
     public function __construct() {
         global $conf;
-        $this->sogo_tb_compatibility = false;
+        //* set to true to avoid conflicts with existing setups
+        $this->sogo_tb_compatibility = true;
+        //* if setting exists, then use that.
         if (isset($conf['sogo_tb_compatibility'])) {
             $this->sogo_tb_compatibility = (bool) $conf['sogo_tb_compatibility'];
         }
@@ -887,6 +889,7 @@ AND sc.`server_name` = s.`server_name";
             return '';
         if (preg_match('/^[0-9\.]+$/', $domain))
             return $domain; // may be an ip address - anyway does not need to bee encoded
+
 
 
 
