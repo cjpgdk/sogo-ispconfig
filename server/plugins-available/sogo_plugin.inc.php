@@ -101,7 +101,7 @@ class sogo_plugin {
      * @return void
      */
     public function action_mail_user_alias($action_name, $data) {
-        if (!$this->_action_get_data_array($data)) {
+        if (!$this->_action_get_data_array($data, 'action_mail_user_alias')) {
             return;
         }
         if ($data['event'] == "mail:mail_alias:on_after_insert") {
@@ -131,7 +131,7 @@ class sogo_plugin {
      */
     public function action_mail_domain($action_name, $data) {
         global $conf;
-        if (!$this->_action_get_data_array($data)) {
+        if (!$this->_action_get_data_array($data, 'action_mail_domain')) {
             return;
         }
         if ($data['event'] == "mail:mail_domain:on_after_insert") {
@@ -802,18 +802,18 @@ class sogo_plugin {
      * @param mixed $data
      * @return boolean
      */
-    private function _action_get_data_array(& $data) {
+    private function _action_get_data_array(& $data, $a) {
         global $app;
         if (!is_array($data)) {
             try {
                 $data = unserialize($data);
             } catch (Exception $ex) {
-                $app->log("action_mail_user_alias('', DATA_ARRAY): DATA_ARRAY is not a valid serialized string" . PHP_EOL . "Exception: " . $ex->getMessage() . PHP_EOL . "Trace: " . $ex->getTraceAsString(), LOGLEVEL_DEBUG);
+                $app->log("{$a}('', DATA_ARRAY): DATA_ARRAY is not a valid serialized string" . PHP_EOL . "Exception: " . $ex->getMessage() . PHP_EOL . "Trace: " . $ex->getTraceAsString(), LOGLEVEL_DEBUG);
                 return false;
             }
         }
         if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
-            $app->log("action_mail_user_alias('', DATA_ARRAY): DATA_ARRAY is not valid", LOGLEVEL_DEBUG);
+            $app->log("{$a}('', DATA_ARRAY): DATA_ARRAY is not valid: ". print_r($data, true), LOGLEVEL_DEBUG);
             return false;
         }
         return true;

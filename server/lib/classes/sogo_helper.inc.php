@@ -82,7 +82,6 @@ class sogo_helper {
         }
         if (!empty($emails)) {
             $domain_config = $this->get_domain_config($domain_name, true);
-            $app->log(print_r($domain_config, true), LOGLEVEL_DEBUG);
             if (!$domain_config || !is_array($domain_config)) {
                 $app->log("SOGo Sync Mail Users - Unable to fetch the domain config for domain [{$domain_name}]", LOGLEVEL_ERROR);
                 return false;
@@ -758,7 +757,9 @@ AND sc.`server_name` = s.`server_name";
      * @global array $conf
      * @return mysqli
      * 
-     * @todo create fail safe in case sql connect fails, currently it will kill the server.php script causing ispconfig cron to stop working
+     * @todo create fail safe in case sql connect fails, 
+     *       currently it will kill the server.php script 
+     *       causing ispconfig cron to stop working
      */
     public function & sqlConnect() {
         global $conf, $app;
@@ -767,7 +768,7 @@ AND sc.`server_name` = s.`server_name";
             $this->_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
             if (mysqli_connect_errno()) {
                 $app->log(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()), LOGLEVEL_ERROR);
-                return;
+                return new mysqli(); //* return empty object 
             }
         }
         //* check if the connetion is still good.!
@@ -778,7 +779,7 @@ AND sc.`server_name` = s.`server_name";
             $this->_sqlObject = new mysqli($conf['sogo_database_host'], $conf['sogo_database_user'], $conf['sogo_database_passwd'], $conf['sogo_database_name'], $conf['sogo_database_port']);
             if (mysqli_connect_errno()) {
                 $app->log(sprintf("SOGo DB, Connect failed: %s\n", mysqli_connect_error()), LOGLEVEL_ERROR);
-                return;
+                return new mysqli(); //* return empty object 
             }
         }
         return $this->_sqlObject;
@@ -796,9 +797,26 @@ AND sc.`server_name` = s.`server_name";
             return $app->dbmaster;
         } else if (property_exists($app, 'db')) {
             return $app->db;
-        } else
-            $app->log('sogo_helper::getDB() : No database connection object found', LOGLEVEL_WARN);
+        } else {
+            $log_msg = 'sogo_helper::getDB() : No database connection object found';
+            // $app->log($log_msg, LOGLEVEL_WARN); //* no db object even 'app->log' will fail
+            $this->_write_ispc_log($log_msg);
+        }
         return NULL;
+    }
+
+    private function _write_ispc_log($log_msg) {
+        global $conf;
+        if (file_exists($conf['log_file'])) {
+            if (!$fp = fopen($conf['log_file'], 'a')) {
+                echo 'Unable to open logfile.';
+            }
+            if (!fwrite($fp, $log_msg . "\r\n")) {
+                echo 'Unable to write to logfile.';
+            }
+            echo $log_msg . "\n";
+            fclose($fp);
+        }
     }
 
     /**
@@ -869,6 +887,9 @@ AND sc.`server_name` = s.`server_name";
             return '';
         if (preg_match('/^[0-9\.]+$/', $domain))
             return $domain; // may be an ip address - anyway does not need to bee encoded
+
+
+
 
 
 
