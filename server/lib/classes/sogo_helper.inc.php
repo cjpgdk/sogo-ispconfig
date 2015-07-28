@@ -518,6 +518,11 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         }
         return (bool) self::$dnCache['active' . $domain_name];
     }
+    
+    public function get_domain_config_exists($domain_name) {
+        $result = $this->getDB()->queryOneRecord('SELECT sc.`server_id`, sd.`domain_name` FROM `sogo_config` sc, `sogo_domains` sd WHERE sc.`server_id`=sd.`server_id` AND sd.`domain_name`=' . intval($domain_name));
+        return (boolean) ($result['domain_id'] == $domain_name) && (isset($result['server_id']) && $result['server_id'] > 0);
+    }
 
     /**
      * get domain config

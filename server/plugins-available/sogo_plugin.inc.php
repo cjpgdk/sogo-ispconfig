@@ -349,7 +349,7 @@ class sogo_plugin {
             } else if (!$app->sogo_helper->module_settings->all_domains && $app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow only domains with sogo domain config + same instance
                 $keep_table = false;
-                if ($app->sogo_helper->get_domain_config($domain_name) !== false)
+                if ($app->sogo_helper->get_domain_config_exists($domain_name) !== false)
                     $keep_table = true;
             } else if ($app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow all domains but only for this server
@@ -359,7 +359,7 @@ class sogo_plugin {
             } else if (!$app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow only domains with sogo domain config and located on this server
                 $keep_table = false;
-                if ($app->sogo_helper->get_domain_config($event_name) !== false && ($data['old']['domain']['server_id'] == $conf['server_id']))
+                if ($app->sogo_helper->get_domain_config_exists($domain_name) !== false && ($data['old']['domain']['server_id'] == $conf['server_id']))
                     $keep_table = true;
             }
 
@@ -813,7 +813,7 @@ class sogo_plugin {
             }
         }
         if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
-            $app->log("{$a}('', DATA_ARRAY): DATA_ARRAY is not valid: ". print_r($data, true), LOGLEVEL_DEBUG);
+            $app->log("{$a}('', DATA_ARRAY): DATA_ARRAY is not valid: " . print_r($data, true), LOGLEVEL_DEBUG);
             return false;
         }
         return true;
