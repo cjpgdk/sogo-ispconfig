@@ -21,333 +21,230 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
  * 
- * @todo Add ask for sogo system user and group name
  */
 class Installer {
 
+    //* folder containing os specific install instructions
+    const os_insterlers_folder = "operating_systems";
+    //* file containing Mysql tables
+    const mysql_tables = "tables.sql";
+
     /**
-     * list of files to copy
-     * @var array 
+     * list of supported operating systems<br>
+     * @var array key=OS Name, Value=
      */
-    static public $files_copy = array();
-    static private $mysql_tables_ispc = "_ins/tables.sql";
+    public $os_supported = array();
 
-    /** @var string location of ISPConfig home dir */
-    static public $ispc_home_dir = "";
+    /**
+     * name of the user selected os to install
+     * @var string 
+     */
+    public $os = null;
 
-    /** @var boolean have ISPConfig interface folder */
-    static private $has_ispconfig_interface_folder = FALSE;
+    /**
+     * name of the user selected os release to install
+     * @var string 
+     */
+    public $os_release = null;
+    private $osObject = null;
+    private $_folder = "";
+    public static $copy_files = "";
 
-    /** @var boolean have ISPConfig server folder */
-    static private $has_ispconfig_server_folder = FALSE;
+    public function __construct() {
+        $this->_folder = __DIR__ . '/';
+        $this->os_supported = array();
 
-    /** @var string location of SOGo init script */
-    static private $sogo_init_script = "";
+        //* get supported operating systems
+        if (is_dir($this->_folder . Installer::os_insterlers_folder)) {
+            $oss = scandir($this->_folder . Installer::os_insterlers_folder);
+            foreach ($oss as $value) {
+                if ($value == '.' || $value == '..')
+                    continue;
+                $tmp = str_replace('.php', '', $value);
+                $this->os_supported[strtolower($tmp)] = $this->_folder . Installer::os_insterlers_folder . '/' . $value;
+            }
+        } else
+            Installer::exitError("Unable to locate folder: " . Installer::os_insterlers_folder . PHP_EOL . "Plase run the installer from: " . realpath(__DIR__ . '/../'));
 
-    /** @var string location of "sogo-tool" binary */
-    static private $sogo_tool_binary = "";
-
-    /** @var string location of SOGo home dir */
-    static private $sogo_home_dir = "";
-
-    /** @var array collection of errors doing this run */
-    static public $errors = array();
-
-    /** @var array last error */
-    static public $error = "";
-
-    /** @var boolean a var used as indicator if SOGo is located */
-    static public $have_signs_of_sogo = FALSE;
-
-    /** @var boolean a var used to check if errors for individual steps */
-    static private $isError = FALSE;
-
-    /** @var boolean a var used to detirming if server module and plugin shall be enabled */
-    static public $config_server = FALSE;
-    static public $type = "all";
-
-    public function __construct($type = "all") {
-        self::$type = strtolower($type); //* no significant use at this point but must be (slave|all|mysqltables)
-        //* if sql tables only no need for the rest
-        if (self::$type == 'mysqltables') {
-            self::$isError = FALSE;
-            return TRUE;
+        require 'copy_files.php';
+        if (isset($files_copy) && is_array($files_copy) && isset($files_copy['interface']) && isset($files_copy['server'])) {
+            self::$copy_files = $files_copy;
         }
-        //* get sogo home dir
-        self::$ispc_home_dir = Installer::getISPConfigHomeDir();
-        if (!empty(self::$ispc_home_dir) && is_dir(self::$ispc_home_dir)) {
-            if (is_dir(self::$ispc_home_dir . '/interface')) {
-                self::$has_ispconfig_interface_folder = TRUE;
-            } else {
-                self::$error = "[FAIL]: Unable to locate ISPConfig interface folder in [" . self::$ispc_home_dir . "/interface]";
-                self::$errors['step1'][] = self::$error;
-                echo self::$error . PHP_EOL;
-                self::$has_ispconfig_interface_folder = FALSE;
-            }
-            if (is_dir(self::$ispc_home_dir . '/server')) {
-                self::$has_ispconfig_server_folder = TRUE;
-            } else {
-                self::$error = "[FAIL]: Unable to locate ISPConfig server folder in [" . self::$ispc_home_dir . "/server]";
-                self::$errors['step1'][] = self::$error;
-                echo self::$error . PHP_EOL;
-                self::$has_ispconfig_server_folder = FALSE;
-            }
-            if (!self::$has_ispconfig_server_folder || !self::$has_ispconfig_interface_folder) {
-                echo "Continue (Y/N) [N]: ";
-                if (strtolower(self::readInput("n")) == "n") {
-                    echo PHP_EOL;
-                    echo "okay goodbye" . PHP_EOL;
-                    exit();
-                }
-            }
-        } else {
-            die("Folder [" . self::$ispc_home_dir . "] is not valid ISPConfig installation." . PHP_EOL);
-        }
-        $insSoGo = TRUE;
-        if (Installer::isSOGoOnServer()) {
-            echo PHP_EOL . "I Found SOGo on your server is this true? (Y/N) [Y]: ";
-            if (strtolower(self::readInput("y")) == "y")
-                $insSoGo = FALSE;
-        }
-        if ($insSoGo) {
-            echo PHP_EOL . "Do you whant me to install SOGo? (Y/N) [Y]: ";
-            if (strtolower(self::readInput("y")) == "y") {
-                $SOGo = new SOGo();
-                $SOGo->run();
-            }
-        }
-        unset($insSoGo, $SOGo);
 
-        self::$isError = FALSE;
+        //* get user selected os
+        if ($this->_get_user_select_os()) {
+            echo $this->os . PHP_EOL;
+            echo print_r($this->os_supported, true) . PHP_EOL;
+            require_once $this->os_supported[$this->os];
+            $this->osObject = new $osInstallerName();
 
-        echo "Do you intend to run SOGo from this server? (Y/N) [Y]: ";
-        if (strtolower(self::readInput("y")) == "y") {
-            //* get init script for sogo
-            self::$sogo_init_script = Installer::getSOGoInitScript();
-            //* locate sogo-tool binary
-            self::$sogo_tool_binary = Installer::getSOGoToolBinary();
-            //* get sogo home dir
-            self::$sogo_home_dir = Installer::getSOGoHomeDir();
-            self::$_server_config_local = str_replace('{SOGOTOOLBIN}', self::$sogo_tool_binary, self::$_server_config_local);
-            self::$_server_config_local = str_replace('{SOGOHOMEDIR}', self::$sogo_home_dir, self::$_server_config_local);
-            //* SOGo init script ?
-            if (empty(self::$sogo_init_script)) {
-                self::$error = "[FAIL]: Unable to locate SOGo init script";
-                self::$errors['step1'][] = self::$error;
-                self::$isError = TRUE;
-                self::$have_signs_of_sogo = FALSE;
-            } else if (file_exists(self::$sogo_init_script)) {
-                self::$have_signs_of_sogo = TRUE;
-            }
-            //* sogo-tool binary?
-            if (empty(self::$sogo_tool_binary)) {
-                self::$error = "[FAIL]: Unable to locate sogo-tool";
-                self::$errors['step1'][] = self::$error;
-                self::$have_signs_of_sogo &= FALSE;
-            } else if (file_exists(self::$sogo_tool_binary)) {
-                self::$have_signs_of_sogo &= TRUE;
-            }
-            //* SOGo home dir ?s
-            if (empty(self::$sogo_home_dir)) {
-                self::$error = "[FAIL]: Unable to locate sogo home dir";
-                self::$errors['step1'][] = self::$error;
-                self::$isError = TRUE;
-                self::$have_signs_of_sogo &= FALSE;
-            } else if (file_exists(self::$sogo_home_dir) && is_dir(self::$sogo_home_dir)) {
-                self::$have_signs_of_sogo &= TRUE;
-            }
-        }
+            echo str_repeat('=', 50) . PHP_EOL;
+            echo "= Installing SOGO-ISPConfig : " . $this->osObject->getOSName() . PHP_EOL;
+            echo str_repeat('=', 50) . PHP_EOL . PHP_EOL;
+
+            //* get user selected os release
+            if ($this->_get_user_select_osrelease()) {
+                //* init requirements
+                if ($this->osObject->initVars($this->os_release)) {
+                    //* install
+                    $this->osObject->installAddon($this->os_release);
+                    //* install vhost?
+                    $this->osObject->installVhost();
+                    //* end of install message
+                    $this->osObject->endOfInstall();
+                } else
+                    Installer::exitError("Installer exit?, doing Initialization");
+            } else
+                Installer::exitError("Installer exit?, doing OS Release Select");
+        } else
+            Installer::exitError("Installer exit?, doing OS Select");
     }
 
-    public function run() {
-        //* any errors!?
-        if (self::$isError) {
+    public function printReadInput($msg, $default_value, $to_lower = false) {
+        echo $msg;
+        $read_val = Installer::readInput($default_value);
+        if ($to_lower)
+            return strtolower($read_val);
+        return $read_val;
+    }
+
+    public static function installMySQLTables($base_dir) {
+        $_error = false;
+        $errors = array();
+        if (file_exists($base_dir . "/" . Installer::mysql_tables)) {
+            echo PHP_EOL . "Installing MySQL tables" . PHP_EOL;
+            //* add mysql tables
+            echo PHP_EOL . "MySQL Host? [127.0.0.1]: ";
+            $mysql_host = self::readInput("127.0.0.1");
+            echo PHP_EOL . "MySQL admin user? [root]: ";
+            $mysql_admin = self::readInput("root");
+            echo PHP_EOL . "MySQL password? []: ";
+            $mysql_password = str_replace('"', '\"', self::readInput(""));
+            echo PHP_EOL . "ISPConfig database? [dbispconfig]: ";
+            $mysql_database = self::readInput("dbispconfig");
             echo PHP_EOL;
-            echo "One or more errors were found during initialization" . PHP_EOL;
-            self::dumbErrors('step1');
+            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\" {$mysql_database} < " . $base_dir . "/" . Installer::mysql_tables;
+            echo exec($command) . PHP_EOL;
+        } else {
+            $errors[] = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" .
+                    PHP_EOL . "File: " . $base_dir . "/" . Installer::mysql_tables .
+                    PHP_EOL . "Redownload the tables and import them manualy before using";
+            $_error = TRUE;
+        }
+        if ($_error) {
+            echo "One or more errors were found importing mysql tables" . PHP_EOL;
+            echo str_repeat('=', 50) . PHP_EOL;
+            echo implode(PHP_EOL, $errors) . PHP_EOL;
+            echo str_repeat('=', 50) . PHP_EOL;
             echo "Continue (Y/N) [N]: ";
             if (strtolower(self::readInput("n")) == "n") {
                 echo PHP_EOL;
-                echo "okay goodbye" . PHP_EOL;
-                exit();
+                die("okay goodbye" . PHP_EOL);
             }
-            echo PHP_EOL;
-            self::$isError = FALSE; //* reset
-        }
-        if (self::$type == "all" || self::$type == "slave") {
-            $this->installInterface();
-            $this->installServer();
-            echo PHP_EOL . "Setup basic Apache vhost (Y/N) [Y]: ";
-            if (strtolower(self::readInput("y")) == "y")
-                ApacheVhost::Run();
-            else {
-                echo PHP_EOL . "Setup basic Nginx vhost (Y/N) [Y]: ";
-                if (strtolower(self::readInput("y")) == "y")
-                    NginxVhost::Run();
-            }
-        } elseif (self::$type == 'mysqltables') {
-            $this->installTablesMySQL();
         }
     }
 
     /**
-     * copy files for server
+     * get sogo home dir location
+     * @return string
      */
-    public function installServer() {
-        if (self::$has_ispconfig_server_folder) {
-            echo "Installing server files" . PHP_EOL;
-            self::copyFiles('server');
-
-            echo "Enable SOGo Module and Plugin?" . PHP_EOL;
-            echo "\t - Only do this if SOGo is install on this server" . PHP_EOL;
-            echo "? (Y/N) [Y]: ";
-            self::$config_server = (strtolower(self::readInput("y")) == 'y' ? TRUE : FALSE);
-            if (self::$config_server) {
-                if (!is_link(self::$ispc_home_dir . '/server/plugins-enabled/sogo_plugin.inc.php')) {
-                    if (!symlink(self::$ispc_home_dir . '/server/plugins-available/sogo_plugin.inc.php', self::$ispc_home_dir . '/server/plugins-enabled/sogo_plugin.inc.php')) {
-                        echo str_repeat('=', 8) . PHP_EOL;
-                        echo "Unable to enable sogo_plugin" . PHP_EOL;
-                        echo "Try!" . PHP_EOL;
-                        echo "ln -s " . self::$ispc_home_dir . "/server/plugins-available/sogo_plugin.inc.php " . self::$ispc_home_dir . "server/plugins-enabled/sogo_plugin.inc.php" . PHP_EOL;
-                        echo str_repeat('=', 8) . PHP_EOL;
-                    }
-                }
-                if (!is_link(self::$ispc_home_dir . '/server/mods-enabled/sogo_module.inc.php')) {
-                    if (!symlink(self::$ispc_home_dir . '/server/mods-available/sogo_module.inc.php', self::$ispc_home_dir . '/server/mods-enabled/sogo_module.inc.php')) {
-                        echo str_repeat('=', 8) . PHP_EOL;
-                        echo "Unable to enable sogo_module" . PHP_EOL;
-                        echo "Try!" . PHP_EOL;
-                        echo "ln -s " . self::$ispc_home_dir . "/server/mods-available/sogo_module.inc.php " . self::$ispc_home_dir . "/server/mods-enabled/sogo_module.inc.php" . PHP_EOL;
-                        echo str_repeat('=', 8) . PHP_EOL;
-                    }
-                }
-                //* create sogo local config in server
-                @file_put_contents(self::$ispc_home_dir . '/server/lib/config.inc.local.sogo-sample.php', self::$_server_config_local);
-            }
-        } else {
-            echo "Not installing server files, server folder not found" . PHP_EOL;
-        }
+    public static function getSOGoHomeDir() {
+        $sogo_home_dir = exec("getent passwd sogo | cut -d: -f6");
+        echo "location of SOGo home dir [{$sogo_home_dir}]: ";
+        $sogo_home_dir = Installer::readInput($sogo_home_dir);
+        return $sogo_home_dir;
     }
 
-    public static function copyFiles($index) {
-        if (isset(self::$files_copy[$index])) {
-            if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/')) {
-                @mkdir(self::$ispc_home_dir . '/' . $index . '/web/mail/lib/menu.d/');
-            }
-            if ($index == "interface" && !is_dir(self::$ispc_home_dir . '/' . $index . '/web/admin/lib/menu.d/')) {
-                @mkdir(self::$ispc_home_dir . '/' . $index . '/web/admin/lib/menu.d/');
-            }
-            foreach (self::$files_copy[$index] as $file) {
+    /**
+     * get sogo-tool location
+     * @return string
+     */
+    public static function getSOGoToolBinary() {
+        $sogo_tool_binary = exec("which sogo-tool");
+        echo "location of sogo-tool [{$sogo_tool_binary}]: ";
+        $sogo_tool_binary = Installer::readInput($sogo_tool_binary);
+        return $sogo_tool_binary;
+    }
+
+    /**
+     * get init script location for SOGo
+     * @return string
+     */
+    public static function getSOGoInitScript() {
+        $sogo_init_script = "";
+        if (file_exists("/etc/init.d/sogo"))
+            $sogo_init_script = "/etc/init.d/sogo";
+        else if (file_exists("/etc/init.d/sogod"))
+            $sogo_init_script = "/etc/init.d/sogod";
+        echo "location of SOGo init script [{$sogo_init_script}]: ";
+        $sogo_init_script = Installer::readInput($sogo_init_script);
+        return $sogo_init_script;
+    }
+
+    /**
+     * copy files from $index to $base_dir
+     * @param string $index
+     * @param string $base_dir
+     */
+    public static function copyFiles($index, $base_dir) {
+        $_error = false;
+        $errors = array();
+        if (isset(self::$copy_files[$index])) {
+            if ($index == "interface" && !is_dir($base_dir . '/' . $index . '/web/mail/lib/menu.d/'))
+                @mkdir($base_dir . '/' . $index . '/web/mail/lib/menu.d/');
+            if ($index == "interface" && !is_dir($base_dir . '/' . $index . '/web/admin/lib/menu.d/'))
+                @mkdir($base_dir . '/' . $index . '/web/admin/lib/menu.d/');
+
+            foreach (self::$copy_files[$index] as $file) {
                 if (file_exists($index . '/' . $file)) {
-                    if (!copy($index . '/' . $file, self::$ispc_home_dir . '/' . $index . '/' . $file)) {
-                        self::$error = "Faild to copy file [{$index}/{$file}] to " . self::$ispc_home_dir . "/{$index}/{$file}";
-                        self::$errors['file_copy_' . $index][] = self::$error;
-                        self::$isError = TRUE;
+                    if (!copy($index . '/' . $file, $base_dir . '/' . $index . '/' . $file)) {
+                        $errors[] = "Faild to copy file [{$index}/{$file}] to " . $base_dir . "/{$index}/{$file}";
+                        $_error = TRUE;
                     }
                 } else {
-                    self::$error = "File [{$index}/{$file}] not found in plugin folder";
-                    self::$errors['file_copy_' . $index][] = self::$error;
-                    self::$isError = TRUE;
+                    $errors[] = "File [{$index}/{$file}] not found in plugin folder";
+                    $_error = TRUE;
                 }
             }
         } else {
             echo "Files index [{$index}] doesn't exists" . PHP_EOL;
         }
-        //* errors?
-        if (self::$isError) {
+        if ($_error) {
             echo "One or more errors were found during file copy" . PHP_EOL;
-            self::dumbErrors('file_copy_' . $index);
+            echo str_repeat('=', 50) . PHP_EOL;
+            echo implode(PHP_EOL, $errors) . PHP_EOL;
+            echo str_repeat('=', 50) . PHP_EOL;
             echo "Continue (Y/N) [N]: ";
-            if (strtolower(self::readInput("n")) == "n") {
+            if (strtolower(Installer::readInput("n")) == "n") {
                 echo PHP_EOL;
                 die("okay goodbye" . PHP_EOL);
             }
-            self::$isError = FALSE;
-        }
-    }
-
-    public function dumbErrors($step) {
-        if (isset(self::$errors[$step])) {
-            echo str_repeat('=', 8) . PHP_EOL;
-            echo implode(PHP_EOL, self::$errors[$step]) . PHP_EOL;
-            echo str_repeat('=', 8) . PHP_EOL;
         }
     }
 
     /**
-     * copy files for interface
+     * install files for ISPConfig server
+     * @param string $base_dir
      */
-    public function installInterface() {
-        if (self::$has_ispconfig_interface_folder) {
-            echo "Installing interface files" . PHP_EOL;
-            self::copyFiles('interface');
+    public static function installServer($base_dir) {
+        if (is_dir($base_dir . '/') && is_dir($base_dir . '/server/')) {
+            echo PHP_EOL . "Installing server files" . PHP_EOL;
+            Installer::copyFiles('server', $base_dir);
         } else {
-            echo "Not installing interface files, interface folder not found" . PHP_EOL;
+            echo "Not installing server files, server folder not found" . PHP_EOL;
         }
-        $this->installTablesMySQL();
     }
 
-    public function installTablesMySQL() {
-        if (file_exists(self::$mysql_tables_ispc)) {
-            //* add mysql tables
-            echo "MySQL Host? [127.0.0.1]: ";
-            $mysql_host = self::readInput("127.0.0.1");
-            echo PHP_EOL;
-            echo "MySQL admin user? [root]: ";
-            $mysql_admin = self::readInput("root");
-            echo PHP_EOL;
-            echo "MySQL password? []: ";
-            $mysql_password = str_replace('"', '\"', self::readInput(""));
-            echo PHP_EOL;
-            echo "ISPConfig database? [dbispconfig]: ";
-            $mysql_database = self::readInput("dbispconfig");
-            echo PHP_EOL;
-            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\" {$mysql_database} < " . self::$mysql_tables_ispc;
-            echo exec($command) . PHP_EOL;
-
-
-            echo PHP_EOL . "Add SOGo database? (Y/N) [Y]:";
-            if (strtolower(self::readInput("y")) == "y") {
-                echo PHP_EOL . "SOGo database? [dbsogo]: ";
-                $sogo_database = self::readInput("dbsogo");
-
-                echo PHP_EOL . "SOGo database user? [sogo]: ";
-                $sogo_user = self::readInput("sogo");
-
-                $passwd = sha1(md5('Jeg er en Nisse og mit navn er Udvikler?-' . microtime(true)));
-                echo PHP_EOL . "SOGo database user password? [{$passwd}]: ";
-                $sogo_passwd = self::readInput($passwd);
-
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"CREATE USER '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}';\"";
-                echo exec($command) . PHP_EOL;
-
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"GRANT USAGE ON * . * TO '{$sogo_user}'@'localhost' IDENTIFIED BY '{$sogo_passwd}' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;\"";
-                echo exec($command) . PHP_EOL;
-
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"CREATE DATABASE IF NOT EXISTS {$sogo_database} ;\"";
-                echo exec($command) . PHP_EOL;
-
-                $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\"  -e \"GRANT ALL PRIVILEGES ON {$sogo_database}. * TO '{$sogo_user}'@'localhost';\"";
-                echo exec($command) . PHP_EOL;
-
-                self::$_server_config_local = str_replace('{SOGODB}', $sogo_database, self::$_server_config_local);
-                self::$_server_config_local = str_replace('{SOGODBUSER}', $sogo_user, self::$_server_config_local);
-                self::$_server_config_local = str_replace('{SOGODBPW}', $sogo_passwd, self::$_server_config_local);
-            }
+    /**
+     * install files for ISPConfig interface
+     * @param string $base_dir
+     */
+    public static function installInterface($base_dir) {
+        if (is_dir($base_dir . '/') && is_dir($base_dir . '/interface/')) {
+            echo PHP_EOL . "Installing interface files" . PHP_EOL;
+            Installer::copyFiles('interface', $base_dir);
         } else {
-            self::$error = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" . PHP_EOL . "Redownload the tables and import them manualy before using";
-            self::$errors['mysql'][] = self::$error;
-            self::$isError = TRUE;
-        }
-        if (self::$isError) {
-            echo "One or more errors were found importing mysql tables" . PHP_EOL;
-            self::dumbErrors('mysql');
-            echo "Continue (Y/N) [N]: ";
-            if (strtolower(self::readInput("n")) == "n") {
-                echo PHP_EOL;
-                die("okay goodbye" . PHP_EOL);
-            }
-            self::$isError = FALSE;
+            echo PHP_EOL . "Not installing interface files, interface folder not found" . PHP_EOL;
         }
     }
 
@@ -365,51 +262,11 @@ class Installer {
     }
 
     /**
-     * locate ISP Config home dir
-     * @return string
+     * print a message and exit the installer.
+     * @param string $msg
      */
-    public static function getISPConfigHomeDir() {
-        echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
-        $ispcdir = self::readInput("/usr/local/ispconfig");
-        return $ispcdir;
-    }
-
-    /**
-     * get sogo home dir location
-     * @return string
-     */
-    public static function getSOGoHomeDir() {
-        $sogo_home_dir = exec("getent passwd sogo | cut -d: -f6");
-        echo "location of SOGo home dir [{$sogo_home_dir}]: ";
-        $sogo_home_dir = self::readInput($sogo_home_dir);
-        return $sogo_home_dir;
-    }
-
-    /**
-     * get sogo-tool location
-     * @return string
-     */
-    public static function getSOGoToolBinary() {
-        $sogo_tool_binary = exec("which sogo-tool");
-        echo "location of sogo-tool [{$sogo_tool_binary}]: ";
-        $sogo_tool_binary = self::readInput($sogo_tool_binary);
-        return $sogo_tool_binary;
-    }
-
-    /**
-     * get init script location for SOGo
-     * @return string
-     */
-    public static function getSOGoInitScript() {
-        if (file_exists("/etc/init.d/sogo"))
-            $sogo_init_script = "/etc/init.d/sogo";
-        else if (file_exists("/etc/init.d/sogod"))
-            $sogo_init_script = "/etc/init.d/sogod";
-        else
-            $sogo_init_script = "";
-        echo "location of SOGo init script [{$sogo_init_script}]: ";
-        $sogo_init_script = self::readInput($sogo_init_script);
-        return $sogo_init_script;
+    public static function exitError($msg) {
+        die(PHP_EOL . $msg . PHP_EOL);
     }
 
     /**
@@ -423,84 +280,57 @@ class Installer {
         return (!empty($line) && trim($line) != "" ? trim($line) : $default);
     }
 
-    private static $_server_config_local = <<< EOF
-<?php
+    private function _get_user_select_osrelease() {
+        $retval = false;
+        $_echo_os = "";
+        $_os_first = "";
+        $_os_release = $this->osObject->getOSReleases();
+        foreach ($_os_release as $key => $value) {
+            $_echo_os .= $key . '|';
+            if (empty($_os_first))
+                $_os_first = $key;
+        }
+        $msg = "Select the name of your system: " . PHP_EOL . trim($_echo_os, '|') . " [{$_os_first}]: ";
+        $this->os_release = $this->printReadInput($msg, $_os_first, true);
+        unset($_echo_os, $_os_first);
+        if ($this->os_release != null && isset($_os_release[$this->os_release])) {
+            $retval = true;
+        } else {
+            echo PHP_EOL . "The selected release is not valid for this script.!" . PHP_EOL . PHP_EOL;
+            $retval = $this->_get_user_select_osrelease();
+        }
+        return $retval;
+    }
 
-/*
-method to use when generating the unique id for the domain
-"" sogo domain config key "id"
+    private function _get_user_select_os() {
+        $_echo_os = "";
+        $_os_first = "";
+        $retval = false;
+        foreach ($this->os_supported as $key => $value) {
+            $_echo_os .= $key . '|';
+            if (empty($_os_first))
+                $_os_first = $key;
+        }
+        $msg = "if your operating system is not listed here" . PHP_EOL;
+        $msg .= "you can still install this addon by selecting" . PHP_EOL;
+        $msg .= "noinstall, this will install all the files related" . PHP_EOL;
+        $msg .= "to this addon but you will have to install SOGo manually" . PHP_EOL . PHP_EOL;
+        $msg .= "Select the name of your system: " . PHP_EOL . trim($_echo_os, '|') . " [{$_os_first}]: ";
+        $this->os = $this->printReadInput($msg, $_os_first, true);
+        unset($_echo_os, $_os_first);
 
-Supported PHP default medthods are
-     - md5, sha1, crypt, crc32
-propperply more but these are widely used.
-
-if you like to use the domain name as is
-without encoding use "plain"
-
-rule of thumb the encoding method must take one argument
-and be available as procedural code and return the result
-
-md5("domain-name.com");
-sha1("domain-name.com");
-crypt("domain-name.com");
-
-if not isset md5 is used
-
- **** side note the resulting string is used with sogo-integrator to identify the domain 
- */ 
-\$conf['sogo_unique_id_method'] = 'md5';
-
-//* SOGo system user name
-\$conf['sogo_system_user'] = 'sogo';
-//* SOGo system group name
-\$conf['sogo_system_group'] = 'sogo';
-/*
- SOGo sudo command to use when executing a SOGo binary
- eg. 
- su -p -c '{command}' sogo
- sudo -u sogo {command}
- **** if you must quote the command ONLY USE ' (Single quote) NOT " (Double quote)
-*/
-\$conf['sogo_su_command'] = 'sudo -u ' . \$conf['sogo_system_user'] . ' {command}';
-//* full path to sogo-tool binary 
-\$conf['sogo_tool_binary'] = '{SOGOTOOLBIN}';
-//* name of the database used for SOGo
-\$conf['sogo_database_name'] = '{SOGODB}';
-//* name of the database user used for SOGo db
-\$conf['sogo_database_user'] = '{SOGODBUSER}';
-//* name of the database user password used for SOGo db
-\$conf['sogo_database_passwd'] = '{SOGODBPW}';
-//* database host where SOGo db is hosted
-\$conf['sogo_database_host'] = '127.0.0.1';
-//* database port number
-\$conf['sogo_database_port'] = '3306';
-//* vars added to the domain template
-\$conf['sogo_domain_extra_vars'] = array(
-    /*
-      password algorithm default is CRYPT
-      Possible algorithms are: plain, MD5, CRYPT-MD5, SHA, SSHA (including 256/512 variants)
-     */
-    'userPasswordAlgorithm' => 'CRYPT',
-    /*
-      The default behaviour is to store newly set
-      passwords with out the scheme (default: NO). 
-      This can be overridden by setting to YES
-      and will result in passwords stored as {scheme}encryptedPass
-     */
-    'prependPasswordScheme' => 'NO',
-    //* human identification name of the address book
-    'displayName' => 'Users in {domain}',
-);
-//* sogo default configuration file(s)
-\$conf['sogo_gnu_step_defaults'] = '{SOGOHOMEDIR}/GNUstep/Defaults/.GNUstepDefaults';
-\$conf['sogo_gnu_step_defaults_sogod.plist'] = '{SOGOHOMEDIR}/GNUstep/Defaults/sogod.plist';
-\$conf['sogo_system_default_conf'] = '/etc/sogo/sogo.conf';
-
-//* template to use for table names in sogo db
-\$conf['sogo_domain_table_tpl'] = "{domain}_users";
-
-//* define if we use the old way for domain tables.
-\$conf['sogo_tb_compatibility'] = false;
-EOF;
+        if ($this->os != null && isset($this->os_supported[$this->os])) {
+            if (file_exists($this->os_supported[$this->os]))
+                $retval = true;
+            else {
+                Installer::exitError("Unable to locate the installer for the selected os: {$this->os}" . PHP_EOL
+                        . $this->os_supported[$this->os]);
+            }
+        } else {
+            echo PHP_EOL . "The selected operating system is not valid for this script.!" . PHP_EOL . PHP_EOL;
+            $retval = $this->_get_user_select_os();
+        }
+        return $retval;
+    }
 
 }

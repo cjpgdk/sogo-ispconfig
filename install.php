@@ -8,42 +8,62 @@
   php install.php
  */
 
-require '_ins/copy_files.php';
-require '_ins/SOGo.php';
-require '_ins/ApacheVhost.php';
-require '_ins/NginxVhost.php';
 require '_ins/Installer.php';
-Installer::$files_copy = $files_copy;
 
-$failed = FALSE;
-$srv_enable = TRUE;
+echo <<< EOF
+ ____   ___   ____            ___ ____  ____   ____             __ _
+/ ___| / _ \ / ___| ___      |_ _/ ___||  _ \ / ___|___  _ __  / _(_) __ _
+\___ \| | | | |  _ / _ \ _____| |\___ \| |_) | |   / _ \| '_ \| |_| |/ _` |
+ ___) | |_| | |_| | (_) |_____| | ___) |  __/| |__| (_) | | | |  _| | (_| |
+|____/ \___/ \____|\___/     |___|____/|_|    \____\___/|_| |_|_| |_|\__, |
+                                                                     |___/
 
-$Installer = new Installer();
-$Installer->run();
+Installer.
+you can exit the installer at any time just hit: [CTRL + C]
 
-if (count(Installer::$errors) > 0) {
-    echo "A list of all errors during the install" . PHP_EOL;
-    foreach (Installer::$errors as $key => $value) {
-        echo "{$key}" . PHP_EOL;
-        if (is_array($value)) {
-            foreach ($value as $i => $s) {
-                echo "\t* {$s}" . PHP_EOL;
-            }
-        } else {
-            echo "\t* {$value}" . PHP_EOL;
-        }
-    }
-}
+Select the installation type:
+all ..........: run the full install process.
+MySQL ........: install only mysql tables. 
+Interface ....: install only interface files
+Server .......: install only server files
+NginxVhost ...: install only Nginx vhost
+ApacheVhost ..: install only Apache vhost
+
+Install: 
+EOF;
+$_install = Installer::readInput('all');
 echo PHP_EOL;
+switch (strtolower($_install)) {
+    case 'all':
+        new Installer();
+        break;
+    case 'mysql':
+        Installer::installMySQLTables(realpath(__DIR__ . "/_ins/"));
+        break;
+    case 'interface':
+        echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
+        $ispcdir = Installer::readInput("/usr/local/ispconfig");
+        require '_ins/copy_files.php';
+        Installer::$copy_files = $files_copy;
+        Installer::installInterface($ispcdir);
+        break;
+    case 'server':
+        echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
+        $ispcdir = Installer::readInput("/usr/local/ispconfig");
+        require '_ins/copy_files.php';
+        Installer::$copy_files = $files_copy;
+        Installer::installServer($ispcdir);
+        break;
+    case 'nginxvhost':
+        require '_ins/NginxVhost.php';
+        NginxVhost::Run();
+        break;
+    case 'apachevhost':
+        require '_ins/ApacheVhost.php';
+        ApacheVhost::Run();
+        break;
+    default:
+        echo PHP_EOL . "Invalid selection" . PHP_EOL;
+        break;
+}
 
-echo "All done assuming no errors and all went well" . PHP_EOL;
-echo "you will need to add SOGo config values to interface config file:" . PHP_EOL;
-echo Installer::$ispc_home_dir."/interface/lib/config.inc.local.php" . PHP_EOL;
-echo "A sample file can be found here.!" . PHP_EOL;
-echo Installer::$ispc_home_dir."/interface/lib/config.inc.local.sogo-sample.php" . PHP_EOL . PHP_EOL;
-echo "and you also need to add SOGo config values to server config file:" . PHP_EOL;
-echo Installer::$ispc_home_dir."/server/lib/config.inc.local.php" . PHP_EOL;
-echo "A sample file can be found here.!" . PHP_EOL;
-echo Installer::$ispc_home_dir."/server/lib/config.inc.local.sogo-sample.php" . PHP_EOL . PHP_EOL;
-
-echo "AND DON'T forget to create a database SOGo can use for storage" . PHP_EOL;
