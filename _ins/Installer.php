@@ -73,8 +73,6 @@ class Installer {
 
         //* get user selected os
         if ($this->_get_user_select_os()) {
-            echo $this->os . PHP_EOL;
-            echo print_r($this->os_supported, true) . PHP_EOL;
             require_once $this->os_supported[$this->os];
             $this->osObject = new $osInstallerName();
 
