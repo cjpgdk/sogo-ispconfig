@@ -252,4 +252,9 @@ $old_files = array(
         'file'=>'interface/web/mail/templates/sogo_domains_reseller_edit.htm',
         'action' => 'delete',
     ),
+    array(
+        'type'=>'file',
+        'file'=>'interface/web/admin/lib/lang/en_sogo_module_bulk_update_config.lng',
+        'action' => 'delete',
+    ),
 );

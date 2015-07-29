@@ -21,8 +21,8 @@
  *  @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  */
 
-$form["title"] = "SOGo Domains";
-$form["description"] = "";
+$form["title"] = "Set SOGo configuration";
+$form["description"] = "update SOGo configuration on the selected domains";
 $form["name"] = "sogo_domains";
 $form["action"] = "sogo_module_bulk_update_config.php";
 $form["db_table"] = "sogo_domains";
