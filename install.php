@@ -6,7 +6,26 @@
   tar -xvf sogo-ispconfig.tar.gz
   cd sogo-ispconfig-master
   php install.php
+ * 
+  or use arguments like this
+  php install.php [-i|--install]
+ * 
+  php install.php -i=all
+  php install.php -i=mysql
+  php install.php -i=interface
+  php install.php -i=server
+  php install.php -i=nginxvhost
+  php install.php -i=apachevhost
  */
+
+if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+    /*
+      PHP 5.3 on CentOS/RHEL 5.11 via Yum | Webtatic.com
+      https://webtatic.com/packages/php53/
+     * 
+     */
+    die('I require PHP >= 5.3 and you are running ' . PHP_VERSION);
+}
 
 require '_ins/Installer.php';
 
@@ -31,7 +50,24 @@ ApacheVhost ..: install only Apache vhost
 
 Install: 
 EOF;
-$_install = Installer::readInput('all');
+$_install_types = array('all', 'mysql', 'interface', 'server', 'nginxvhost', 'apachevhost');
+$ARGS = array();
+if ($argc > 0) {
+    foreach ($argv as $arg) {
+        if (preg_match('#--([^=]+)=(.*)#', $arg, $reg) || preg_match('#-([^=]+)=(.*)#', $arg, $reg)) {
+            $ARGS[$reg[1]] = $reg[2];
+        }
+    }
+}
+if (isset($ARGS['install']) && in_array($ARGS['install'], $_install_types)) {
+    echo $ARGS['install'];
+    $_install = $ARGS['install'];
+} else if (isset($ARGS['i']) && in_array($ARGS['i'], $_install_types)) {
+    echo $ARGS['i'];
+    $_install = $ARGS['i'];
+} else
+    $_install = Installer::readInput('all');
+
 echo PHP_EOL;
 switch (strtolower($_install)) {
     case 'all':

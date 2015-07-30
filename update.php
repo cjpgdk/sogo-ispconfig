@@ -6,7 +6,20 @@
   tar -xvf sogo-ispconfig.tar.gz
   cd sogo-ispconfig-master
   php update.php
+ * 
+  or use arguments like this
+  php update.php [-u|--update]
+ * 
+  php update.php -u=all
+  php update.php -u=mysql
+  php update.php -u=interface
+  php update.php -u=server
+  php update.php -u=php
  */
+
+if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+    die('I require PHP >= 5.3 and you are running ' . PHP_VERSION);
+}
 
 $sogo_interface_version_latest = "9";
 
@@ -66,8 +79,24 @@ Server .......: update only server files
 
 Update: 
 EOF;
+$_update_types = array('all', 'mysql', 'interface', 'server', 'php');
+$ARGS = array();
+if ($argc > 0) {
+    foreach ($argv as $arg) {
+        if (preg_match('#--([^=]+)=(.*)#', $arg, $reg) || preg_match('#-([^=]+)=(.*)#', $arg, $reg)) {
+            $ARGS[$reg[1]] = $reg[2];
+        }
+    }
+}
+if (isset($ARGS['update']) && in_array($ARGS['update'], $_update_types)) {
+    echo $ARGS['update'];
+    $_update = $ARGS['update'];
+} else if (isset($ARGS['u']) && in_array($ARGS['u'], $_update_types)) {
+    echo $ARGS['u'];
+    $_update = $ARGS['u'];
+} else
+    $_update = Installer::readInput('all');
 
-$_update = Installer::readInput('all');
 echo PHP_EOL;
 switch (strtolower($_update)) {
     case 'all': {
