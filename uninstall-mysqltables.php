@@ -9,6 +9,10 @@
   cd sogo-ispconfig-master
   php uninstall-mysqltables.php
  */
+
+echo str_repeat('=', 50) . PHP_EOL;
+echo "= This file will be removed with next update" . PHP_EOL . "= use uninstall.php instead";
+echo str_repeat('=', 50) . PHP_EOL . PHP_EOL;
  
 function readInput($default = "") {
     $handle = fopen("php://stdin", "r");

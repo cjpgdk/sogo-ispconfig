@@ -19,7 +19,9 @@ function readInput($default = "") {
     return (!empty($line) && trim($line) != "" ? trim($line) : $default);
 }
 
-echo PHP_EOL . PHP_EOL;
+echo str_repeat('=', 50) . PHP_EOL;
+echo "= This file will be removed with next update" . PHP_EOL . "= use uninstall.php instead";
+echo str_repeat('=', 50) . PHP_EOL . PHP_EOL;
 
 echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
 $ispcdir = readInput("/usr/local/ispconfig");

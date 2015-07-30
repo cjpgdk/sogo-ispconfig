@@ -47,10 +47,12 @@ Interface ....: install only interface files
 Server .......: install only server files
 NginxVhost ...: install only Nginx vhost
 ApacheVhost ..: install only Apache vhost
+enplugin .....: enable server plugin
+enmodule .....: enable server module
 
 Install: 
 EOF;
-$_install_types = array('all', 'mysql', 'interface', 'server', 'nginxvhost', 'apachevhost');
+$_install_types = array('all', 'mysql', 'interface', 'server', 'nginxvhost', 'apachevhost', 'enplugin', 'enmodule');
 $ARGS = array();
 if ($argc > 0) {
     foreach ($argv as $arg) {
@@ -97,6 +99,33 @@ switch (strtolower($_install)) {
     case 'apachevhost':
         require '_ins/ApacheVhost.php';
         ApacheVhost::Run();
+        break;
+    case 'enplugin':
+        echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
+        $ispcdir = Installer::readInput("/usr/local/ispconfig");
+        if (!is_link($ispcdir . '/server/plugins-enabled/sogo_plugin.inc.php') && !file_exists($ispcdir . '/server/plugins-enabled/sogo_plugin.inc.php')) {
+            if (!@link($ispcdir . '/server/plugins-available/sogo_plugin.inc.php', $ispcdir . '/server/plugins-enabled/sogo_plugin.inc.php')) {
+                echo "\033[1;33m" . 'Unable to enable plugin: sogo_plugin' . "\033[0m" . PHP_EOL;
+            } else {
+                echo "\033[0;32m" . 'Enabled plugin: sogo_plugin' . "\033[0m" . PHP_EOL;
+            }
+        } else {
+            echo "\033[1;33m" . 'Plugin already enabled: sogo_plugin' . "\033[0m" . PHP_EOL;
+        }
+        break;
+    case 'enmodule':
+        echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
+        $ispcdir = Installer::readInput("/usr/local/ispconfig");
+        
+        if (!is_link($ispcdir . '/server/mods-enabled/sogo_module.inc.php') && !file_exists($ispcdir . '/server/mods-enabled/sogo_module.inc.php')) {
+            if (!@link($ispcdir . '/server/mods-available/sogo_module.inc.php', $ispcdir . '/server/mods-enabled/sogo_module.inc.php')) {
+                echo "\033[1;33m" . 'Unable to enable module: sogo_module' . "\033[0m" . PHP_EOL;
+            } else {
+                echo "\033[0;32m" . 'Enabled module: sogo_module' . "\033[0m" . PHP_EOL;
+            }
+        } else {
+            echo "\033[1;33m" . 'Module already enabled: sogo_module' . "\033[0m" . PHP_EOL;
+        }
         break;
     default:
         echo PHP_EOL . "Invalid selection" . PHP_EOL;
