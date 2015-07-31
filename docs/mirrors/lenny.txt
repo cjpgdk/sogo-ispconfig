@@ -21,3 +21,12 @@ deb http://archive.debian.org/debian-volatile lenny/volatile main contrib non-fr
 # apt-get update && apt-get install debian-archive-keyring 
 # apt-get upgrade
 
+# dotdeb.org [lenny] (resigned for import into my mirror)
+# wget -O - http://mirror.cjwebh.net/cjwebh.gpg.key|apt-key add -
+#deb http://mirror.cjwebh.net/debian lenny dotdeb-lenny
+#deb-src http://mirror.cjwebh.net/debian lenny dotdeb-lenny
+#
+# >> /etc/apt/preferences
+#        Package: *
+#        Pin: origin mirror.cjwebh.net
+#        Pin-Priority: 700

@@ -16,6 +16,8 @@
   php install.php -i=server
   php install.php -i=nginxvhost
   php install.php -i=apachevhost
+  php install.php -i=enplugin
+  php install.php -i=enmoduleq
  */
 
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {

@@ -36,10 +36,10 @@ class noinstallInstaller {
         if (strtolower(Installer::readInput("y")) == "y") {
             echo PHP_EOL . "Webserver apache, nginx [apache]: ";
             if (strtolower(Installer::readInput("apache")) == "apache") {
-                require '../ApacheVhost.php';
+                require __DIR__ . '/../ApacheVhost.php';
                 ApacheVhost::Run();
             } else {
-                require '../NginxVhost.php';
+                require __DIR__ . '/../NginxVhost.php';
                 NginxVhost::Run();
             }
         }
