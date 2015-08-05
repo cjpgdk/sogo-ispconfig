@@ -406,8 +406,10 @@ class sogo_plugin {
         if ($event_name != 'mail_forwarding_delete')
             return;
         //* check this is an alias
-        if (!isset($data['new']['type']) || ($data['new']['type'] != 'alias'))
-            return;
+        if (!isset($data['old']['type']) || ($data['old']['type'] != 'alias')) {
+            if (!isset($data['new']['type']) || ($data['new']['type'] != 'alias'))
+                return;
+        }
 
         /**
          * @todo make single query to remove aliases (this lightens the load and the amount of sql queries)
@@ -574,7 +576,7 @@ class sogo_plugin {
             list($old_user, $old_domain) = explode('@', $data['old']['email']);
             list($new_user, $new_domain) = explode('@', $data['new']['email']);
 
-            // avoid annoying errors
+            //* avoid annoying errors
             if (($app->sogo_helper->idn_decode($data['old']['email']) == $data['new']['email']) &&
                     ($app->sogo_helper->idn_encode($data['new']['email']) == $data['old']['email'])) {
                 $data['new']['email'] = $app->sogo_helper->idn_encode($data['new']['email']);
@@ -589,16 +591,13 @@ class sogo_plugin {
             //* in reponse to user/domain changed
             if ($data['old']['email'] != $data['new']['email']) {
                 $app->log("sogo_plugin::update_sogo_mail_user(): change email, OLD:{$data['old']['email']} , NEW:{$data['new']['email']}", LOGLEVEL_DEBUG);
-                /*
-                  we do this in "$this->remove_sogo_domain(...);"
-                  $app->sogo_helper->delete_mail_user($data['old']['login']);
-                 */
+
                 $sync = FALSE;
                 //* make sure new domain is created
                 if ($old_domain != $new_domain) {
                     $app->sogo_helper->delete_mail_user($data['old']['login']); //* remove all related to old user 
                     if (!$app->sogo_helper->sogo_table_exists($new_domain)) {
-                        $app->sogo_helper->create_sogo_table($new_domain); //* allso syncs all users!
+                        $app->sogo_helper->create_sogo_table($new_domain); //* also syncs all users!
                         $sync = TRUE;
                     }
                 }
@@ -651,12 +650,11 @@ class sogo_plugin {
         //* check event
         if ($event_name != 'mail_domain_insert')
             return;
-
+        //* if domain has users, create related SOGo config
         if ($app->sogo_helper->has_mail_users($data['new']['domain'])) {
             $app->sogo_helper->create_sogo_table($data['new']['domain']);
+            $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
         }
-        //* rebuild conf, so new domain settings/config actually gets added to SOGo
-        $app->services->restartServiceDelayed('sogoConfigRebuild', 'bob the "SOGo Config" builder');
     }
 
     /**
@@ -670,7 +668,7 @@ class sogo_plugin {
         global $app, $conf;
         if ($event_name == "mail_domain_update") {
 
-            // avoid annoying errors
+            //* avoid annoying errors
             if ($app->sogo_helper->idn_decode($data['old']['domain']) == $data['new']['domain']) {
                 $data['new']['domain'] = $app->sogo_helper->idn_encode($data['new']['domain']);
             }
@@ -678,7 +676,7 @@ class sogo_plugin {
             $change_domain = $change_server = FALSE;
             if ($data['old']['domain'] != $data['new']['domain']) {
                 //* change domain name (sogo_domains)
-                $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` SET `domain_name` = '{$data['new']['domain']}' WHERE `domain_name` = '{$data['old']['domain']}' AND `domain_id` = '{$data['old']['domain_id']}';");
+                $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` SET `domain_name` = '{$data['new']['domain']}', `domain_id` = '{$data['new']['domain_id']}' WHERE `domain_id` = '{$data['old']['domain']}' AND `domain_id` = '{$data['old']['domain_id']}';");
 
                 $app->log("sogo_plugin::update_sogo_mail_domain(): change domain name [{$data['old']['domain']}] => [{$data['new']['domain']}] IN table sogo_domains", LOGLEVEL_DEBUG);
 
@@ -703,10 +701,6 @@ class sogo_plugin {
                     ) )
             ) {
                 //* change domain owner
-                /*
-                 * One would expect it function like any other domain update 
-                 * BUT NO NO, no call to plugins if owner is changed!! 
-                 */
                 $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` "
                         . "SET `sys_userid` = '{$data['new']['sys_userid']}'"
                         . ", `sys_groupid` = '{$data['new']['sys_groupid']}'"
@@ -715,19 +709,18 @@ class sogo_plugin {
                         . ", `sys_perm_other` = '{$data['new']['sys_perm_other']}'"
                         . " WHERE `domain_id` = '{$data['old']['domain_id']}';");
 
-                $app->log("sogo_plugin::update_sogo_mail_domain(): change domain owner for domain [{$data['new']['domain']}] IN table sogo_domains", LOGLEVEL_DEBUG);
+                $app->log("sogo_plugin::update_sogo_mail_domain(): change owner of domain [{$data['new']['domain']}] IN table sogo_domains", LOGLEVEL_DEBUG);
             }
 
             if ($data['old']['server_id'] != $data['new']['server_id']) {
-                //* change domain server
-                $server_name = $app->sogo_helper->getDB()->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($data['new']['server_id']));
-                $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` "
-                        . "SET `server_name` = '{$server_name['server_name']}'"
-                        . ", `server_id` = '{$data['new']['server_id']}'"
-                        . " WHERE `domain_id` = '{$data['old']['domain_id']}';");
-                $app->log("sogo_plugin::update_sogo_mail_domain(): change server for domain [{$data['new']['domain']}] IN table sogo_domains to [{$server_name['server_name']}]", LOGLEVEL_DEBUG);
-
-
+                // started using "SOGo server id" not "mail server id"
+                // //* change server
+                // $server_name = $app->sogo_helper->getDB()->queryOneRecord('SELECT `server_name` FROM `server` WHERE `server_id`=' . intval($data['new']['server_id']));
+                // $app->sogo_helper->getDB()->query("UPDATE `sogo_domains` "
+                //         . "SET `server_name` = '{$server_name['server_name']}'"
+                //         . ", `server_id` = '{$data['new']['server_id']}'"
+                //         . " WHERE `domain_id` = '{$data['old']['domain_id']}';");
+                // $app->log("sogo_plugin::update_sogo_mail_domain(): change server for domain [{$data['new']['domain']}] IN table sogo_domains to [{$server_name['server_name']}]", LOGLEVEL_DEBUG);
                 //* change server setting (SOGO db) && (SOGo config)
                 $change_server = TRUE;
             }
@@ -763,7 +756,6 @@ class sogo_plugin {
      * @global app $app
      * @param string $event_name
      * @param array $data array of old and new data
-     * @todo Added call to rebuild SOGo config.!
      */
     public function remove_sogo_mail_domain($event_name, $data) {
         global $app;
@@ -778,12 +770,7 @@ class sogo_plugin {
                     $app->log("sogo_plugin::remove_sogo_mail_domain(): delete SOGo config for domain: {$data['old']['domain_id']}#{$data['old']['domain']}", LOGLEVEL_DEBUG);
                 } else {
                     $app->log("No SOGo config, create fake configuration datalog delete", LOGLEVEL_DEBUG);
-                    /*
-                     * if no config exists force a datalog to call event sogo_domains_delete
-                     * this ensures all tables in sogo db is removed as well and keeping the plugin functionality of ISPConfig
-                     * 
-                     * IMPORTANT KEEP index == -1 (avoid deleting an existing records)
-                     */
+                    //* no config exists for domain, force a datalog to call event sogo_domains_delete
                     $app->sogo_helper->getDB()->datalogSave('sogo_domains', 'DELETE', 'sogo_id', -1, $data['old'], $data['new'], TRUE);
                 }
             } else {
@@ -813,7 +800,7 @@ class sogo_plugin {
             }
         }
         if (is_array($data) && (!isset($data['oldDataRecord']) || !isset($data['dataRecord']))) {
-            $app->log("{$a}('', DATA_ARRAY): DATA_ARRAY is not valid: " . print_r($data, true), LOGLEVEL_DEBUG);
+            $app->log("{$a}('', DATA_ARRAY): DATA_ARRAY is not valid" . (!isset($data['oldDataRecord']) ? ' : Missing index oldDataRecord ' : '') . (!isset($data['dataRecord']) ? ' : Missing index dataRecord ' : ''), LOGLEVEL_DEBUG);
             return false;
         }
         return true;

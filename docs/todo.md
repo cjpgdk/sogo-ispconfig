@@ -23,10 +23,6 @@
         this method should check if the destination email address is allowed imap access and if 
         the mail domain table exists before trying to create the new alias column.
 
-@todo sogo_plugin::remove_sogo_mail_user_alias() #35
-        this method should check the old array and not the new array. :angry:,
-        but check new if old is empty. currently only works if called from remote actions!
-
 @todo sync mail users when user updates 'Name' or 'Disable IMAP' #34
         missing sync mail users if a mail user updates the 'Name' or 'Disable IMAP' field of the email address
 
