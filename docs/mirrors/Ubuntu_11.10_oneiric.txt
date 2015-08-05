@@ -1,0 +1,23 @@
+deb http://old-releases.ubuntu.com/ubuntu oneiric main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu oneiric main restricted universe multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu oneiric-updates main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu oneiric-updates main restricted universe multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu oneiric-backports main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu oneiric-backports main restricted universe multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu oneiric-security main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu oneiric-security main restricted universe multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu oneiric-proposed main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu oneiric-proposed main restricted universe multiverse
+
+
+# -----------------------------------------------------------------
+# INVERSE.CA 
+# sudo apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4 
+# -----------------------------------------------------------------
+
+deb http://inverse.ca/ubuntu/ oneiric oneiric
+deb-src http://inverse.ca/ubuntu/ oneiric oneiric

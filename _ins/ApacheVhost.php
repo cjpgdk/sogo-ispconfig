@@ -25,6 +25,8 @@ if (!class_exists('VhostBase')) {
 }
 
 class ApacheVhost extends VhostBase {
+    
+    public static $old22conf = false; 
 
     public static function Run() {
         //* locate "usr/lib/GNUstep/SOGo"
@@ -49,7 +51,7 @@ class ApacheVhost extends VhostBase {
         }
         exec("apache2ctl -v", $out);
         if (!isset($out[0])) {
-            echo PHP_EOL . "Apache is installed on this server";
+            echo PHP_EOL . "Apache is not installed on this server";
             return;
         }
         //Server version: Apache/2.2.22 (Debian)
@@ -76,8 +78,10 @@ class ApacheVhost extends VhostBase {
                 $apachebin = Installer::readInput('');
             }
 
-            if (empty($apachebin) || !file_exists($apachebin))
-                die(PHP_EOL . "No apache2 or httpd binary" . PHP_EOL . "*Here is the vhost config file i created, installed it manualy" . PHP_EOL . "{$httpconfdir}/SOGo.conf");
+            if (empty($apachebin) || !file_exists($apachebin)){
+                echo (PHP_EOL . "No apache2 or httpd binary" . PHP_EOL . "*Here is the vhost config file i created, installed it manualy" . PHP_EOL . "{$httpconfdir}/SOGo.conf");
+                return;
+			}
 
             self::execWriteOut('a2enmod proxy proxy_http headers rewrite', $out);
             if (isset($out) && is_array($out)) {
@@ -102,20 +106,37 @@ class ApacheVhost extends VhostBase {
     }
 
     public static function printCronfig() {
+        
+        $new_22_conf = "
+    <IfVersion < 2.4>
+        Order deny,allow
+        Allow from all
+    </IfVersion>
+    <IfVersion >= 2.4>
+        Require all granted
+    </IfVersion>
+";
+        $old_22_conf = "
+    Order deny,allow
+    Allow from all
+";
+        
         return str_replace(array(
             '{SOGoHostPort}',
             '{GnuStepDir}',
             '{SOGoListenIpPort}',
             '{EnableMSActiveSync}',
             '{SOGoHostname}',
-            '{SOGoServerURL}'
+            '{SOGoServerURL}',
+            '{IFVERSION}',
                 ), array(
             self::$SOGoHostPort,
             self::$GnuStepDir,
             self::$SOGoListenIpPort,
             self::$EnableMSActiveSync,
             self::$SOGoHostname,
-            self::$SOGoServerURL
+            self::$SOGoServerURL,
+            (self::$old22conf ? $old_22_conf : $new_22_conf)
                 ), self::$tpl);
     }
 
@@ -133,13 +154,7 @@ Alias /SOGo/WebServerResources/ \
 <Directory {GnuStepDir}/>
     AllowOverride None
 
-    <IfVersion < 2.4>
-        Order deny,allow
-        Allow from all
-    </IfVersion>
-    <IfVersion >= 2.4>
-        Require all granted
-    </IfVersion>
+{IFVERSION}
 
     # Explicitly allow caching of static content to avoid browser specific behavior.
     # A resource's URL MUST change in order to have the client load the new version.

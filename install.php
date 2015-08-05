@@ -118,7 +118,7 @@ switch (strtolower($_install)) {
     case 'enmodule':
         echo "location of ISPConfig folder? [/usr/local/ispconfig]: ";
         $ispcdir = Installer::readInput("/usr/local/ispconfig");
-        
+
         if (!is_link($ispcdir . '/server/mods-enabled/sogo_module.inc.php') && !file_exists($ispcdir . '/server/mods-enabled/sogo_module.inc.php')) {
             if (!@link($ispcdir . '/server/mods-available/sogo_module.inc.php', $ispcdir . '/server/mods-enabled/sogo_module.inc.php')) {
                 echo "\033[1;33m" . 'Unable to enable module: sogo_module' . "\033[0m" . PHP_EOL;

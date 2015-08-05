@@ -1,0 +1,48 @@
+deb http://ftp.dk.debian.org/debian wheezy main contrib non-free
+deb-src http://ftp.dk.debian.org/debian wheezy main contrib non-free
+
+deb http://ftp.debian.org/debian/ wheezy-updates main contrib non-free
+deb-src http://ftp.debian.org/debian/ wheezy-updates main contrib non-free
+
+deb http://security.debian.org/ wheezy/updates main contrib non-free
+deb-src http://security.debian.org/ wheezy/updates main contrib non-free
+
+deb http://http.debian.net/debian wheezy-backports main contrib non-free
+deb-src http://http.debian.net/debian wheezy-backports main contrib non-free
+
+#deb http://http.debian.net/debian wheezy-backports-sloppy main contrib non-free
+#deb-src http://http.debian.net/debian wheezy-backports-sloppy main contrib non-free
+
+#deb http://ftp.debian.org/debian/ wheezy-proposed-updates main contrib non-free
+#deb-src http://ftp.debian.org/debian/ wheezy-proposed-updates main contrib non-free
+
+
+######################################################
+# DOTDEB.ORG                                         #
+######################################################
+# wget https://www.dotdeb.org/dotdeb.gpg             #
+# sudo apt-key add dotdeb.gpg                        #
+######################################################
+
+#deb http://packages.dotdeb.org wheezy all
+#deb-src http://packages.dotdeb.org wheezy all
+
+# PHP 5.6 on Debian 7 "Wheezy" (without Zend thread safety), add these two lines too :
+#deb http://packages.dotdeb.org wheezy-php56 all
+#deb-src http://packages.dotdeb.org wheezy-php56 all
+
+# PHP 5.6 on Debian 7 "Wheezy" (with Zend thread safety), add these two lines instead :
+#deb http://packages.dotdeb.org wheezy-php56-zts all
+#deb-src http://packages.dotdeb.org wheezy-php56-zts all
+
+# PHP 5.5 on Debian 7 "Wheezy", add these two lines too :
+#deb http://packages.dotdeb.org wheezy-php55 all
+#deb-src http://packages.dotdeb.org wheezy-php55 all
+
+# -----------------------------------------------------------------
+# INVERSE.CA 
+# sudo apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4 
+# -----------------------------------------------------------------
+
+deb http://inverse.ca/debian/ wheezy wheezy
+deb-src http://inverse.ca/debian/ wheezy wheezy

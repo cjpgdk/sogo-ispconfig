@@ -65,8 +65,8 @@ class SOGo {
             if (!Installer::isSOGoOnServer()) {
                 $this->echoMessage(PHP_EOL . "About to install SOGo");
                 $pkg = "sogo sope4.9-gdl1-mysql memcached rpl";
-                //* lenny do not have activesync
-                if($this->os_name != "lenny"){
+                //* lenny, maverick do not have activesync
+                if($this->os_name != "lenny" && $this->os_name != "maverick"){
                     $this->echoMessage("Shall i install sogo-activesync? (Y/N) [Y]: ", '');
                     $pkg .= (strtolower(Installer::readInput("y")) == "y" ? " sogo-activesync" : "");
                 }

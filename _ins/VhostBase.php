@@ -23,9 +23,9 @@
 
 class VhostBase {
 
-    public static function getSOGoGnuStepDir($libdir = "/usr/lib") {
+    public static function getSOGoGnuStepDir($libdir = "") {
         if (file_exists("{$libdir}/GNUstep/SOGo/") || is_dir("{$libdir}/GNUstep/SOGo/")) {
-            //* $libdir is set we must trut the user ´know what the hell he/she is doing
+            //* $libdir is set we must trut the user know what the hell he/she is doing
             $GnuStepDir = "{$libdir}/GNUstep/SOGo";
         } else if (file_exists("/usr/lib/GNUstep/SOGo/") || is_dir("/usr/lib/GNUstep/SOGo/")) {
             //* default (Debian && Ubuntu [32Bit & 64Bit])

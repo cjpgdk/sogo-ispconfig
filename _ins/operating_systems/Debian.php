@@ -23,13 +23,13 @@ $osInstallerName = "DebianInstaller";
  * @copyright 2015 Christian M. Jensen
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
- * 
  */
 class DebianInstaller extends noinstallInstaller {
 
     public $os_name = "debian";
     public $os_releases = array(
         'lenny' => 'lenny',
+        'squeeze' => 'squeeze',
         'wheezy' => 'wheezy',
         'jessie' => 'jessie',
     );
@@ -43,8 +43,7 @@ class DebianInstaller extends noinstallInstaller {
     // source list
     public $source_list = "/etc/apt/sources.list";
     public $source_list_dir = "/etc/apt/sources.list.d/";
-    
-    
+
     public function endOfInstall() {
         echo PHP_EOL . "All done assuming no errors and all went well" . PHP_EOL;
         echo "you will need to add SOGo config values to interface config file:" . PHP_EOL;
@@ -105,10 +104,15 @@ class DebianInstaller extends noinstallInstaller {
                 unset($inverse_mirror);
 
                 //* install SOGo
-                echo PHP_EOL .  "About to install SOGo";
+                echo PHP_EOL . "About to install SOGo";
                 $pkg = "sogo sope4.9-gdl1-mysql memcached rpl";
-                //* lenny do not have activesync
-                if ($os_release != "lenny") {
+                /*
+                  Debian: lenny
+                  Ubuntu: maverick, natty, oneiric
+                  do not have activesync
+                 */
+                if ($os_release != "lenny" && $os_release != "maverick" && 
+                        $os_release != "natty" && $os_release != "oneiric") {
                     echo PHP_EOL . "Shall i install sogo-activesync? (Y/N) [Y]: ";
                     $pkg .= (strtolower(Installer::readInput("y")) == "y" ? " sogo-activesync" : "");
                 }
@@ -245,4 +249,3 @@ class DebianInstaller extends noinstallInstaller {
     }
 
 }
-

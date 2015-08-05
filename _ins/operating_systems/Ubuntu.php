@@ -24,18 +24,17 @@ $osInstallerName = "UbuntuInstaller";
  * @copyright 2015 Christian M. Jensen
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3
  * @link https://github.com/cmjnisse/sogo-ispconfig original source code for sogo-ispconfig
- * 
  */
 class UbuntuInstaller extends DebianInstaller {
 
     public $os_name = "ubuntu";
     public $os_releases = array(
         'lucid' => 'lucid',
-        'trusty' => 'trusty',
-        'precise' => 'precise',
-        'oneiric' => 'oneiric',
-        'natty' => 'natty',
         'maverick' => 'maverick',
+        'natty' => 'natty',
+        'oneiric' => 'oneiric',
+        'precise' => 'precise',
+        'trusty' => 'trusty',
     );
     
     protected function debMirrors($os_release) {
@@ -46,11 +45,11 @@ class UbuntuInstaller extends DebianInstaller {
                 $mirror .= "#deb http://inverse.ca/ubuntu-nightly/ lucid main" . PHP_EOL;
                 $mirror .= "#deb-src http://inverse.ca/ubuntu-nightly/ lucid main";
                 return $mirror;
-            case 'trusty':
-            case 'precise':
-            case 'oneiric':
-            case 'natty':
             case 'maverick':
+            case 'natty':
+            case 'oneiric':
+            case 'precise':
+            case 'trusty':
             default:
                 $mirror = "deb http://inverse.ca/ubuntu/ {$os_release} {$os_release}" . PHP_EOL;
                 $mirror .= "#deb-src http://inverse.ca/ubuntu/ {$os_release} {$os_release}" . PHP_EOL . PHP_EOL;

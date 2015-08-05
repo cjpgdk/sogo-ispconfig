@@ -60,10 +60,14 @@ interface/web/mail/templates/sogo_domains_user_edit.htm
 
 ##### HELP ME
 
-use the issue system here at GitHub for help, questions, or suggestions
+use the issue system here at GitHub for help, questions, or suggestions, 
+if you like to help with development of this project all you have todo 
+is post suggestions in the issue system, you are also more than welcome 
+to create a [pull requests] with your suggested changes
 
 
 [SOGo]:http://sogo.nu/
 [ISPConfig]:http://www.ispconfig.org
 [Update 9]:https://github.com/cmjnisse/sogo-ispconfig/wiki/Install-Update-9
 [Sortable]:http://rubaxa.github.io/Sortable/
+[pull requests]:https://help.github.com/articles/using-pull-requests/

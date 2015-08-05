@@ -7,8 +7,35 @@
 
 ~~@todo in multi server setups maybe use domain to SOGo server map~~ [removed all auto create](#todoremoved-autocreate)
 
-
 @todo maybe allow dedicated SOGo server like ISPConfig do with web and dns, will make the auto create config more doable
+
+@todo sogo_plugin::onLoad(): 
+        add a more reliable configuration check
+
+@todo sogo_plugin::update_sogo_mail_user_alias(): 
+        if destination changes add function to double check the alias counts on table and in ISPConfig
+
+@todo sogo_plugin::update_sogo_mail_user_alias(): 
+        might need to add some restriction to this method to prevent constenly updating the db.
+        make single query to remove aliases (this lightens the load and the amount of sql queries).
+
+@todo sogo_plugin::insert_sogo_mail_user_alias() #36
+        this method should check if the destination email address is allowed imap access and if 
+        the mail domain table exists before trying to create the new alias column.
+
+@todo sogo_plugin::remove_sogo_mail_user_alias() #35
+        this method should check the old array and not the new array. :angry:,
+        but check new if old is empty. currently only works if called from remote actions!
+
+@todo sync mail users when user updates 'Name' or 'Disable IMAP' #34
+        missing sync mail users if a mail user updates the 'Name' or 'Disable IMAP' field of the email address
+
+@todo sync mail users if config change #33
+        Sync mail users if IMAP Server, SMTP Server and / or Sieve Server is change in the SOGo sever configuration.
+
+@todo just a thought on Address Book #19
+        maybe add this as an option to enable or disable this, makes it easy to se what users exists in a domain
+        also if using aliases searching for the alias name will bring up the user whom this alias belongs to
 
 
 
@@ -27,9 +54,7 @@ so this is for the future
 *****
 
 ```
-On SOGo config insert..?
-run rebuild SOGO config.. not sure if you install this and create the configs you are properply 
-going over all options and checking your domains, and in the end you trigger and update that will call the rebuild
+Nothing here!
 ```
 
 
@@ -46,5 +71,5 @@ the mail module
 this is done to better allow multi server configuration where
 SOGo server IS NOT installed on the mail server
 
-but i kept the todo line as a reminder to many add this later on
+but i kept the todo line as a reminder to maybe add this later on
 ```

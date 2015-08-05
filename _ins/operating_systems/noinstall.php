@@ -31,15 +31,35 @@ class noinstallInstaller {
     public $interface_installed = false;
     public $server_installed = false;
 
-    public function installVhost() {
+    public function installVhost($os, $os_release) {
         echo PHP_EOL . PHP_EOL . "Setup basic vhost (Y/N) [Y]: ";
         if (strtolower(Installer::readInput("y")) == "y") {
             echo PHP_EOL . "Webserver apache, nginx [apache]: ";
             if (strtolower(Installer::readInput("apache")) == "apache") {
                 require __DIR__ . '/../ApacheVhost.php';
+
+                if (
+                     ($os == 'ubuntu' && 
+                       (
+                         $os_release == 'lucid' 
+                         || $os_release == 'maverick' 
+                         || $os_release == "natty"  
+                         || $os_release == "oneiric"
+                        )
+                      ) ||
+                      ($os == 'debian' && ($os_release == 'lenny' || $os_release == "squeeze"))
+                ) {
+                    ApacheVhost::$old22conf = true;
+                }
+
+                echo PHP_EOL . "Loading installer for Apache vhost" . PHP_EOL;
+
                 ApacheVhost::Run();
             } else {
                 require __DIR__ . '/../NginxVhost.php';
+
+                echo PHP_EOL . "Loading installer for Nginx vhost" . PHP_EOL;
+
                 NginxVhost::Run();
             }
         }
@@ -68,7 +88,7 @@ class noinstallInstaller {
             //* required...
             Installer::installMySQLTables(realpath(__DIR__ . "/.."));
         } else {
-            //* install MySQL tables
+            //* install MySQL tables?
             echo PHP_EOL . "Install MySQL tables? (Y/N) [Y]: ";
             if (strtolower(Installer::readInput("y")) == "y") {
                 Installer::installMySQLTables(realpath(__DIR__ . "/.."));
@@ -251,4 +271,3 @@ if not isset md5 is used
 EOF;
 
 }
-

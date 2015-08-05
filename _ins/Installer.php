@@ -25,7 +25,7 @@
 class Installer {
 
     //* folder containing os specific install instructions
-    const os_insterlers_folder = "operating_systems";
+    const os_installers_folder = "operating_systems";
     //* file containing Mysql tables
     const mysql_tables = "tables.sql";
 
@@ -55,16 +55,16 @@ class Installer {
         $this->os_supported = array();
 
         //* get supported operating systems
-        if (is_dir($this->_folder . Installer::os_insterlers_folder)) {
-            $oss = scandir($this->_folder . Installer::os_insterlers_folder);
+        if (is_dir($this->_folder . Installer::os_installers_folder)) {
+            $oss = scandir($this->_folder . Installer::os_installers_folder);
             foreach ($oss as $value) {
                 if ($value == '.' || $value == '..')
                     continue;
                 $tmp = str_replace('.php', '', $value);
-                $this->os_supported[strtolower($tmp)] = $this->_folder . Installer::os_insterlers_folder . '/' . $value;
+                $this->os_supported[strtolower($tmp)] = $this->_folder . Installer::os_installers_folder . '/' . $value;
             }
         } else
-            Installer::exitError("Unable to locate folder: " . Installer::os_insterlers_folder . PHP_EOL . "Plase run the installer from: " . realpath(__DIR__ . '/../'));
+            Installer::exitError("Unable to locate folder: " . Installer::os_installers_folder . PHP_EOL . "Plase run the installer from: " . realpath(__DIR__ . '/../'));
 
         require 'copy_files.php';
         if (isset($files_copy) && is_array($files_copy) && isset($files_copy['interface']) && isset($files_copy['server'])) {
@@ -87,7 +87,7 @@ class Installer {
                     //* install
                     $this->osObject->installAddon($this->os_release);
                     //* install vhost?
-                    $this->osObject->installVhost();
+                    $this->osObject->installVhost($this->os, $this->os_release);
                     //* end of install message
                     $this->osObject->endOfInstall();
                 } else

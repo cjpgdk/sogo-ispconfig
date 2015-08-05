@@ -1,0 +1,20 @@
+PHP >= 5.3.0
+
+ISPConfig >= 3.0.4.6 (maybe it works on older versions but i do not test them)
+
+---
+
+
+if you use ISPConfig 3.0.4.x.
+    SOGo MUST BE installed on the same server as your mail server the reason
+    is that the server plugin and module requires the mail actions,
+    and remote action is not available before version 3.0.5
+
+from ISPConfig version 3.0.5 and up remote action can be used and SOGo can be 
+placed on a separate server. (WITH ISPConfig installed)
+
+oldest test version of SOGo is 2.0.2a
+    keep in mind this plugin builds configuration, aimed 
+    at the latest release of SOGo.
+
+--

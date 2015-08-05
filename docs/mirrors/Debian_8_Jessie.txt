@@ -1,0 +1,37 @@
+deb http://ftp.debian.org/debian jessie main contrib non-free
+deb-src http://ftp.debian.org/debian jessie main contrib non-free
+
+deb http://ftp.debian.org/debian jessie-updates main contrib non-free
+deb-src http://ftp.debian.org/debian jessie-updates main contrib non-free
+
+deb http://security.debian.org jessie/updates main contrib non-free
+deb-src http://security.debian.org jessie/updates main contrib non-free
+
+#deb http://http.debian.net/debian jessie-backports main contrib non-free
+#deb-src http://http.debian.net/debian jessie-backports main contrib non-free
+
+
+######################################################
+# DOTDEB.ORG                                         #
+######################################################
+# wget https://www.dotdeb.org/dotdeb.gpg             #
+# sudo apt-key add dotdeb.gpg                        #
+######################################################
+
+#deb http://packages.dotdeb.org jessie all
+#deb-src http://packages.dotdeb.org jessie all
+
+
+# -----------------------------------------------------------------
+# INVERSE.CA 
+# sudo apt-key adv --keyserver keys.gnupg.net --recv-key 0x810273C4 
+# -----------------------------------------------------------------
+
+# jessie amd64 "64Bit"
+deb http://inverse.ca/debian/ jessie jessie
+deb-src http://inverse.ca/debian/ jessie jessie
+
+# for i386 versions of jessie
+# wget -O - http://mirror.cjwebh.net/cjwebh.gpg.key | apt-key add -
+#deb http://mirror.cjwebh.net/debian jessie sogo
+#deb-src http://mirror.cjwebh.net/debian jessie sogo
