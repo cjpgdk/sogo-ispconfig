@@ -114,6 +114,8 @@ class Installer {
             //* add mysql tables
             echo PHP_EOL . "MySQL Host? [127.0.0.1]: ";
             $mysql_host = self::readInput("127.0.0.1");
+            echo PHP_EOL . "MySQL Port? [3306]: ";
+            $mysql_port = self::readInput("3306");
             echo PHP_EOL . "MySQL admin user? [root]: ";
             $mysql_admin = self::readInput("root");
             echo PHP_EOL . "MySQL password? []: ";
@@ -121,8 +123,32 @@ class Installer {
             echo PHP_EOL . "ISPConfig database? [dbispconfig]: ";
             $mysql_database = self::readInput("dbispconfig");
             echo PHP_EOL;
-            $command = "mysql -h {$mysql_host} -u {$mysql_admin} -p\"{$mysql_password}\" {$mysql_database} < " . $base_dir . "/" . Installer::mysql_tables;
-            echo exec($command) . PHP_EOL;
+            
+            $mysqli_object = new mysqli($mysql_host, $mysql_admin, $mysql_password, $mysql_database, $mysql_port);
+            if ($mysqli_object->connect_errno <= 0 && empty($mysqli_object->connect_error)) {
+                @$mysqli_object->close();
+                unset($mysqli_object);
+
+                $command = "mysql -h {$mysql_host} -P {$mysql_port} -u {$mysql_admin} -p\"{$mysql_password}\" {$mysql_database} < " . $base_dir . "/" . Installer::mysql_tables;
+                $out = array();
+                echo exec($command, $out) . PHP_EOL;
+                foreach ($out as $value) {
+                    echo PHP_EOL . $value;
+                }
+            } else {
+                $error = '[MYSQL]: ' . $mysqli_object->connect_error;
+                $errors[] = $error;
+                unset($mysqli_object);
+                echo PHP_EOL . "Unable to connact to mysql on host {$mysql_host}:{$mysql_port}";
+                echo PHP_EOL . $error;
+                echo PHP_EOL . "Try again? (y,n) [Y]";
+                if (strtolower(self::readInput("y")) == 'y') {
+                    self::installMySQLTables($base_dir);
+                } else {
+                    $errors[] = "[FAIL]: Mysql tables are not imported, connection faild";
+                    $_error = TRUE;
+                }
+            }
         } else {
             $errors[] = "[FAIL]: Unable to locate mysql tables file (interface, plugin and module WILL NOT WORK without them)" .
                     PHP_EOL . "File: " . $base_dir . "/" . Installer::mysql_tables .
