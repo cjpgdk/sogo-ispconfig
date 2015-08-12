@@ -347,7 +347,9 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         $result = $sqlres->query($sql) ? TRUE : FALSE;
         $app->log("sogo_helper::create_sogo_table(): add SOGo table for domain: {$domain_name}" . (!$result ? "\n\tERROR\t\n{$sql}" : ""), ($result ? LOGLEVEL_DEBUG : LOGLEVEL_ERROR));
         if ($call_sync)
-            $result &= $this->sync_mail_users($domain_name);
+            $this->sync_mail_users($domain_name);
+        if ($result)
+            unset(self::$sutCache[$domain_name]);
         return $result;
     }
 
@@ -453,8 +455,17 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
     }
 
     /**
+     * check if an email has imap access
+     * @param string $email
+     * @return boolean
+     */
+    public function has_imap_access($email = "") {
+        $_email = $this->getDB()->queryOneRecord("SELECT `email` FROM `mail_user` WHERE `email`='{$email}'  AND `disableimap` = 'n'");
+        return (bool)(isset($_email['email']) && $_email['email'] == $email);
+    }
+
+    /**
      * check if a domain has any email addresses
-     * @global array $conf
      * @param string $domain_name
      * @param boolean $imap_enabled if set to false will count all email addresses, is set to true will only count email addresses with imap enabled
      * @return boolean
@@ -467,6 +478,7 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         return false;
     }
 
+    
     public function get_server($sid) {
         if (!isset(self::$sogo_server[$sid])) {
             global $app, $conf;
@@ -506,8 +518,12 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         return self::$sCache[$server_id];
     }
 
+    /**
+     * Check if a domain is active
+     * @param string $domain_name
+     * @return boolean
+     */
     public function is_domain_active($domain_name) {
-        global $app;
         if (!isset(self::$dnCache['active' . $domain_name])) {
             $sql = "SELECT `active` FROM `mail_domain` WHERE `domain`='{$this->dbEscapeString($domain_name)}'";
             $res = $this->getDB()->queryOneRecord($sql);
@@ -518,10 +534,15 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
         }
         return (bool) self::$dnCache['active' . $domain_name];
     }
-    
-    public function get_domain_config_exists($domain_name) {
+
+    /**
+     * Check if configuration for domain exists
+     * @param string $domain_name
+     * @return boolean
+     */
+    public function config_exists_domain($domain_name) {
         $result = $this->getDB()->queryOneRecord('SELECT sc.`server_id`, sd.`domain_name` FROM `sogo_config` sc, `sogo_domains` sd WHERE sc.`server_id`=sd.`server_id` AND sd.`domain_name`=' . intval($domain_name));
-        return (boolean) ($result['domain_id'] == $domain_name) && (isset($result['server_id']) && $result['server_id'] > 0);
+        return (bool) ($result['domain_name'] == $domain_name) && (isset($result['server_id']) && $result['server_id'] > 0);
     }
 
     /**
@@ -889,6 +910,7 @@ AND sc.`server_name` = s.`server_name";
             return '';
         if (preg_match('/^[0-9\.]+$/', $domain))
             return $domain; // may be an ip address - anyway does not need to bee encoded
+
 
 
 

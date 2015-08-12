@@ -349,7 +349,7 @@ class sogo_plugin {
             } else if (!$app->sogo_helper->module_settings->all_domains && $app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow only domains with sogo domain config + same instance
                 $keep_table = false;
-                if ($app->sogo_helper->get_domain_config_exists($domain_name) !== false)
+                if ($app->sogo_helper->config_exists_domain($domain_name) !== false)
                     $keep_table = true;
             } else if ($app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow all domains but only for this server
@@ -359,7 +359,7 @@ class sogo_plugin {
             } else if (!$app->sogo_helper->module_settings->all_domains && !$app->sogo_helper->module_settings->allow_same_instance) {
                 //* allow only domains with sogo domain config and located on this server
                 $keep_table = false;
-                if ($app->sogo_helper->get_domain_config_exists($domain_name) !== false && ($data['old']['domain']['server_id'] == $conf['server_id']))
+                if ($app->sogo_helper->config_exists_domain($domain_name) !== false && ($data['old']['domain']['server_id'] == $conf['server_id']))
                     $keep_table = true;
             }
 
@@ -444,6 +444,22 @@ class sogo_plugin {
         list($destination_user, $destination_domain) = explode('@', $data['new']['destination']);
         if ($destdomenc = $app->sogo_helper->idn_encode($destination_domain))
             $destination_domain = $destdomenc;
+
+
+        //* check table and create
+        if (!$app->sogo_helper->sogo_table_exists($destination_domain)) {
+            $app->sogo_helper->create_sogo_table($destination_domain, false);
+        }
+        //* destination mail has imap access?
+        if (!$app->sogo_helper->has_imap_access($data['new']['destination'])) {
+            $app->log("sogo_plugin::insert_sogo_mail_user_alias(): Imap Access denied: {$data['new']['destination']}", LOGLEVEL_DEBUG);
+            return;
+        }
+        //* create_sogo_table can fail so we check again.
+        if (!$app->sogo_helper->sogo_table_exists($destination_domain)){
+            $app->log("No table for domain: {$destination_domain}, so not creating alias for sogo", LOGLEVEL_DEBUG);
+            return;
+        }
 
         $app->log("sogo_plugin::insert_sogo_mail_user_alias(): {$data['new']['source']} => {$data['new']['destination']}", LOGLEVEL_DEBUG);
 
