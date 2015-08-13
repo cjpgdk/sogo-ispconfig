@@ -373,7 +373,8 @@ CREATE TABLE IF NOT EXISTS `{$this->get_valid_sogo_table_name($domain_name)}` (
             $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='{$active}' AND md.`domain_id`=sd.`domain_id`";
         } else if ($this->module_settings->all_domains && !$this->module_settings->allow_same_instance) {
             //* allow all domains but only for this server
-            $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE `active`='{$active}' AND sd.`server_id`=" . intval($conf['server_id']);
+            // $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE `active`='{$active}' AND sd.`server_id`=" . intval($conf['server_id']);
+            $mail_domains_sql = "SELECT `domain` FROM `mail_domain` WHERE `active`='{$active}' AND `server_id`=" . intval($conf['server_id']);
         } else if (!$this->module_settings->all_domains && !$this->module_settings->allow_same_instance) {
             //* allow only domains with sogo domain config and located on this server
             $mail_domains_sql = "SELECT md.`domain` FROM `mail_domain` md, `sogo_domains` sd WHERE md.`active`='{$active}' AND md.`domain_id`=sd.`domain_id` AND sd.`server_id`=" . intval($conf['server_id']);

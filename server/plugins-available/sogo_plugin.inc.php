@@ -456,7 +456,7 @@ class sogo_plugin {
             return;
         }
         //* create_sogo_table can fail so we check again.
-        if (!$app->sogo_helper->sogo_table_exists($destination_domain)){
+        if (!$app->sogo_helper->sogo_table_exists($destination_domain)) {
             $app->log("No table for domain: {$destination_domain}, so not creating alias for sogo", LOGLEVEL_DEBUG);
             return;
         }
@@ -629,9 +629,32 @@ class sogo_plugin {
                 $sync = TRUE;
             }
 
+            //* change password
             if ($data['old']['password'] != $data['new']['password']) {
                 $app->log("sogo_plugin::update_sogo_mail_user(): change password, on {$data['new']['email']}", LOGLEVEL_DEBUG);
-                //* sync all based on new domain
+                if (!$sync) {
+                    $sogo_table_name = $app->sogo_helper->get_valid_sogo_table_name($new_domain);
+                    $sqlres = & $app->sogo_helper->sqlConnect();
+                    $sql = "UPDATE `{$sogo_table_name}` SET `c_password`='{$sqlres->escape_string($data['new']['password'])}'  WHERE `c_uid`='{$sqlres->escape_string($data['new']['email'])}'";
+                    if (!$sqlres->query($sql))
+                        $app->log("Faild to change password, on {$data['new']['email']}\n" . $sqlres->error, LOGLEVEL_DEBUG);
+                }
+            }
+            //* change name
+            if ($data['old']['name'] != $data['new']['name']) {
+                $app->log("sogo_plugin::update_sogo_mail_user(): change name, on {$data['new']['email']}", LOGLEVEL_DEBUG);
+                if (!$sync) {
+                    $sogo_table_name = $app->sogo_helper->get_valid_sogo_table_name($new_domain);
+                    $sqlres = & $app->sogo_helper->sqlConnect();
+                    $sql = "UPDATE `{$sogo_table_name}` SET `c_cn`='{$sqlres->escape_string($data['new']['name'])}'  WHERE `c_uid`='{$sqlres->escape_string($data['new']['email'])}'";
+                    if (!$sqlres->query($sql))
+                        $app->log("Faild to change name, on {$data['new']['email']}\n" . $sqlres->error, LOGLEVEL_DEBUG);
+                }
+            }
+            //* change imap access
+            if ($data['old']['disableimap'] != $data['new']['disableimap']) {
+                $app->log("sogo_plugin::update_sogo_mail_user(): change imap access, on {$data['new']['email']}", LOGLEVEL_DEBUG);
+                //* @todo change to use sql query to remove user if imap access is disabled
                 if (!$sync)
                     $app->sogo_helper->sync_mail_users($new_domain);
             }

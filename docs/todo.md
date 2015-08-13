@@ -19,13 +19,6 @@
         might need to add some restriction to this method to prevent constenly updating the db.
         make single query to remove aliases (this lightens the load and the amount of sql queries).
 
-@todo sogo_plugin::insert_sogo_mail_user_alias() #36
-        this method should check if the destination email address is allowed imap access and if 
-        the mail domain table exists before trying to create the new alias column.
-
-@todo sync mail users when user updates 'Name' or 'Disable IMAP' #34
-        missing sync mail users if a mail user updates the 'Name' or 'Disable IMAP' field of the email address
-
 @todo sync mail users if config change #33
         Sync mail users if IMAP Server, SMTP Server and / or Sieve Server is change in the SOGo sever configuration.
 
